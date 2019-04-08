@@ -14,14 +14,14 @@ var CarRate = new keystone.List('CarRate', {
 });
 
 CarRate.add({
-  package: { type: Types.Relationship, ref: 'Package' },
+  package: { type: Types.Relationship, ref: 'TravelPackage' },
   name: { type: Types.Text, required: true, index: true },
   description: { type: Types.Textarea },
-  type: { type: Types.Textarea },
+  type: { type: Types.Select, options: 'Regular, Premium, Luxury', index: true },
   minParticipant: { type: Types.Number, default: 0 },
   maxParticipant: { type: Types.Number, default: 0 },
-  rangeFrom: { type: Types.Datetime, default: Date.now },
-  rangeTo: { type: Types.Datetime, default: Date.now },
+  rangeFrom: { type: Types.Date, default: Date.now },
+  rangeTo: { type: Types.Date, default: Date.now },
   cost: { type: Types.Number, default: 0 },
   rate: { type: Types.Number, default: 0 },
   priority: { type: Types.Number, default: 0 },
@@ -29,8 +29,7 @@ CarRate.add({
   additionalField: { type: Types.Textarea },
 });
 
-CarRate.defaultColumns = 'name, type|10%, minParticipant|10%, maxParticipant|10%, '
-  + 'rangeFrom|10%, rangeTo|10%, priority, rate|10%';
+CarRate.defaultColumns = 'name, package|30%, type|10%, minParticipant|10%, maxParticipant|10%, rate|10%';
 
 /**
  * Registration

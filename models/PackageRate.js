@@ -14,23 +14,23 @@ var PackageRate = new keystone.List('PackageRate', {
 });
 
 PackageRate.add({
-  package: { type: Types.Relationship, ref: 'Package' },
+  package: { type: Types.Relationship, ref: 'TravelPackage' },
   name: { type: Types.Text, required: true, index: true },
   description: { type: Types.Textarea },
-  type: { type: Types.Textarea },
+  premiumFee: { type: Types.Number, default: 0 },
   minParticipant: { type: Types.Number, default: 0 },
   maxParticipant: { type: Types.Number, default: 0 },
-  rangeFrom: { type: Types.Datetime, default: Date.now },
-  rangeTo: { type: Types.Datetime, default: Date.now },
   cost: { type: Types.Number, default: 0 },
   rate: { type: Types.Number, default: 0 },
+  //rangeFrom and rangeTo applies to departure date only
+  rangeFrom: { type: Types.Date, default: Date.now },
+  rangeTo: { type: Types.Date, default: Date.now },
   priority: { type: Types.Number, default: 0 },
   notes: { type: Types.Textarea },
   additionalField: { type: Types.Textarea },
 });
 
-PackageRate.defaultColumns = 'name, type|10%, minParticipant|10%, maxParticipant|10%, '
-  + 'rangeFrom|10%, rangeTo|10%, priority, rate|10%';
+PackageRate.defaultColumns = 'name, package|30%, minParticipant|10%, maxParticipant|10%, rate|10%';
 
 /**
  * Registration
