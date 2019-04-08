@@ -22,7 +22,6 @@ Hotel.add({
   image: { type: Types.CloudinaryImage, folder: 'Hotels', select: true, selectPrefix: 'Hotels' },
   timeTraffic: { type: Types.Number, default: 0 },
   nearByAttractions: { type: Types.Relationship, ref: 'Attraction', many: true },
-  //rooms: { type: Types.Relationship, ref: 'HotelRoom', many: true },
   notes: { type: Types.Textarea },
   additionalField: { type: Types.Textarea },
 });
