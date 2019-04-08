@@ -34,12 +34,12 @@ Attraction.defaultColumns = 'name, city';
 Attraction.relationship({ path: 'nearBySites', ref: 'Attraction', refPath: 'nearByAttractions' });
 
 Attraction.schema.pre('save', function (next) {
-  console.log('Before save object[Attraction]', this);
+  console.log('>>>>Before save object[Attraction]', this);
   next();
 });
 
 Attraction.schema.post('save', function () {
-  console.log('After save object[Attraction]', this);
+  console.log('>>>>After save object[Attraction]', this);
 });
 
 
