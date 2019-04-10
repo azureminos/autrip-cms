@@ -1,6 +1,6 @@
 var keystone = require('keystone');
 var Types = keystone.Field.Types;
-
+var _ = require('lodash');
 /**
  * Country Model
  * ==========
@@ -20,6 +20,12 @@ Country.add({
   tag: { type: Types.TextArray },
   alias: { type: Types.TextArray },
   additionalField: { type: Types.Textarea },
+});
+
+Country.schema.set('toJSON', {
+	transform: function(doc, rtn, options) {
+		return _.pick(doc, '_id', 'name', 'description', 'region', 'additionalField');
+	}
 });
 
 Country.defaultColumns = 'name, region';

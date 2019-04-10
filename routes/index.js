@@ -43,6 +43,12 @@ exports = module.exports = function (app) {
 	// City
 	app.get('/api/city', keystone.middleware.api, routes.api.city.getCity);
 	app.get('/api/city/:id', keystone.middleware.api, routes.api.city.getCityById);
+	// Attraction
+	app.get('/api/attraction', keystone.middleware.api, routes.api.attraction.getAttraction);
+	app.get('/api/attraction/:id', keystone.middleware.api, routes.api.attraction.getAttractionById);
+
+
+
 
 	// NOTE: To protect a route so that only admins can see it, use the requireUser middleware:
 	// app.get('/protected', middleware.requireUser, routes.views.protected);

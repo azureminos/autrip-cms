@@ -1,6 +1,6 @@
 var keystone = require('keystone');
 var Types = keystone.Field.Types;
-
+var _ = require('lodash');
 /**
  * City Model
  * ==========
@@ -20,6 +20,12 @@ City.add({
   tag: { type: Types.TextArray },
   alias: { type: Types.TextArray },
   additionalField: { type: Types.Textarea },
+});
+
+City.schema.set('toJSON', {
+	transform: function(doc, rtn, options) {
+		return _.pick(doc, '_id', 'name', 'description', 'country', 'additionalField');
+	}
 });
 
 City.defaultColumns = 'name, country';

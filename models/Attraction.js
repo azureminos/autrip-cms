@@ -33,6 +33,22 @@ Attraction.defaultColumns = 'name, city';
 
 Attraction.relationship({ path: 'nearBySites', ref: 'Attraction', refPath: 'nearByAttractions' });
 
+Attraction.schema.methods.updateNearby = function(callback) {
+	var attraction = this;
+  // Get all nearby attractions
+  // Loop through and check if current attraction is in their nearby
+  // If yes, bypass; if no, add to their nearby
+  
+  /*keystone.list('RSVP').model.count()
+		.where('meetup').in([meetup.id])
+		.where('attending', true)
+		.exec(function(err, count) {
+			if (err) return callback(err);
+			meetup.totalRSVPs = count;
+			meetup.save(callback);
+		});*/
+}
+
 Attraction.schema.pre('save', function (next) {
   console.log('>>>>Before save object[Attraction]', this);
   next();
