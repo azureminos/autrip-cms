@@ -6,9 +6,7 @@ var keystone = require('keystone'),
 exports.getCountry = function (req, res) {
     Country.model.find(function (err, items) {
         if (err) return res.apiError('database error', err);
-        res.apiResponse({
-            Country: items
-        });
+        res.apiResponse(items);
     });
 }
 
@@ -17,8 +15,6 @@ exports.getCountryById = function (req, res) {
     Country.model.findById(req.params.id).exec(function (err, item) {
         if (err) return res.apiError('database error', err);
         if (!item) return res.apiError('not found');
-        res.apiResponse({
-            Country: item
-        });
+        res.apiResponse(item);
     });
 }

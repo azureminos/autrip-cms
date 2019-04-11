@@ -1,4 +1,5 @@
 var keystone = require('keystone');
+var _ = require('lodash');
 var Types = keystone.Field.Types;
 
 /**
@@ -34,30 +35,37 @@ Attraction.defaultColumns = 'name, city';
 Attraction.relationship({ path: 'nearBySites', ref: 'Attraction', refPath: 'nearByAttractions' });
 
 Attraction.schema.methods.updateNearby = function(callback) {
-	var attraction = this;
+  var site = this;
+  var siteId = site._id;
   // Get all nearby attractions
-  // Loop through and check if current attraction is in their nearby
-  // If yes, bypass; if no, add to their nearby
-  
-  /*keystone.list('RSVP').model.count()
-		.where('meetup').in([meetup.id])
-		.where('attending', true)
-		.exec(function(err, count) {
-			if (err) return callback(err);
-			meetup.totalRSVPs = count;
-			meetup.save(callback);
-		});*/
+  _.forEach(site.nearByAttractions, function(id) {
+    // Loop through and check if current attraction is in their nearby
+    keystone.list('Attraction').model.findById(id).exec(function (err, item) {
+      if (err || !item) return;
+      // If yes, bypass; if no, add to their nearby
+      var isFound = _.find(item.nearByAttractions, function(o) {
+        return o.toString() == siteId.toString(); }
+      );
+
+      if(!isFound) {
+        item.nearByAttractions.push(siteId);
+        item.save(callback);
+      }
+    });
+  });
 }
 
-Attraction.schema.pre('save', function (next) {
+Attraction.schema.set('usePushEach', true);
+
+/*Attraction.schema.pre('save', function (next) {
   console.log('>>>>Before save object[Attraction]', this);
   next();
-});
+});*/
 
 Attraction.schema.post('save', function () {
-  console.log('>>>>After save object[Attraction]', this);
+  //console.log('>>>>After save object[Attraction]', this);
+  this.updateNearby();
 });
-
 
 /**
  * Registration

@@ -46,7 +46,12 @@ exports = module.exports = function (app) {
 	// Attraction
 	app.get('/api/attraction', keystone.middleware.api, routes.api.attraction.getAttraction);
 	app.get('/api/attraction/:id', keystone.middleware.api, routes.api.attraction.getAttractionById);
-
+	// HotelRoom
+	app.get('/api/hotelroom', keystone.middleware.api, routes.api.hotelroom.getHotelRoom);
+	app.get('/api/hotelroom/:id', keystone.middleware.api, routes.api.hotelroom.getHotelRoomById);
+	// HotelRoom
+	app.get('/api/hotel', keystone.middleware.api, routes.api.hotel.getHotel);
+	app.get('/api/hotel/:id', keystone.middleware.api, routes.api.hotel.getHotelById);
 
 
 

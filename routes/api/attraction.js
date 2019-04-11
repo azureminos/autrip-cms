@@ -4,21 +4,17 @@ var keystone = require('keystone'),
 
 /** * Get List of Attraction */
 exports.getAttraction = function (req, res) {
-    Attraction.model.find(function (err, items) {
+    Attraction.model.find().populate('city, nearByAttractions').exec(function (err, items) {
         if (err) return res.apiError('database error', err);
-        res.apiResponse({
-            Attraction: items
-        });
+        res.apiResponse(items);
     });
 }
 
 /** * Get Attraction by ID */
 exports.getAttractionById = function (req, res) {
-    Attraction.model.findById(req.params.id).exec(function (err, item) {
+    Attraction.model.findById(req.params.id).populate('city, nearByAttractions').exec(function (err, item) {
         if (err) return res.apiError('database error', err);
         if (!item) return res.apiError('not found');
-        res.apiResponse({
-            Attraction: item
-        });
+        return res.apiResponse(item);
     });
 }

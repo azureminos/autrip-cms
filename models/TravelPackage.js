@@ -20,7 +20,7 @@ TravelPackage.add({
   totalDays: { type: Types.Number, default: 0 },
   maxParticipant: { type: Types.Number, default: 0 },
   departureDate: { type: Types.Textarea },
-  state: { type: Types.Select, options: 'draft, published, archived', default: 'draft' },
+  state: { type: Types.Select, options: 'draft, published, archived', default: 'draft', noedit: true },
   publishedAt: { type: Types.Date },
   isPromoted: { type: Types.Boolean, default: false },
   isCustomisable: { type: Types.Boolean, default: false },
@@ -37,6 +37,17 @@ TravelPackage.relationship({ path: 'carRate', ref: 'CarRate', refPath: 'package'
 TravelPackage.relationship({ path: 'packageRate', ref: 'PackageRate', refPath: 'package' });
 TravelPackage.relationship({ path: 'packageItem', ref: 'PackageItem', refPath: 'package' });
 TravelPackage.relationship({ path: 'packageHotel', ref: 'PackageHotel', refPath: 'package' });
+
+TravelPackage.schema.methods.isPublished = function() {
+  return this.state == 'published';
+}
+
+TravelPackage.schema.pre('save', function(next) {
+  if (this.isModified('state') && this.isPublished() && !this.publishedAt) {
+    this.publishedAt = new Date();
+  }
+  next();
+});
 
 TravelPackage.defaultColumns = 'name, totalDays|15%, maxParticipant|15%, isPromoted|15%, isExtention|15%';
 

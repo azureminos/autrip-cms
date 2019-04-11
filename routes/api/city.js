@@ -34,9 +34,7 @@ exports.getCity = function (req, res) {
                 return res.apiError('database error', err);
             } else {
                 //console.log('>>>>Final Result', result);
-                return res.apiResponse({
-                    City: result
-                });
+                return res.apiResponse(result);
             }
         });
     });
@@ -51,13 +49,11 @@ exports.getCityById = function (req, res) {
         Country.model.findById(city.country, function (err, item) {
             if (err) return res.apiError('database error', err);
             return res.apiResponse({
-                City: {
-                    id: city._id,
-                    name: city.name,
-                    description: city.description,
-                    country: item.name,
-                    additionalField: city.additionalField,
-                }
+                id: city._id,
+                name: city.name,
+                description: city.description,
+                country: item.name,
+                additionalField: city.additionalField,
             });
         });
     });
