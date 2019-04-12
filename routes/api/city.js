@@ -1,12 +1,13 @@
 // API to get City
-var keystone = require('keystone'),
-    _ = require('lodash'),
-    async = require('async'),
-    City = keystone.list('City');
-    Country = keystone.list('Country');
+var keystone = require('keystone');
+var _ = require('lodash');
+var async = require('async');
+
+var City = keystone.list('City');
+var Country = keystone.list('Country');
 
 /** * Get List of City */
-exports.getCity = function (req, res) {
+exports.getAllCity = function (req, res) {
     var result = [];
     City.model.find(function (err, items) {
         if (err) return res.apiError('database error', err);
@@ -38,7 +39,7 @@ exports.getCity = function (req, res) {
             }
         });
     });
-}
+};
 
 /** * Get City by ID */
 exports.getCityById = function (req, res) {
@@ -57,4 +58,16 @@ exports.getCityById = function (req, res) {
             });
         });
     });
-}
+};
+
+/** * Get City by Country */
+exports.getCityByCountry = function (req, res) {
+    var countryId = req.params.id;
+    Country.model
+        .findById(countryId).populate('city')
+        .exec(function (err, item) {
+            if (err) return res.apiError('database error', err);
+            if (!item) return res.apiError('not found');
+            res.apiResponse(item.city);
+        });
+};
