@@ -51,7 +51,7 @@ exports = module.exports = function (app) {
 	app.get('/gallery', routes.views.gallery);
 	/* ===== APIs ===== */
 	// Country
-	app.get('/api/country', keystone.middleware.api, routes.api.country.getCountry);
+	app.get('/api/country', keystone.middleware.api, routes.api.country.getAllCountry);
 	app.get('/api/country/:id', keystone.middleware.api, routes.api.country.getCountryById);
 	// City
 	app.get('/api/city', keystone.middleware.api, routes.api.city.getAllCity);
@@ -61,7 +61,7 @@ exports = module.exports = function (app) {
 	app.get('/api/attraction', keystone.middleware.api, routes.api.attraction.getAllAttraction);
 	app.get('/api/attraction/:id', keystone.middleware.api, routes.api.attraction.getAttractionById);
 	app.get('/api/city/:id/attraction', keystone.middleware.api, routes.api.attraction.getAttractionByCity);
-	// HotelRoom
+	/*// HotelRoom
 	app.get('/api/hotelroom', keystone.middleware.api, routes.api.hotelroom.getAllHotelRoom);
 	app.get('/api/hotelroom/:id', keystone.middleware.api, routes.api.hotelroom.getHotelRoomById);
 	app.get('/api/hotel/:id/hotelroom', keystone.middleware.api, routes.api.hotelroom.getHotelRoomByHotel);
@@ -92,7 +92,7 @@ exports = module.exports = function (app) {
 	// TravelPackage
 	app.get('/api/travelpackage', keystone.middleware.api, routes.api.carrate.getAllTravelPackage);
 	app.get('/api/travelpackage/:id', keystone.middleware.api, routes.api.carrate.getTravelPackageById);
-	app.get('/api/country/:id/package', keystone.middleware.api, routes.api.carrate.getTravelPackageByCountry);
+	app.get('/api/country/:id/package', keystone.middleware.api, routes.api.carrate.getTravelPackageByCountry);*/
 
 	// NOTE: To protect a route so that only admins can see it, use the requireUser middleware:
 	// app.get('/protected', middleware.requireUser, routes.views.protected);

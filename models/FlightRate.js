@@ -1,3 +1,5 @@
+var _ = require('lodash');
+var async = require('async');
 var keystone = require('keystone');
 var Types = keystone.Field.Types;
 
@@ -29,6 +31,81 @@ FlightRate.add({
 });
 
 FlightRate.defaultColumns = 'name, airline|15%, type|15%, rangeFrom|15%, rangeTo|15%, rate|15%';
+
+FlightRate.schema.methods.cleanupPackage = function (callback) {
+  var flightRate = this;
+  // Remove flightRate from package.flightRates
+  keystone.list('TravelPackage').model
+    .findOne({ flightRates: flightRate._id })
+    .exec(function (err, item) {
+      if (err || !item) return callback();
+      if (!flightRate.package || (flightRate.package && item._id.toString() != flightRate.package.toString())) {
+        item.flightRates = _.remove(item.flightRates, function (o) {
+          return o.toString() != flightRate._id.toString();
+        });
+        //console.log('>>>>Updated item.flightRates', item);
+        keystone.list('TravelPackage').model
+          .findByIdAndUpdate(item._id, { flightRates: item.flightRates }, callback);
+      } else {
+        return callback();
+      }
+    });
+}
+
+FlightRate.schema.methods.updatePackage = function (callback) {
+  var flightRate = this;
+  // Update flightRate from package.flightRates
+  if (flightRate.package) {
+    // Find the new selected paclage, then add this flightRate to package.flightRates
+    //console.log('>>>>Found flightRate to add package', this.package);
+    keystone.list('TravelPackage').model
+      .findById(flightRate.package.toString())
+      .exec(function (err, item) {
+        if (err || !item) return callback();
+        //console.log('>>>>package retrieved', item);
+        var isFound = _.find(item.flightRates, function (o) {
+          return o.toString() == flightRate._id.toString(); }
+        );
+        if (!isFound) {
+          item.flightRates.push(flightRate._id);
+          //console.log('>>>>Updated item.flightRates', item);
+          keystone.list('TravelPackage').model
+            .findByIdAndUpdate(item._id, { flightRates: item.flightRates }, callback);
+        } else {
+          return callback();
+        }
+      });
+  } else {
+    return callback();
+  }
+}
+
+FlightRate.schema.set('usePushEach', true);
+
+FlightRate.schema.pre('save', function (next) {
+  console.log('>>>>Before Save FlightRate', this.name);
+  var flightRate = this;
+	async.series([
+		function (callback) {
+      if(flightRate.isModified('package')) {
+        console.log('>>>>flightRate.package changed, calling flightRate.cleanupPackage');
+        flightRate.cleanupPackage(callback);
+      } else {
+        return callback();
+      }
+		},
+		function (callback) {
+      if (flightRate.isModified('package')) {
+        console.log('>>>>flightRate.package changed, calling flightRate.updatePackage');
+        flightRate.updatePackage(callback);
+      } else {
+        return callback();
+      }
+    },
+	], function (err) {
+    next();
+	});
+});
 
 /**
  * Registration

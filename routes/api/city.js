@@ -43,12 +43,13 @@ exports.getAllCity = function (req, res) {
 
 /** * Get City by ID */
 exports.getCityById = function (req, res) {
-    City.model.findById(req.params.id).exec(function (err, city) {
+    City.model.findById(req.params.id).populate('attractions').exec(function (err, city) {
         if (err) return res.apiError('database error', err);
         if (!city) return res.apiError('not found');
-
-        Country.model.findById(city.country, function (err, item) {
+        return res.apiResponse(city);
+        /*City.model.findById(city.country, function (err, item) {
             if (err) return res.apiError('database error', err);
+            return res.apiResponse(item);
             return res.apiResponse({
                 id: city._id,
                 name: city.name,
@@ -56,7 +57,7 @@ exports.getCityById = function (req, res) {
                 country: item.name,
                 additionalField: city.additionalField,
             });
-        });
+        });*/
     });
 };
 

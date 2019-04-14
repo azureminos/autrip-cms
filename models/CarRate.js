@@ -1,6 +1,7 @@
+var _ = require('lodash');
+var async = require('async');
 var keystone = require('keystone');
 var Types = keystone.Field.Types;
-
 /**
  * CarRate Model
  * ==========
@@ -30,6 +31,81 @@ CarRate.add({
 });
 
 CarRate.defaultColumns = 'name, package|30%, type|10%, minParticipant|10%, maxParticipant|10%, rate|10%';
+
+CarRate.schema.methods.cleanupPackage = function (callback) {
+  var carRate = this;
+  // Remove carRate from package.carRates
+  keystone.list('TravelPackage').model
+    .findOne({ carRates: carRate._id })
+    .exec(function (err, item) {
+      if (err || !item) return callback();
+      if (!carRate.package || (carRate.package && item._id.toString() != carRate.package.toString())) {
+        item.carRates = _.remove(item.carRates, function (o) {
+          return o.toString() != carRate._id.toString();
+        });
+        //console.log('>>>>Updated item.carRates', item);
+        keystone.list('TravelPackage').model
+          .findByIdAndUpdate(item._id, { carRates: item.carRates }, callback);
+      } else {
+        return callback();
+      }
+    });
+}
+
+CarRate.schema.methods.updatePackage = function (callback) {
+  var carRate = this;
+  // Update carRate from package.carRates
+  if (carRate.package) {
+    // Find the new selected paclage, then add this carRate to package.carRates
+    //console.log('>>>>Found carRate to add package', this.package);
+    keystone.list('TravelPackage').model
+      .findById(carRate.package.toString())
+      .exec(function (err, item) {
+        if (err || !item) return callback();
+        //console.log('>>>>package retrieved', item);
+        var isFound = _.find(item.carRates, function (o) {
+          return o.toString() == carRate._id.toString(); }
+        );
+        if (!isFound) {
+          item.carRates.push(carRate._id);
+          //console.log('>>>>Updated item.carRates', item);
+          keystone.list('TravelPackage').model
+            .findByIdAndUpdate(item._id, { carRates: item.carRates }, callback);
+        } else {
+          return callback();
+        }
+      });
+  } else {
+    return callback();
+  }
+}
+
+CarRate.schema.set('usePushEach', true);
+
+CarRate.schema.pre('save', function (next) {
+  console.log('>>>>Before Save CarRate', this.name);
+  var carRate = this;
+	async.series([
+		function (callback) {
+      if(carRate.isModified('package')) {
+        console.log('>>>>carRate.package changed, calling carRate.cleanupPackage');
+        carRate.cleanupPackage(callback);
+      } else {
+        return callback();
+      }
+		},
+		function (callback) {
+      if (carRate.isModified('package')) {
+        console.log('>>>>carRate.package changed, calling carRate.updatePackage');
+        carRate.updatePackage(callback);
+      } else {
+        return callback();
+      }
+    },
+	], function (err) {
+    next();
+	});
+});
 
 /**
  * Registration
