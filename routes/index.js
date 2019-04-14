@@ -56,43 +56,43 @@ exports = module.exports = function (app) {
 	// City
 	app.get('/api/city', keystone.middleware.api, routes.api.city.getAllCity);
 	app.get('/api/city/:id', keystone.middleware.api, routes.api.city.getCityById);
-	app.get('/api/country/:id/city', keystone.middleware.api, routes.api.city.getCityByCountry);
+	app.post('/api/city', keystone.middleware.api, routes.api.city.getCityByCountry);
 	// Attraction
 	app.get('/api/attraction', keystone.middleware.api, routes.api.attraction.getAllAttraction);
 	app.get('/api/attraction/:id', keystone.middleware.api, routes.api.attraction.getAttractionById);
-	app.get('/api/city/:id/attraction', keystone.middleware.api, routes.api.attraction.getAttractionByCity);
-	/*// HotelRoom
+	app.post('/api/attraction', keystone.middleware.api, routes.api.attraction.getAttractionByCity);
+	// HotelRoom
 	app.get('/api/hotelroom', keystone.middleware.api, routes.api.hotelroom.getAllHotelRoom);
 	app.get('/api/hotelroom/:id', keystone.middleware.api, routes.api.hotelroom.getHotelRoomById);
-	app.get('/api/hotel/:id/hotelroom', keystone.middleware.api, routes.api.hotelroom.getHotelRoomByHotel);
+	app.post('/api/hotelroom', keystone.middleware.api, routes.api.hotelroom.getHotelRoomByHotel);
 	// Hotel
 	app.get('/api/hotel', keystone.middleware.api, routes.api.hotel.getAllHotel);
 	app.get('/api/hotel/:id', keystone.middleware.api, routes.api.hotel.getHotelById);
-	app.get('/api/city/:id/hotel', keystone.middleware.api, routes.api.hotel.getHotelByCity);
+	app.post('/api/hotel', keystone.middleware.api, routes.api.hotel.getHotelByCity);
 	// FlightRate
 	app.get('/api/flightrate', keystone.middleware.api, routes.api.flightrate.getAllFlightRate);
 	app.get('/api/flightrate/:id', keystone.middleware.api, routes.api.flightrate.getFlightRateById);
-	app.get('/api/package/:id/flightrate', keystone.middleware.api, routes.api.flightrate.getFlightRateByPackage);
+	app.post('/api/flightrate', keystone.middleware.api, routes.api.flightrate.getFlightRateByPackage);
 	// CarRate
 	app.get('/api/carrate', keystone.middleware.api, routes.api.carrate.getAllCarRate);
 	app.get('/api/carrate/:id', keystone.middleware.api, routes.api.carrate.getCarRateById);
-	app.get('/api/package/:id/carrate', keystone.middleware.api, routes.api.carrate.getCarRateByPackage);
+	app.post('/api/carrate', keystone.middleware.api, routes.api.carrate.getCarRateByPackage);
 	// PackageRate
 	app.get('/api/packagerate', keystone.middleware.api, routes.api.packagerate.getAllPackageRate);
 	app.get('/api/packagerate/:id', keystone.middleware.api, routes.api.packagerate.getPackageRateById);
-	app.get('/api/package/:id/packagerate', keystone.middleware.api, routes.api.packagerate.getPackageRateByPackage);
+	app.post('/api/packagerate', keystone.middleware.api, routes.api.packagerate.getPackageRateByPackage);
 	// PackageHotel
 	app.get('/api/packagehotel', keystone.middleware.api, routes.api.packagehotel.getAllPackageHotel);
 	app.get('/api/packagehotel/:id', keystone.middleware.api, routes.api.packagehotel.getPackageHotelById);
-	app.get('/api/package/:id/packagehotel', keystone.middleware.api, routes.api.packagehotel.getPackageHotelByPackage);
+	app.post('/api/packagehotel', keystone.middleware.api, routes.api.packagehotel.getPackageHotelByPackage);
 	// PackageItem
 	app.get('/api/packageitem', keystone.middleware.api, routes.api.packageitem.getAllPackageItem);
 	app.get('/api/packageitem/:id', keystone.middleware.api, routes.api.packageitem.getPackageItemById);
-	app.get('/api/package/:id/packageitem', keystone.middleware.api, routes.api.packageitem.getPackageItemByPackage);
+	app.post('/api/packageitem', keystone.middleware.api, routes.api.packageitem.getPackageItemByPackage);
 	// TravelPackage
-	app.get('/api/travelpackage', keystone.middleware.api, routes.api.carrate.getAllTravelPackage);
-	app.get('/api/travelpackage/:id', keystone.middleware.api, routes.api.carrate.getTravelPackageById);
-	app.get('/api/country/:id/package', keystone.middleware.api, routes.api.carrate.getTravelPackageByCountry);*/
+	app.get('/api/travelpackage', keystone.middleware.api, routes.api.travelpackage.getAllTravelPackage);
+	app.get('/api/travelpackage/:id', keystone.middleware.api, routes.api.travelpackage.getTravelPackageById);
+	app.post('/api/travelpackage', keystone.middleware.api, routes.api.travelpackage.getTravelPackageByCountry);
 
 	// NOTE: To protect a route so that only admins can see it, use the requireUser middleware:
 	// app.get('/protected', middleware.requireUser, routes.views.protected);

@@ -22,12 +22,27 @@ exports.getPackageRateById = function (req, res) {
 
 /** * Get FlightRate by Params */
 exports.getPackageRateByPackage = function (req, res) {
-    var packageId = req.params.id;
-    TravelPackage.model
-        .findById(packageId).populate('packageRate')
-        .exec(function (err, item) {
-            if (err) return res.apiError('database error', err);
-            if (!item) return res.apiError('not found');
-            return res.apiResponse(item.packageRate);
-        });
+    console.log('>>>>Calling getPackageRateByPackage', req.body);
+    var query = req.body;
+    if (query.package) {
+        if (query.package.id) {
+            TravelPackage.model
+                .findById(query.package.id).populate('packageRates')
+                .exec(function (err, item) {
+                    if (err) return res.apiError('database error', err);
+                    if (!item) return res.apiError('not found');
+                    return res.apiResponse(item.packageRates);
+                });
+        } else if (query.package.name) {
+            TravelPackage.model
+                .findOne({ name: query.package.name }).populate('packageRates')
+                .exec(function (err, item) {
+                    if (err) return res.apiError('database error', err);
+                    if (!item) return res.apiError('not found');
+                    return res.apiResponse(item.packageRates);
+                });
+        }
+    } else {
+        return res.apiError('invalid query request', query);
+    }
 };

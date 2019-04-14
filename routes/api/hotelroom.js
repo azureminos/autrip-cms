@@ -22,12 +22,27 @@ exports.getHotelRoomById = function (req, res) {
 
 /** * Get HotelRoom by Hotel */
 exports.getHotelRoomByHotel = function (req, res) {
-    var hotelId = req.params.id;
-    Hotel.model
-        .findById(hotelId).populate('hotelroom')
-        .exec(function (err, item) {
-            if (err) return res.apiError('database error', err);
-            if (!item) return res.apiError('not found');
-            return res.apiResponse(item.hotelroom);
-        });
+    console.log('>>>>Calling getHotelRoomByHotel', req.body);
+    var query = req.body;
+    if (query.hotel) {
+        if (query.hotel.id) {
+            Hotel.model
+                .findById(query.hotel.id).populate('rooms')
+                .exec(function (err, item) {
+                    if (err) return res.apiError('database error', err);
+                    if (!item) return res.apiError('not found');
+                    return res.apiResponse(item.rooms);
+                });
+        } else if (query.hotel.name) {
+            Hotel.model
+                .findOne({ name: query.hotel.name }).populate('rooms')
+                .exec(function (err, item) {
+                    if (err) return res.apiError('database error', err);
+                    if (!item) return res.apiError('not found');
+                    return res.apiResponse(item.rooms);
+                });
+        }
+    } else {
+        return res.apiError('invalid query request', query);
+    }
 };

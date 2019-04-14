@@ -5,7 +5,7 @@ var City = keystone.list('City');
 
 /** * Get List of Hotel */
 exports.getAllHotel = function (req, res) {
-    Hotel.model.find().populate('city, nearByAttractions').exec(function (err, items) {
+    Hotel.model.find().populate('city nearByAttractions').exec(function (err, items) {
         if (err) return res.apiError('database error', err);
         return res.apiResponse(items);
     });
@@ -13,7 +13,7 @@ exports.getAllHotel = function (req, res) {
 
 /** * Get Hotel by ID */
 exports.getHotelById = function (req, res) {
-    Hotel.model.findById(req.params.id).populate('city, nearByAttractions').exec(function (err, item) {
+    Hotel.model.findById(req.params.id).populate('city nearByAttractions').exec(function (err, item) {
         if (err) return res.apiError('database error', err);
         if (!item) return res.apiError('not found');
         return res.apiResponse(item);
@@ -22,12 +22,27 @@ exports.getHotelById = function (req, res) {
 
 /** * Get Hotel by City */
 exports.getHotelByCity = function (req, res) {
-    var cityId = req.params.id;
-    City.model
-        .findById(cityId).populate('hotel')
-        .exec(function (err, item) {
-            if (err) return res.apiError('database error', err);
-            if (!item) return res.apiError('not found');
-            return res.apiResponse(item.hotel);
-        });
+    console.log('>>>>Calling getHotelByCity', req.body);
+    var query = req.body;
+    if (query.city) {
+        if (query.city.id) {
+            City.model
+                .findById(query.city.id).populate('hotels')
+                .exec(function (err, item) {
+                    if (err) return res.apiError('database error', err);
+                    if (!item) return res.apiError('not found');
+                    return res.apiResponse(item.hotels);
+                });
+        } else if (query.city.name) {
+            City.model
+                .findOne({ name: query.city.name }).populate('hotels')
+                .exec(function (err, item) {
+                    if (err) return res.apiError('database error', err);
+                    if (!item) return res.apiError('not found');
+                    return res.apiResponse(item.hotels);
+                });
+        }
+    } else {
+        return res.apiError('invalid query request', query);
+    }
 };
