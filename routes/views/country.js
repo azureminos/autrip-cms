@@ -1,29 +1,16 @@
 var keystone = require('keystone');
 
-exports = module.exports = function(req, res) {
-  var view = new keystone.View(req, res);
-  var locals = res.locals;
+exports = module.exports = function (req, res) {
 
-  // Set locals
-  locals.section = 'countries';
-  locals.filters = {
-    country: req.params.country
-  }
-  locals.data = {
-    countries:[]
-  }
+	var view = new keystone.View(req, res);
+	var locals = res.locals;
 
-view.on('init', function(next){
-  var q = keystone.list('Country').model.findOne({
-    slug: locals.filters.country
-  });
+	// Set locals
+	locals.section = 'country';
 
-  q.exec(function(err, result){
-    locals.data.country = result;
-    next(err);
-  });
-});
+	// Load the galleries by sortOrder
+	view.query('country', keystone.list('Country').model.find());
 
-  // Render View
-  view.render('country');
-}
+	// Render the view
+	view.render('country');
+};

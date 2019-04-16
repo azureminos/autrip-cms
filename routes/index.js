@@ -46,9 +46,9 @@ exports = module.exports = function (app) {
 			next();
 		});
 	}
-	// Views
+	/* ===== Views ===== */
 	app.get('/', routes.views.index);
-	app.get('/gallery', routes.views.gallery);
+	app.get('/country', routes.views.country);
 	/* ===== APIs ===== */
 	// Country
 	app.get('/api/country', keystone.middleware.api, routes.api.country.getAllCountry);
