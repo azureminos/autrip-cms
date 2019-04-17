@@ -1,13 +1,31 @@
 // API to get CarRate
+var _ = require('lodash');
 var keystone = require('keystone');
+
 var CarRate = keystone.list('CarRate');
 var TravelPackage = keystone.list('TravelPackage');
+
+var parseCarRate = function (input) {
+    if (Array.isArray(input)) {
+        var rs = [];
+        _.each(input, function(item) {
+            var r = _.pick(item, 'type', 'priority', 'cost', 'rate', 'rangeFrom', 'rangeTo', 'minParticipant', 'maxParticipant');
+            r.id = item._id;
+            rs.push(r);
+        });
+        return rs;
+    } else {
+        var r = _.pick(input, 'type', 'priority', 'cost', 'rate', 'rangeFrom', 'rangeTo', 'minParticipant', 'maxParticipant');
+        r.id = input._id;
+        return r;
+    }
+};
 
 /** * Get List of CarRate */
 exports.getAllCarRate = function (req, res) {
     CarRate.model.find(function (err, items) {
         if (err) return res.apiError('database error', err);
-        return res.apiResponse(items);
+        return res.apiResponse(parseCarRate(items));
     });
 };
 
@@ -16,7 +34,7 @@ exports.getCarRateById = function (req, res) {
     CarRate.model.findById(req.params.id).exec(function (err, item) {
         if (err) return res.apiError('database error', err);
         if (!item) return res.apiError('not found');
-        return res.apiResponse(item);
+        return res.apiResponse(parseCarRate(item));
     });
 };
 
@@ -31,7 +49,7 @@ exports.getCarRateByPackage = function (req, res) {
                 .exec(function (err, item) {
                     if (err) return res.apiError('database error', err);
                     if (!item) return res.apiError('not found');
-                    return res.apiResponse(item.carRates);
+                    return res.apiResponse(parseCarRate(item.carRates));
                 });
         } else if (query.package.name) {
             TravelPackage.model
@@ -39,7 +57,7 @@ exports.getCarRateByPackage = function (req, res) {
                 .exec(function (err, item) {
                     if (err) return res.apiError('database error', err);
                     if (!item) return res.apiError('not found');
-                    return res.apiResponse(item.carRates);
+                    return res.apiResponse(parseCarRate(item.carRates));
                 });
         }
     } else {

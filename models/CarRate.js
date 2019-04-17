@@ -32,6 +32,15 @@ CarRate.add({
 
 CarRate.defaultColumns = 'name, package|30%, type|10%, minParticipant|10%, maxParticipant|10%, rate|10%';
 
+CarRate.schema.set('toJSON', {
+	transform: function(doc, rtn, options) {
+    var rs = _.pick(doc, 'name', 'description', 'type', 'package', 'priority', 'rate', 'cost', 'rangeFrom', 
+      'rangeTo', 'minParticipant', 'maxParticipant');
+    rs.id = doc._id;
+		return rs;
+	}
+});
+
 CarRate.schema.methods.cleanupPackage = function (callback) {
   var carRate = this;
   // Remove carRate from package.carRates

@@ -182,12 +182,6 @@ City.schema.methods.updateHotels = function (callback) {
   async.series(promises, callback);
 }
 
-/*City.schema.set('toJSON', {
-	transform: function(doc, rtn, options) {
-		return _.pick(doc, '_id', 'name', 'description', 'country', 'additionalField');
-	}
-});*/
-
 City.defaultColumns = 'name, country';
 
 City.schema.set('usePushEach', true);

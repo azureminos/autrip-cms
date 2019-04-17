@@ -1,22 +1,41 @@
 // API to get Attraction
+var _ = require('lodash');
 var keystone = require('keystone');
+
 var Attraction = keystone.list('Attraction');
 var City = keystone.list('City');
 
+var parseAttraction = function (input) {
+    if (Array.isArray(input)) {
+        var rs = [];
+        _.each(input, function(item) {
+            var r = _.pick(item, 'name', 'description', 'alias', 'tag', 'additionalField', 'timeVisit', 'timeTraffic', 'rate', 'cost', 'nearByAttractions');
+            r.id = item._id;
+            r.imageUrl = item.image ? item.image.secure_url : '';
+            rs.push(r);
+        });
+        return rs;
+    } else {
+        var r = _.pick(input, 'name', 'description', 'alias', 'tag', 'additionalField', 'timeVisit', 'timeTraffic', 'rate', 'cost', 'nearByAttractions');
+        r.id = input._id;
+        r.imageUrl = input.image ? input.image.secure_url : '';
+        return r;
+    }
+};
 /** * Get List of Attraction */
 exports.getAllAttraction = function (req, res) {
-    Attraction.model.find().populate('city nearByAttractions').exec(function (err, items) {
+    Attraction.model.find().exec(function (err, items) {
         if (err) return res.apiError('database error', err);
-        return res.apiResponse(items);
+        return res.apiResponse(parseAttraction(items));
     });
 }
 
 /** * Get Attraction by ID */
 exports.getAttractionById = function (req, res) {
-    Attraction.model.findById(req.params.id).populate('city nearByAttractions').exec(function (err, item) {
+    Attraction.model.findById(req.params.id).exec(function (err, item) {
         if (err) return res.apiError('database error', err);
         if (!item) return res.apiError('not found');
-        return res.apiResponse(item);
+        return res.apiResponse(parseAttraction(item));
     });
 }
 
@@ -31,7 +50,7 @@ exports.getAttractionByCity = function (req, res) {
                 .exec(function (err, item) {
                     if (err) return res.apiError('database error', err);
                     if (!item) return res.apiError('not found');
-                    res.apiResponse(item.attractions);
+                    res.apiResponse(parseAttraction(item.attractions));
                 });
         } else if (query.city.name) {
             City.model
@@ -39,7 +58,7 @@ exports.getAttractionByCity = function (req, res) {
                 .exec(function (err, item) {
                     if (err) return res.apiError('database error', err);
                     if (!item) return res.apiError('not found');
-                    res.apiResponse(item.attractions);
+                    res.apiResponse(parseAttraction(item.attractions));
                 });
         }
     } else {

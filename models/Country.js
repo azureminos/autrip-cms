@@ -26,12 +26,6 @@ Country.add({
   additionalField: { type: Types.Textarea },
 });
 
-/*Country.schema.set('toJSON', {
-	transform: function(doc, rtn, options) {
-		return _.pick(doc, '_id', 'name', 'description', 'region', 'additionalField');
-	}
-});*/
-
 Country.schema.methods.cleanupCities = function (callback) {
   var country = this;
   keystone.list('City').model
