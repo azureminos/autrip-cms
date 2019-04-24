@@ -44,8 +44,8 @@ keystone.set('routes', require('./routes'));
 
 // Configure the navigation bar in Keystone's Admin UI
 keystone.set('nav', {
-	destinations: ['countries','cities','attractions'],
-	hotels: ['hotels','hotel-rooms'],
+	destinations: ['countries', 'cities', 'attractions'],
+	hotels: ['hotels', 'hotel-rooms'],
 	packages: ['travel-packages', 'package-items', 'package-hotels', 'package-rates', 'flight-rates', 'car-rates'],
 	users: 'users',
 });
