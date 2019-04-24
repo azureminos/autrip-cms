@@ -30,7 +30,7 @@ FlightRate.add({
 	additionalField: { type: Types.Textarea },
 });
 
-FlightRate.defaultColumns = 'name, airline|15%, type|15%, rangeFrom|15%, rangeTo|15%, rate|15%';
+FlightRate.defaultColumns = 'name|50%, type, rangeFrom, rangeTo, rate';
 
 FlightRate.schema.methods.cleanupPackage = function (callback) {
 	var flightRate = this;

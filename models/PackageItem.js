@@ -21,13 +21,13 @@ PackageItem.add({
 	description: { type: Types.Textarea },
 	dayNo: { type: Types.Number, default: 0 },
 	daySeq: { type: Types.Number, default: 0 },
-	isPlannable: { type: Types.Boolean, default: true },
+	timePlannable: { type: Types.Number, default: 10 },
 	attraction: { type: Types.Relationship, ref: 'Attraction' },
 	notes: { type: Types.Textarea },
 	additionalField: { type: Types.Textarea },
 });
 
-PackageItem.defaultColumns = 'name, package, dayNo, daySeq, attraction';
+PackageItem.defaultColumns = 'name|50%, dayNo, daySeq, attraction';
 
 PackageItem.schema.methods.cleanupPackage = function (callback) {
 	var packageItem = this;

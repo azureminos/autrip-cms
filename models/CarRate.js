@@ -30,7 +30,7 @@ CarRate.add({
 	additionalField: { type: Types.Textarea },
 });
 
-CarRate.defaultColumns = 'name, package|30%, type|10%, minParticipant|10%, maxParticipant|10%, rate|10%';
+CarRate.defaultColumns = 'name|50%, type, minParticipant, maxParticipant, rate';
 
 /*CarRate.schema.set('toJSON', {
 	transform: function (doc, rtn, options) {

@@ -26,7 +26,7 @@ PackageHotel.add({
 	additionalField: { type: Types.Textarea },
 });
 
-PackageHotel.defaultColumns = 'name, package, dayNo, hotel';
+PackageHotel.defaultColumns = 'name|50%, dayNo, hotel';
 
 PackageHotel.schema.methods.cleanupPackage = function (callback) {
 	var packageHotel = this;

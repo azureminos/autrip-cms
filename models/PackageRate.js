@@ -32,7 +32,7 @@ PackageRate.add({
 	additionalField: { type: Types.Textarea },
 });
 
-PackageRate.defaultColumns = 'name, package|30%, minParticipant|10%, maxParticipant|10%, rate|10%';
+PackageRate.defaultColumns = 'name|50%, minParticipant, maxParticipant, rate';
 
 PackageRate.schema.methods.cleanupPackage = function (callback) {
 	var packageRate = this;
