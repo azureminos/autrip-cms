@@ -35,7 +35,7 @@ var routes = {
 // Setup Route Bindings
 exports = module.exports = function (app) {
 	// Allow cross-domain requests (development only)
-	if (process.env.NODE_ENV !== 'production') {
+	if (process.env.NODE_ENV !== 'production' || true) {
 		console.log('------------------------------------------------');
 		console.log('Notice: Enabling CORS for development.');
 		console.log('------------------------------------------------');
