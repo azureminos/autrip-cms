@@ -21,8 +21,8 @@ exports.getTravelPackageById = function (req, res) {
 };
 
 /** * Get TravelPackage by Params */
-exports.getTravelPackageByCountry = function (req, res) {
-	console.log('>>>>Calling getTravelPackageByCountry', req.body);
+exports.getTravelPackageByParams = function (req, res) {
+	console.log('>>>>Calling getTravelPackageByParams', req.body);
 	var query = req.body;
 	if (query.country) {
 		if (query.country.id) {
