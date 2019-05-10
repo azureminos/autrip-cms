@@ -13,12 +13,14 @@ var parseCountry = function (input) {
       r.id = item._id;
       r.name = item.name;
 			rs.push(r);
-		});
+    });
+    console.log('>>>>Metadata.parseCountry', rs);
 		return rs;
 	} else {
     var r = {};
     r.id = item._id;
     r.name = item.name;
+    console.log('>>>>Metadata.parseCountry', r);
 		return r;
 	}
 };
