@@ -34,6 +34,7 @@ exports.getMetadata = function (req, res) {
   const getCountryList = function (callback) {
     Country.model.find()
       .exec(function (err, items) {
+        console.log('>>>>Metadata.getCountryList', {err, items});
         if (err || !items) return callback();
         // If yes, bypass; if no, update carRate.package
         result.country = parseCountry(items);
@@ -43,6 +44,7 @@ exports.getMetadata = function (req, res) {
 
   const returnMetadata = function() {
     let rs = {};
+    console.log('>>>>Metadata.returnMetadata', {query, result});
     if (query.keys) {
       _.each(query.keys, function(item) {
         rs[item] = result[item];
