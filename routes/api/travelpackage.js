@@ -49,6 +49,6 @@ exports.getTravelPackageByParams = function (req, res) {
 	TravelPackage.model.find(query)
 		.exec(function (err, items) {
 			if (err) return res.apiError('database error', err);
-			return res.apiResponse(parseTravelPackage(items);
+			return res.apiResponse(parseTravelPackage(items));
 	});
 };
