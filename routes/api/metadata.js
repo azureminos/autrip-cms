@@ -14,13 +14,13 @@ var parseCountry = function (input) {
       r.name = item.name;
 			rs.push(r);
     });
-    console.log('>>>>Metadata.parseCountry', rs);
+    //console.log('>>>>Metadata.parseCountry', rs);
 		return rs;
 	} else {
     var r = {};
     r.id = item._id;
     r.name = item.name;
-    console.log('>>>>Metadata.parseCountry', r);
+    //console.log('>>>>Metadata.parseCountry', r);
 		return r;
 	}
 };
@@ -36,7 +36,7 @@ exports.getMetadata = function (req, res) {
   const getCountryList = function (callback) {
     Country.model.find()
       .exec(function (err, items) {
-        console.log('>>>>Metadata.getCountryList', {err, items});
+        //console.log('>>>>Metadata.getCountryList', {err, items});
         if (err || !items) return callback();
         // If yes, bypass; if no, update carRate.package
         result.country = parseCountry(items);
@@ -46,8 +46,8 @@ exports.getMetadata = function (req, res) {
 
   const returnMetadata = function() {
     let rs = {};
-    console.log('>>>>Metadata.returnMetadata >> query', query);
-    console.log('>>>>Metadata.returnMetadata >> result', result);
+    //console.log('>>>>Metadata.returnMetadata >> query', query);
+    //console.log('>>>>Metadata.returnMetadata >> result', result);
     if (query && query.keys && Array.isArray(query.keys)) {
       _.each(query.keys, function(item) {
         rs[item] = result[item];
