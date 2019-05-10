@@ -32,8 +32,7 @@ exports.getMetadata = function (req, res) {
   };
 
   const getCountryList = function (callback) {
-    Country
-      .find()
+    Country.model.find()
       .exec(function (err, items) {
         if (err || !items) return callback();
         // If yes, bypass; if no, update carRate.package
@@ -58,5 +57,4 @@ exports.getMetadata = function (req, res) {
     [
       getCountryList,
     ], returnMetadata);
-
 };
