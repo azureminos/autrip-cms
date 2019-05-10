@@ -45,7 +45,7 @@ exports.getMetadata = function (req, res) {
   const returnMetadata = function() {
     let rs = {};
     console.log('>>>>Metadata.returnMetadata', {query, result});
-    if (query.keys) {
+    if (query && query.keys && Array.isArray(query.keys)) {
       _.each(query.keys, function(item) {
         rs[item] = result[item];
       });
