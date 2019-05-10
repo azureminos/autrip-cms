@@ -46,7 +46,7 @@ exports = module.exports = nextApp => keystoneApp => {
 
 	/* ===== APIs ===== */
 	// Metadata
-	keystoneApp.post('/api/metadata', keystone.middleware.api, routes.api.metadata.getMetadata);
+	keystoneApp.get('/api/metadata', keystone.middleware.api, routes.api.metadata.getMetadata);
 	// Country
 	keystoneApp.get('/api/country', keystone.middleware.api, routes.api.country.getAllCountry);
 	keystoneApp.get('/api/country/:id', keystone.middleware.api, routes.api.country.getCountryById);
