@@ -1,4 +1,5 @@
 import React, {createElement} from 'react';
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import {withStyles} from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -6,7 +7,6 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 
-import _ from 'lodash';
 
 function TabContainer({children, dir}) {
   return (
