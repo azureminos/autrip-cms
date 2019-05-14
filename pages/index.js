@@ -3,6 +3,7 @@ import _ from 'lodash';
 import axios from 'axios';
 import { Paper, Typography } from '@material-ui/core';
 import FullWidthTabs from '../components/fixed-tab';
+import SearchAppBar from '../components/app-bar';
 import PackageCardList from '../components/package-card-list';
 
 class App extends Component {
@@ -22,10 +23,14 @@ class App extends Component {
 		let tabs, page;
 		//Init tab content to display all packages
 		const tabPackages = (
-			<PackageCardList
-				packages={packages}
-				filters={filters}
-			/>
+			<div>
+				<SearchAppBar/>
+				<PackageCardList
+					packages={packages}
+					filters={filters}
+				/>
+			</div>
+			
 		);
 		//Init tab content to display all attractions
 		const tabAttractions = (
