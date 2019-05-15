@@ -9,6 +9,7 @@
     "async": "2.1.4",
     "axios": "^0.18.0",
     "dotenv": "4.0.0",
+    "express": "^4.16.4",
     "jss": "^9.8.7",
     "keystone": "4.0.0-beta.5",
     "lodash": "^4.13.1",
@@ -16,7 +17,9 @@
     "prop-types": "^15.7.2",
     "react": "^16.3.1",
     "react-dom": "^16.3.1",
-    "react-jss": "^8.1.0"
+    "react-jss": "^8.1.0",
+    "socket.io": "^2.0.3",
+    "socket.io-client": "^2.0.3"
   },
   "devDependencies": {
     "eslint": "3.15.0",

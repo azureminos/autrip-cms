@@ -2,10 +2,47 @@
 // customising the .env file in your project's root folder.
 require('dotenv').config();
 
+// Init socket
+const app = require('express')();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
 // Next app
 const next = require('next');
 const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
+const nextApp = next({ dev });
+const nextHandler = nextApp.getRequestHandler();
+
+const messages = [];
+io.on('connection', (socket) => {
+	/*const channel = (channel, handler) => {
+		socket.on(channel, (request, sendStatus) => {
+			console.log(`>>>>Captured event[${channel}] on socket[${socket.id}]`, request);
+
+			handler({
+				request,
+				sendStatus,
+				socket,
+			});
+		});
+	};
+	console.log(`A user connected (socket ID ${socket.id})`);
+	// Register channels
+	channel('disconnect', ({ request, sendStatus, socket }) => {
+		console.log(`A user disconnect (socket ID ${socket.id})`, request);
+		sendStatus('ok');
+	});
+	channel('push:test', ({ request, sendStatus, socket }) => {
+		console.log(`Received a test push from (socket ID ${socket.id})`, request);
+		socket.emit('test', 'hello from server');
+		sendStatus('ok');
+	});*/
+	socket.on('push:message', (data) => {
+		console.log('>>>>server socket', data);
+		messages.push(data);
+		socket.emit('message', data);
+	});
+});
 
 // Require keystone
 var keystone = require('keystone');
@@ -27,8 +64,17 @@ keystone.init({
 keystone.import('models');
 
 // Start Next app
-app.prepare()
+nextApp.prepare()
 	.then(() => {
+		app.get('*', (req, res) => {
+			return nextHandler(req, res);
+		});
+
+		server.listen(4000, (err) => {
+			if (err) throw err;
+			console.log('> Ready on http://localhost:3000');
+		});
+
 		// Setup common locals for your templates. The following are required for the
 		// bundled templates and layouts. Any runtime locals (that should be set uniquely
 		// for each request) should be added to ./routes/middleware.js
@@ -40,7 +86,7 @@ app.prepare()
 		});
 
 		// Load your project's Routes
-		keystone.set('routes', require('./routes')(app));
+		keystone.set('routes', require('./routes')(nextApp));
 
 
 		// Configure the navigation bar in Keystone's Admin UI
