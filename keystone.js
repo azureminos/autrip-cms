@@ -5,7 +5,8 @@ require('dotenv').config();
 // Init socket
 const app = require('express')();
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const SocketServer = require('socket.io');
+const io = new SocketServer(server, {pingInterval: 2000, pingTimeout: 5000});
 
 // Next app
 const next = require('next');
@@ -72,9 +73,14 @@ nextApp.prepare()
 
 		const socketPort = Number(process.env.SOCKET_PORT || '4000');
 
-		server.listen(socketPort, (err) => {
+		/*server.listen(socketPort, (err) => {
 			if (err) throw err;
 			console.log('> Ready on http://localhost:3000');
+		});*/
+
+		app.use(function(req, res, next) {
+			res.io = io;
+			next();
 		});
 
 		// Setup common locals for your templates. The following are required for the
