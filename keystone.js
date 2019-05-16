@@ -70,7 +70,9 @@ nextApp.prepare()
 			return nextHandler(req, res);
 		});
 
-		server.listen(4000, (err) => {
+		const socketPort = Number(process.env.SOCKET_PORT || '4000');
+
+		server.listen(socketPort, (err) => {
 			if (err) throw err;
 			console.log('> Ready on http://localhost:3000');
 		});
