@@ -3,8 +3,8 @@ const withPlugins = require('next-compose-plugins');
 
 const nextConfig = {
   publicRuntimeConfig: {
-    SOCKET_BASE_URL: process.env.SOCKET_BASE_URL || 'http://0.0.0.0',
-    SOCKET_PORT: Number(process.env.SOCKET_PORT || '4000'),
+    SOCKET_BASE_URL: process.env.API_BASE_URL || 'http://localhost',
+    SOCKET_PORT: Number(process.env.PORT || '4000'),
   },
 };
 
