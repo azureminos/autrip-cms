@@ -36,8 +36,9 @@ class App extends Component {
 
 	// connect to WS server and listen event
 	componentDidMount() {
-		console.log('>>>>Print system env', publicRuntimeConfig);
-		socket = io('http://localhost:4000')
+		const socketUrl = `{publicRuntimeConfig.API_BASE_URL}:{publicRuntimeConfig.SOCKET_PORT}`;
+		console.log('>>>>App.SOCKET_URL', socketUrl);
+		socket = io(socketUrl);
 		socket.on('message', this.handleMessage)
 	}
 
