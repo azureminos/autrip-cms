@@ -36,7 +36,7 @@ class App extends Component {
 
 	// connect to WS server and listen event
 	componentDidMount() {
-		const socketUrl = `${publicRuntimeConfig.API_BASE_URL}:${publicRuntimeConfig.SOCKET_PORT}`;
+		const socketUrl = `${publicRuntimeConfig.SOCKET_BASE_URL}:${publicRuntimeConfig.SOCKET_PORT}`;
 		console.log('>>>>App.SOCKET_URL', socketUrl);
 		socket = io(socketUrl);
 		socket.on('message', this.handleMessage)
