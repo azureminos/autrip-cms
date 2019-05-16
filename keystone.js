@@ -8,6 +8,10 @@ const next = require('next');
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const nextHandler = nextApp.getRequestHandler();
+const async = require('async');
+
+// Socket components
+const socketIO = require('socket.io');
 
 // Require keystone
 var keystone = require('keystone');
@@ -60,7 +64,7 @@ nextApp.prepare()
 		keystone.start({
 			onHttpServerCreated: function () {
 				const server = keystone.httpsServer ? keystone.httpsServer : keystone.httpServer;
-				keystone.set('io', require('socket.io').listen(server));
+				keystone.set('io', socketIO.listen(server));
 			},
 			onStart: function () {
 				var io = keystone.get('io');
@@ -73,15 +77,42 @@ nextApp.prepare()
 
 				// Socketio connection
 				io.on('connect', (socket) => {
+					const channel = (channel, handler) => {
+						socket.on(channel, (request, sendStatus) => {
+							console.log(`>>>>Captured event[${channel}] on socket[${socket.id}]`, request);
+
+							handler({
+								request,
+								sendStatus,
+								socket,
+							});
+						});
+					};
+
 					console.log('>>>>User connected', socket.id);
 
-					socket.on('push:message', (data) => {
-						console.log('>>>>server socket', data);
-						socket.emit('message', data);
-					});
+					channel('push:package:get', (data) => {
+						console.log('>>>>server socket received event[push:package:get]', data.request);
+						const packageId = data.request.id;
+						// async calls
+						async.parallel({
+							package: (callback) => {
+								const TravelPackage = keystone.list('TravelPackage');
+								TravelPackage.model
+									.findById(packageId)
+									.exec(function (err, item) {
+										console.log('>>>>server async calls for event[push:package:get]', item);
+										return callback(null, item);
+									});
+							},
+						}, function (err, results) {
+							console.log('>>>>server final callback for event[push:package:get]', results);
+							socket.emit('package:get', results);
+						});
 
-					socket.on('disconnect', () => {
-						console.log('>>>>User disconnected');
+						channel('disconnect', () => {
+							console.log('>>>>User disconnected');
+						});
 					});
 				});
 			},

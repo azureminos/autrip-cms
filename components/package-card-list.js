@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
-import {withStyles} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
+import PackageCard from './package-card';
 
 const styles = (theme) => ({
 	root: {
@@ -10,15 +10,16 @@ const styles = (theme) => ({
 });
 
 class PackageCardList extends React.Component {
-	state = {
-		status: '',
-		country: '',
-	};
-	
-	render() {
-		const { classes, theme, packages } = this.props;
+	render () {
+		const { classes, theme, packages, btnActionMap } = this.props;
 
-		let cards = _.map(packages, (pkg) => (<div key={pkg.id}>{pkg.name}</div>));
+		let cards = _.map(packages, (pkg) => (
+			<PackageCard
+				key={pkg.id}
+				item={pkg}
+				btnActionMap={btnActionMap}
+			/>
+		));
 
 
 		return (
