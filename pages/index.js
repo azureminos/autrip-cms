@@ -7,6 +7,10 @@ import FullWidthTabs from '../components/fixed-tab';
 import SearchAppBar from '../components/app-bar';
 import PackageCardList from '../components/package-card-list';
 import PersistentDrawer from '../components/persistent-drawer';
+import getConfig from 'next/config'
+
+const { publicRuntimeConfig } = getConfig();
+const { SOCKET_BASE_URL } = publicRuntimeConfig;
 
 let socket;
 
@@ -34,6 +38,7 @@ class App extends Component {
 
 	// connect to WS server and listen event
 	componentDidMount() {
+		console.log('>>>>Print system env', SOCKET_BASE_URL);
 		socket = io('http://localhost:4000')
 		socket.on('message', this.handleMessage)
 	}
