@@ -9,7 +9,7 @@ import PackageCardList from '../components/package-card-list';
 import PersistentDrawer from '../components/persistent-drawer';
 import getConfig from 'next/config';
 
-const { env } = getConfig();
+const { publicRuntimeConfig } = getConfig();
 let socket;
 
 class App extends Component {
@@ -36,7 +36,7 @@ class App extends Component {
 
 	// connect to WS server and listen event
 	componentDidMount() {
-		console.log('>>>>Print system env', env);
+		console.log('>>>>Print system env', publicRuntimeConfig);
 		socket = io('http://localhost:4000')
 		socket.on('message', this.handleMessage)
 	}
