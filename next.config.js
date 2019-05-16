@@ -3,7 +3,8 @@ const withPlugins = require('next-compose-plugins');
 
 const hostname = process.env.API_BASE_URL || 'http://localhost';
 const {DEMO, PORT, LOCAL} = process.env;
-const socketAddress = (DEMO && LOCAL) ? `http://${hostname}:1${PORT}` : `wss://${hostname}`;
+const socketPort = Number(PORT) - 1;
+const socketAddress = (DEMO && LOCAL) ? `http://${hostname}:${socketPort}` : `wss://${hostname}`;
 
 console.log('>>>>Print env[socketAddress]', socketAddress);
 
