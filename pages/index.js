@@ -36,16 +36,10 @@ class App extends Component {
 
 	// connect to WS server and listen event
 	componentDidMount() {
-		const socketUrl = `${publicRuntimeConfig.SOCKET_BASE_URL}:${publicRuntimeConfig.SOCKET_PORT}`;
+		const socketUrl = publicRuntimeConfig.SOCKET_URL;
 		console.log('>>>>App.SOCKET_URL', socketUrl);
 		socket = io(socketUrl);
 		socket.on('message', this.handleMessage)
-	}
-
-	// close socket connection
-	componentWillUnmount() {
-		socket.off('message', this.handleMessage)
-		socket.close()
 	}
 
 	  // add messages from server to the state
