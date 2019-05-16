@@ -4,7 +4,7 @@ require('dotenv').config();
 
 // Init socket
 const app = require('express')();
-const appPort = process.env.PORT;
+const appPort = `1${process.env.PORT}`;
 const server = require('http').Server(app);
 const SocketServer = require('socket.io');
 const io = new SocketServer(server, {pingInterval: 2000, pingTimeout: 5000});
