@@ -2,45 +2,12 @@
 // customising the .env file in your project's root folder.
 require('dotenv').config();
 
-// Init socket
-const app = require('express')();
-const socketPort = Number(process.env.PORT) - 1;
-const server = require('http').Server(app);
-const SocketServer = require('socket.io');
-const io = new SocketServer(server, {pingInterval: 2000, pingTimeout: 5000});
-
 // Next app
+const app = require('express')();
 const next = require('next');
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const nextHandler = nextApp.getRequestHandler();
-
-const messages = [];
-io.on('connection', (socket) => {
-	console.log('Client connected', socket.id);
-	/*const channel = (channel, handler) => {
-		socket.on(channel, (request, sendStatus) => {
-			console.log(`>>>>Captured event[${channel}] on socket[${socket.id}]`, request);
-
-			handler({
-				request,
-				sendStatus,
-				socket,
-			});
-		});
-	};
-	console.log(`A user connected (socket ID ${socket.id})`);
-	// Register channels
-	channel('disconnect', ({ request, sendStatus, socket }) => {
-		console.log(`A user disconnect (socket ID ${socket.id})`, request);
-		sendStatus('ok');
-	});*/
-	socket.on('push:message', (data) => {
-		console.log('>>>>server socket', data);
-		messages.push(data);
-		socket.emit('message', data);
-	});
-});
 
 // Require keystone
 var keystone = require('keystone');
@@ -68,13 +35,6 @@ nextApp.prepare()
 			return nextHandler(req, res);
 		});
 
-		app.use(function(req, res, next) {
-			res.io = io;
-			next();
-		});
-		
-		server.listen(socketPort);
-
 		// Setup common locals for your templates. The following are required for the
 		// bundled templates and layouts. Any runtime locals (that should be set uniquely
 		// for each request) should be added to ./routes/middleware.js
@@ -97,6 +57,34 @@ nextApp.prepare()
 			users: 'users',
 		});
 
-		keystone.start();
+		keystone.start({
+			onHttpServerCreated: function () {
+				const server = keystone.httpsServer ? keystone.httpsServer : keystone.httpServer;
+				keystone.set('io', require('socket.io').listen(server));
+			},
+			onStart: function () {
+				var io = keystone.get('io');
+				var session = keystone.expressSession;
+
+				// Share session between express and socketio
+				io.use(function (socket, next) {
+					session(socket.handshake, {}, next);
+				});
+
+				// Socketio connection
+				io.on('connect', (socket) => {
+					console.log('>>>>User connected', socket.id);
+
+					socket.on('push:message', (data) => {
+						console.log('>>>>server socket', data);
+						socket.emit('message', data);
+					});
+
+					socket.on('disconnect', () => {
+						console.log('>>>>User disconnected');
+					});
+				});
+			},
+		});
 	});
 

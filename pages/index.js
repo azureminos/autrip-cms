@@ -27,7 +27,7 @@ class App extends Component {
 	state = {
 		isUpdating: false,
 		idxSelected: 0,
-		messages: [{id:1, value:'AA'}, {id:2, value:'AB'}],
+		messages: [{ id: 1, value: 'AA' }, { id: 2, value: 'AB' }],
 	};
 
 	/* ==============================
@@ -42,11 +42,11 @@ class App extends Component {
 		socket.on('message', this.handleMessage)
 	}
 
-	  // add messages from server to the state
-	  handleMessage = (message) => {
+	// add messages from server to the state
+	handleMessage = (message) => {
 		console.log('>>>>App.handleMessage', message);
 		//this.setState(state => ({ messages: state.messages.concat(message) }))
-	  }
+	}
 
 	handleSocketMessage = (msg) => {
 		console.log('>>>>App.handleSocketMessage', msg);
