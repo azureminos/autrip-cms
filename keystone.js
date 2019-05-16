@@ -5,6 +5,7 @@ require('dotenv').config();
 // Init socket
 const app = require('express')();
 const appPort = `1${process.env.PORT}`;
+const socketPort = Number(appPort) - 1;
 const server = require('http').Server(app);
 const SocketServer = require('socket.io');
 const io = new SocketServer(server, {pingInterval: 2000, pingTimeout: 5000});
@@ -73,7 +74,7 @@ nextApp.prepare()
 			next();
 		});
 		
-		server.listen(appPort);
+		server.listen(socketPort);
 
 		// Setup common locals for your templates. The following are required for the
 		// bundled templates and layouts. Any runtime locals (that should be set uniquely
