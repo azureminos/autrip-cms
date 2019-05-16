@@ -4,6 +4,7 @@ require('dotenv').config();
 
 // Init socket
 const app = require('express')();
+const appPort = process.env.PORT;
 const server = require('http').Server(app);
 const SocketServer = require('socket.io');
 const io = new SocketServer(server, {pingInterval: 2000, pingTimeout: 5000});
@@ -16,6 +17,7 @@ const nextHandler = nextApp.getRequestHandler();
 
 const messages = [];
 io.on('connection', (socket) => {
+	console.log('Client connected', socket.id);
 	/*const channel = (channel, handler) => {
 		socket.on(channel, (request, sendStatus) => {
 			console.log(`>>>>Captured event[${channel}] on socket[${socket.id}]`, request);
@@ -31,11 +33,6 @@ io.on('connection', (socket) => {
 	// Register channels
 	channel('disconnect', ({ request, sendStatus, socket }) => {
 		console.log(`A user disconnect (socket ID ${socket.id})`, request);
-		sendStatus('ok');
-	});
-	channel('push:test', ({ request, sendStatus, socket }) => {
-		console.log(`Received a test push from (socket ID ${socket.id})`, request);
-		socket.emit('test', 'hello from server');
 		sendStatus('ok');
 	});*/
 	socket.on('push:message', (data) => {
@@ -71,17 +68,12 @@ nextApp.prepare()
 			return nextHandler(req, res);
 		});
 
-		const socketPort = Number(process.env.SOCKET_PORT || '4000');
-
-		/*server.listen(socketPort, (err) => {
-			if (err) throw err;
-			console.log('> Ready on http://localhost:3000');
-		});*/
-
 		app.use(function(req, res, next) {
 			res.io = io;
 			next();
 		});
+		
+		server.listen(appPort);
 
 		// Setup common locals for your templates. The following are required for the
 		// bundled templates and layouts. Any runtime locals (that should be set uniquely
