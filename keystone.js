@@ -91,6 +91,7 @@ nextApp.prepare()
 					console.log('>>>>User connected', socket.id);
 
 					channel('push:package:get', PackageSocket.getPackageDetails);
+					channel('disconnect', () => {console.log('>>>>User disconnected');});
 				});
 			},
 		});
