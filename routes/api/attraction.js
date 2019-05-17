@@ -6,7 +6,7 @@ var helper = require('../../lib/object-parser');
 var Attraction = keystone.list('Attraction');
 var City = keystone.list('City');
 
-/*var parseAttraction = function (input) {
+var parseAttraction = function (input) {
 	if (Array.isArray(input)) {
 		var rs = [];
 		_.each(input, function (item) {
@@ -22,8 +22,7 @@ var City = keystone.list('City');
 		r.imageUrl = input.image ? input.image.secure_url : '';
 		return r;
 	}
-};*/
-
+};
 /** * Get List of Attraction */
 exports.getAllAttraction = function (req, res) {
 	Attraction.model.find().exec(function (err, items) {
