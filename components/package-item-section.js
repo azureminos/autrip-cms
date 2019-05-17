@@ -13,6 +13,7 @@ import PublishIcon from '@material-ui/icons/Publish';
 import MobileViewIcon from '@material-ui/icons/MobileScreenShare';
 import ComputerIcon from '@material-ui/icons/Computer';
 import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
+import PackageSummary from './package-summary-div';
 
 const styles = theme => ({
 	root: {
@@ -132,32 +133,25 @@ class PackageDetails extends React.Component {
 						onClick={() => this.handleShowPackageList()}
 					>
 						Return
-        				<GoBackIcon className={classes.rightIcon} />
+						<GoBackIcon className={classes.rightIcon} />
 					</Button>
 				</div>
 				<List className={classes.root}>
 					<li>
 						<Typography className={classes.dividerFullWidth} color="textSecondary" variant="caption">
 							Package Summary
-        				</Typography>
+						</Typography>
 					</li>
 					<Divider component="li" />
 					<ListItem>
-						<form className={classes.container} noValidate autoComplete="off">
-							<TextField
-								id="standard-read-only-input"
-								label="Read Only"
-								defaultValue={packageSummary.name}
-								className={classes.textField}
-								margin="normal"
-								InputProps={{ readOnly: true }}
-							/>
-						</form>
+						<PackageSummary
+							packageSummary={packageSummary}
+						/>
 					</ListItem>
 					<li>
 						<Typography className={classes.dividerFullWidth} color="textSecondary" variant="caption">
 							Package Itinerary
-        				</Typography>
+						</Typography>
 					</li>
 					<Divider component="li" />
 					<ListItem>

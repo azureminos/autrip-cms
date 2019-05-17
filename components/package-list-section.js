@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { withStyles } from '@material-ui/core/styles';
-import PackageCard from './package-card';
+import PackageCard from './package-card-div';
 
 const styles = (theme) => ({
 	root: {
