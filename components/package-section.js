@@ -10,28 +10,61 @@ const styles = (theme) => ({
 });
 
 class PackageSection extends React.Component {
-	state = {
-		idSelectedPackage: this.props.selectedPackage ? this.props.selectedPackage.id : -1,
-	};
+	constructor (props) {
+		super(props);
 
-	//Event Handlers
-	handleOpenPackage = (pkg) => {
+		this.getNextStatus = this.getNextStatus.bind(this);
+		this.handleOpenPackage = this.handleOpenPackage.bind(this);
+		this.handlePackageStatus = this.handlePackageStatus.bind(this);
+
+		this.state = {
+			idSelectedPackage: this.props.selectedPackage ? this.props.selectedPackage.id : -1,
+		};
+	}
+
+	/* ----------  Helpers  ------- */
+	// Get next status
+	getNextStatus (status) {
+		let nextStatus;
+		switch (status) {
+			case 'draft':
+				nextStatus = 'published';
+				break;
+			case 'published':
+				nextStatus = 'archived';
+				break;
+			case 'archived':
+				nextStatus = 'draft';
+				break;
+		}
+		return nextStatus;
+	};
+	/* ----------  Event Handlers  ------- */
+	// Handle open package
+	handleOpenPackage (pkg) {
 		console.log('>>>>PackageSection.handleOpenPackage', pkg);
-		//Add here for logics to update state
 		this.setState({ idSelectedPackage: pkg.id });
-		this.props.getPackageDetails(pkg);
+		this.props.getPackageDetails(pkg.id);
+	};
+	// Handle package state change
+	handlePackageStatus (pkg) {
+		console.log('>>>>PackageSection.handlePackageStatus', pkg);
+		this.props.updatePackageState({
+			id: pkg.id,
+			status: this.getNextStatus(pkg.state),
+			isRefreshAll: true,
+		});
 	};
 
 	render () {
 		const { classes, theme, packages, filters, selectedPackage } = this.props;
-		const btnActionMap = {
-			'View Package': this.handleOpenPackage,
-		};
+
 		return (
 			<div className={classes.root}>
 				<PackageCardList
 					packages={packages}
-					btnActionMap={btnActionMap}
+					handleOpenPackage={this.handleOpenPackage}
+					handlePackageStatus={this.handlePackageStatus}
 				/>
 			</div>
 		);

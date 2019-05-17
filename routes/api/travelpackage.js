@@ -40,7 +40,7 @@ exports.getTravelPackageById = function (req, res) {
 			if (err) return res.apiError('database error', err);
 			if (!item) return res.apiError('not found');
 			return res.apiResponse(parseTravelPackage(item));
-	});
+		});
 };
 
 /** * Get TravelPackage by Params */
@@ -51,5 +51,5 @@ exports.getTravelPackageByParams = function (req, res) {
 		.exec(function (err, items) {
 			if (err) return res.apiError('database error', err);
 			return res.apiResponse(parseTravelPackage(items));
-	});
+		});
 };

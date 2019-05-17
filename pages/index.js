@@ -26,14 +26,16 @@ class App extends Component {
 
 	constructor(props) {
 		super(props);
-		
+
 		this.getPackageDetails = this.getPackageDetails.bind(this);
-	
+		this.updatePackageState = this.updatePackageState.bind(this);
+
 		this.state = {
-		  idxSelected: 0,
-		  updating: false,
+			idxSelectedSection: 0,
+			packages: props.packages ? props.packages : [],
+			updating: false,
 		};
-	  }
+	}
 
 	/* ==============================
      = Helper Methods             =
@@ -62,15 +64,32 @@ class App extends Component {
 		);
 	}
 
-    /* ==============================
-     = State & Event Handlers     =
-     ============================== */
+	/* ==============================
+	 = State & Event Handlers     =
+	 ============================== */
 
 	/* ----------  Package  ------- */
-	getPackageDetails(pkg) {
-		console.log('>>>>App Client >> getPackageDetails', pkg);
-		this.pushToRemote('package:get', {id: pkg.id});
+	// Get package details, Event[push:package:get]
+	getPackageDetails(id) {
+		console.log('>>>>App Client >> getPackageDetails', id);
+		this.pushToRemote('package:get', { id: id });
 		this.setState({ updating: true });
+	}
+	// Handle response of Get package details, Event[package:get]
+	handleGetPackageDetails(res) {
+		console.log('>>>>Event[package:get] response', res);
+		this.setState({ updating: false });
+	}
+	// Update package state, Event[push:package:status]
+	updatePackageState(req) {
+		console.log('>>>>App Client >> updatePackageState', req);
+		this.pushToRemote('package:status', req);
+		this.setState({ updating: true });
+	}
+	// Handle response of Update package state, Event[package:status]
+	handleUpdatePackageState(res) {
+		console.log('>>>>Event[package:status] response', res);
+		this.setState({ updating: false, packages: res.packages });
 	}
 
 	/* ==============================
@@ -84,17 +103,18 @@ class App extends Component {
 		socket = io(socketUrl);
 
 		//Register socket listeners
-		socket.on('package:get', (res) => { console.log('>>>>Event[package:get] response', res); })
+		socket.on('package:get', (res) => { this.handleGetPackageDetails(res); });
+		socket.on('package:status', (res) => { this.handleUpdatePackageState(res); });
 	}
 
 	handleDrawerItemClick = (idx) => {
 		//Add here for logics to update state
-		this.setState({ idxSelected: idx });
+		this.setState({ idxSelectedSection: idx });
 	};
 
 	render() {
-		const { packages, filters, drawerItems } = this.props;
-		const { updating, idxSelected } = this.state;
+		const { filters, drawerItems } = this.props;
+		const { updating, idxSelectedSection, packages } = this.state;
 		let page;
 		//Init tab content to display all packages
 
@@ -104,22 +124,23 @@ class App extends Component {
 				packages={packages}
 				filters={filters}
 				getPackageDetails={this.getPackageDetails}
+				updatePackageState={this.updatePackageState}
 			/>
 		);
-		
+
 		//Init page
 		page = (
 			<Paper>
 				<PersistentDrawer
 					drawerItems={drawerItems}
-					selectedDrawerItem={idxSelected}
+					selectedDrawerItem={idxSelectedSection}
 					handleDrawerItemClick={this.handleDrawerItemClick}
 				>
-					{idxSelected === 0 && divPackageCards}
-					{idxSelected === 1 && <div>This is Country</div>}
-					{idxSelected === 2 && <div>This is City</div>}
-					{idxSelected === 3 && <div>This is Attraction</div>}
-					{idxSelected === 4 && <div>This is Hotel</div>}
+					{idxSelectedSection === 0 && divPackageCards}
+					{idxSelectedSection === 1 && <div>This is Country</div>}
+					{idxSelectedSection === 2 && <div>This is City</div>}
+					{idxSelectedSection === 3 && <div>This is Attraction</div>}
+					{idxSelectedSection === 4 && <div>This is Hotel</div>}
 				</PersistentDrawer>
 			</Paper >
 		);

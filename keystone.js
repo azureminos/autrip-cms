@@ -14,7 +14,7 @@ const socketIO = require('socket.io');
 
 // Require keystone
 const keystone = require('keystone');
-const PackageSocket = require('./sockets/package');
+const socket = require('./sockets');
 // Initialise Keystone with your project's configuration.
 // See http://keystonejs.com/guide/config for available options
 // and documentation.
@@ -73,26 +73,8 @@ nextApp.prepare()
 				io.use(function (socket, next) {
 					session(socket.handshake, {}, next);
 				});
-
-				// Socketio connection
-				io.on('connect', (socket) => {
-					const channel = (channel, handler) => {
-						socket.on(channel, (request, sendStatus) => {
-							console.log(`>>>>Captured event[${channel}] on socket[${socket.id}]`, request);
-
-							handler({
-								request,
-								sendStatus,
-								socket,
-							});
-						});
-					};
-
-					console.log('>>>>User connected', socket.id);
-
-					channel('push:package:get', PackageSocket.getPackageDetails);
-					channel('disconnect', () => {console.log('>>>>User disconnected');});
-				});
+				// Attach socket channels
+				socket.attachSockets(io);
 			},
 		});
 	});
