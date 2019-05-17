@@ -17,35 +17,35 @@ exports.getPackageDetails = ({request: {id}, sendStatus, socket}) => {
     },
     packageItems: (callback) => {
       TravelPackage.model
-      .findById(query.package.id).populate('packageItems')
+      .findById(id).populate('packageItems')
       .exec(function (err, item) {
         return callback(null, item.packageItems);
       });
     },
     packageHotels: (callback) => {
       TravelPackage.model
-      .findById(query.package.id).populate('packageHotels')
+      .findById(id).populate('packageHotels')
       .exec(function (err, item) {
         return callback(null, item.packageHotels);
       });
     },
     packageRates: (callback) => {
       TravelPackage.model
-      .findById(query.package.id).populate('packageRates')
+      .findById(id).populate('packageRates')
       .exec(function (err, item) {
         return callback(null, item.packageRates);
       });
     },
     carRates: (callback) => {
       TravelPackage.model
-      .findById(query.package.id).populate('carRates')
+      .findById(id).populate('carRates')
       .exec(function (err, item) {
         return callback(null, item.carRates);
       });
     },
     flightRates: (callback) => {
       TravelPackage.model
-      .findById(query.package.id).populate('flightRates')
+      .findById(id).populate('flightRates')
       .exec(function (err, item) {
         return callback(null, item.flightRates);
       });
