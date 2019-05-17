@@ -53,7 +53,7 @@ class PackageSummary extends React.Component {
 						<TextField
 							id="package-summary-max-participants"
 							label="Max Participants"
-							defaultValue={packageSummary.maxParticipant}
+							defaultValue={String(packageSummary.maxParticipant)}
 							className={classes.textField}
 							margin="normal"
 							InputProps={{ readOnly: true }}
@@ -63,7 +63,7 @@ class PackageSummary extends React.Component {
 						<TextField
 							id="package-summary-effective-from"
 							label="Effective From"
-							defaultValue={packageSummary.effectiveFrom}
+							defaultValue={packageSummary.effectiveFrom.substring(0, packageSummary.effectiveFrom.indexOf('T'))}
 							className={classes.textField}
 							margin="normal"
 							InputProps={{ readOnly: true }}
@@ -73,7 +73,7 @@ class PackageSummary extends React.Component {
 						<TextField
 							id="package-summary-effective-to"
 							label="Effective To"
-							defaultValue={packageSummary.effectiveTo}
+							defaultValue={packageSummary.effectiveTo.substring(0, packageSummary.effectiveTo.indexOf('T'))}
 							className={classes.textField}
 							margin="normal"
 							InputProps={{ readOnly: true }}
@@ -83,7 +83,7 @@ class PackageSummary extends React.Component {
 						<TextField
 							id="package-summary-is-customisable"
 							label="Customisable"
-							defaultValue={packageSummary.isCustomisable}
+							defaultValue={String(packageSummary.isCustomisable)}
 							className={classes.textField}
 							margin="normal"
 							InputProps={{ readOnly: true }}
@@ -93,7 +93,7 @@ class PackageSummary extends React.Component {
 						<TextField
 							id="package-summary-is-extension"
 							label="Extension"
-							defaultValue={packageSummary.isExtention}
+							defaultValue={String(packageSummary.isExtention)}
 							className={classes.textField}
 							margin="normal"
 							InputProps={{ readOnly: true }}
@@ -103,7 +103,7 @@ class PackageSummary extends React.Component {
 						<TextField
 							id="package-summary-is-promoted"
 							label="On Sale"
-							defaultValue={packageSummary.isPromoted}
+							defaultValue={String(packageSummary.isPromoted)}
 							className={classes.textField}
 							margin="normal"
 							InputProps={{ readOnly: true }}
