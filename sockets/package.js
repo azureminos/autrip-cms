@@ -3,10 +3,6 @@ const keystone = require('keystone');
 const helper = require('../lib/object-parser');
 
 const TravelPackage = keystone.list('TravelPackage');
-const TravelPackage = keystone.list('TravelPackage');
-const TravelPackage = keystone.list('TravelPackage');
-const TravelPackage = keystone.list('TravelPackage');
-const TravelPackage = keystone.list('TravelPackage');
 
 exports.getPackageDetails = ({request: {id}, sendStatus, socket}) => {
   console.log('>>>>server socket received event[push:package:get]', id);
