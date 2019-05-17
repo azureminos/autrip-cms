@@ -32,6 +32,8 @@ class PackageCard extends React.Component {
 	render() {
 		const { classes, item, btnActionMap } = this.props;
 		const buttons = [];
+		const description = item.description.length > 200 ?
+			`${item.description.substring(0, 200)}...` : item.description;
 		console.log('>>>>PackageCard.item', item);
 
 		_.each(btnActionMap, (btnAction, btnName) => {
@@ -55,7 +57,7 @@ class PackageCard extends React.Component {
 							{item.name} <span className={classes.state}>{item.state}</span>
 						</Typography>
 						<Typography component='p'>
-							{item.description}
+							{description}
 						</Typography>
 					</CardContent>
 				</CardActionArea>
