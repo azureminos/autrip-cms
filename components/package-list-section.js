@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { withStyles } from '@material-ui/core/styles';
-import PackageCardList from './package-card-list';
+import PackageCard from './package-card';
 
 const styles = (theme) => ({
 	root: {
@@ -9,11 +9,12 @@ const styles = (theme) => ({
 	},
 });
 
-class PackageSection extends React.Component {
+class PackageCards extends React.Component {
 	constructor (props) {
 		super(props);
 
 		this.getNextStatus = this.getNextStatus.bind(this);
+		this.getNextAction = this.getNextAction.bind(this);
 		this.handleOpenPackage = this.handleOpenPackage.bind(this);
 		this.handlePackageStatus = this.handlePackageStatus.bind(this);
 
@@ -39,16 +40,33 @@ class PackageSection extends React.Component {
 		}
 		return nextStatus;
 	};
+	// Get next Action
+	getNextAction (status) {
+		let nextStatus;
+		switch (status) {
+			case 'Draft':
+				nextStatus = 'Publish';
+				break;
+			case 'Published':
+				nextStatus = 'Archive';
+				break;
+			case 'Archived':
+				nextStatus = 'Edit';
+				break;
+		}
+		return nextStatus;
+	};
+
 	/* ----------  Event Handlers  ------- */
 	// Handle open package
 	handleOpenPackage (pkg) {
-		console.log('>>>>PackageSection.handleOpenPackage', pkg);
+		console.log('>>>>PackageCards.handleOpenPackage', pkg);
 		this.setState({ idSelectedPackage: pkg.id });
 		this.props.getPackageDetails(pkg.id);
 	};
 	// Handle package state change
 	handlePackageStatus (pkg) {
-		console.log('>>>>PackageSection.handlePackageStatus', pkg);
+		console.log('>>>>PackageCards.handlePackageStatus', pkg);
 		this.props.updatePackageState({
 			id: pkg.id,
 			status: this.getNextStatus(pkg.state),
@@ -57,18 +75,34 @@ class PackageSection extends React.Component {
 	};
 
 	render () {
-		const { classes, theme, packages, selectedPackage } = this.props;
+		const { classes, theme, packages, getPackageDetails, updatePackageState } = this.props;
+
+		let cards = _.map(packages, (pkg) => {
+			// Init button/action of package card
+			const nextAction = this.getNextAction(pkg.state);
+			const btnActionMap = {};
+			if (getPackageDetails) {
+				btnActionMap['View Package'] = this.handleOpenPackage;
+			}
+			if (updatePackageState) {
+				btnActionMap[`${nextAction} Package`] = this.handlePackageStatus;
+			}
+
+			return (
+				<PackageCard
+					key={pkg.id}
+					item={pkg}
+					btnActionMap={btnActionMap}
+				/>
+			);
+		});
 
 		return (
 			<div className={classes.root}>
-				<PackageCardList
-					packages={packages}
-					handleOpenPackage={this.handleOpenPackage}
-					handlePackageStatus={this.handlePackageStatus}
-				/>
+				{cards}
 			</div>
 		);
 	}
 }
 
-export default withStyles(styles, { withTheme: true })(PackageSection);
+export default withStyles(styles, { withTheme: true })(PackageCards);

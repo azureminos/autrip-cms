@@ -5,10 +5,10 @@ import io from 'socket.io-client';
 import getConfig from 'next/config';
 
 import { Paper, Typography } from '@material-ui/core';
-import PackageSection from '../components/package-section';
 import PersistentDrawer from '../components/persistent-drawer';
 import PackageFilters from '../components/package-filters';
-
+import PackageCards from '../components/package-list-section';
+import PackageDetails from '../components/package-item-section';
 
 const { publicRuntimeConfig } = getConfig();
 let socket;
@@ -40,6 +40,7 @@ class App extends Component {
 			idxSelectedSection: 0,
 			packages: props.packages ? props.packages : [],
 			updating: false,
+			selectedPackage: {},
 		};
 	}
 
@@ -90,7 +91,7 @@ class App extends Component {
 	// Handle response of Get package details, Event[package:get]
 	handleGetPackageDetails (res) {
 		console.log('>>>>Event[package:get] response', res);
-		this.setState({ updating: false });
+		this.setState({ updating: false, packages: [], selectedPackage: res });
 	}
 	// Update package state, Event[push:package:status]
 	updatePackageState (req) {
@@ -101,9 +102,8 @@ class App extends Component {
 	// Handle response of refresh all packages, Event[package:refreshAll]
 	handleRefreshAllPackages (res) {
 		console.log('>>>>Event[package:refreshAll] response', res);
-		this.setState({ updating: false, packages: res.packages });
+		this.setState({ updating: false, packages: res.packages, selectedPackage: {} });
 	}
-	
 
 	/* ==============================
      = React Lifecycle              =
@@ -128,15 +128,23 @@ class App extends Component {
 	render () {
 		console.log('>>>>App.render', this.props.filters);
 		const { filters, drawerItems } = this.props;
-		const { idxSelectedSection, packages } = this.state;
+		const { idxSelectedSection, packages, selectedPackage } = this.state;
 		let page;
 
 		// Init tab content to display all packages
 		const divPackageCards = (
-			<PackageSection
+			<PackageCards
 				packages={packages}
 				getPackageDetails={this.getPackageDetails}
 				updatePackageState={this.updatePackageState}
+			/>
+		);
+		// Init tab content to display selected package
+		const divPackageDetails = (
+			<PackageDetails
+				selectedPackage={selectedPackage}
+				updatePackageState={this.updatePackageState}
+				getFilteredPackages={this.getFilteredPackages}
 			/>
 		);
 
@@ -159,7 +167,8 @@ class App extends Component {
 					handleDrawerItemClick={this.handleDrawerItemClick}
 					toolbarItem={toolbarItem}
 				>
-					{idxSelectedSection === 0 && divPackageCards}
+					{idxSelectedSection === 0 && packages.length > 0 && divPackageCards}
+					{idxSelectedSection === 0 && packages.length === 0 && !!selectedPackage && divPackageDetails}
 					{idxSelectedSection === 1 && <div>This is Country</div>}
 					{idxSelectedSection === 2 && <div>This is City</div>}
 					{idxSelectedSection === 3 && <div>This is Attraction</div>}

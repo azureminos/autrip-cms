@@ -25,9 +25,15 @@ const styles = theme => ({
 });
 
 class PackageFilters extends React.Component {
-	state = {
-		status: '',
-	};
+	constructor (props) {
+		super(props);
+
+		this.handlePackageStatusChange = this.handlePackageStatusChange.bind(this);
+
+		this.state = {
+			status: '',
+		};
+	}
 
 	handlePackageStatusChange = event => {
 		console.log('>>>>PackageFilters.handleChange', event.target);
