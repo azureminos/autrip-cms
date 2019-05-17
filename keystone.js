@@ -8,14 +8,13 @@ const next = require('next');
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const nextHandler = nextApp.getRequestHandler();
-const async = require('async');
 
 // Socket components
 const socketIO = require('socket.io');
 
 // Require keystone
-var keystone = require('keystone');
-
+const keystone = require('keystone');
+const PackageSocket = require('./sockets/package');
 // Initialise Keystone with your project's configuration.
 // See http://keystonejs.com/guide/config for available options
 // and documentation.
@@ -91,29 +90,7 @@ nextApp.prepare()
 
 					console.log('>>>>User connected', socket.id);
 
-					channel('push:package:get', (data) => {
-						console.log('>>>>server socket received event[push:package:get]', data.request);
-						const packageId = data.request.id;
-						// async calls
-						async.parallel({
-							package: (callback) => {
-								const TravelPackage = keystone.list('TravelPackage');
-								TravelPackage.model
-									.findById(packageId)
-									.exec(function (err, item) {
-										console.log('>>>>server async calls for event[push:package:get]', item);
-										return callback(null, item);
-									});
-							},
-						}, function (err, results) {
-							console.log('>>>>server final callback for event[push:package:get]', results);
-							socket.emit('package:get', results);
-						});
-
-						channel('disconnect', () => {
-							console.log('>>>>User disconnected');
-						});
-					});
+					channel('push:package:get', PackageSocket.getPackageDetails);
 				});
 			},
 		});
