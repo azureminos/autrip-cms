@@ -1,11 +1,12 @@
 // API to get Attraction
 var _ = require('lodash');
 var keystone = require('keystone');
+var helper = require('../../lib/object-parser');
 
 var Attraction = keystone.list('Attraction');
 var City = keystone.list('City');
 
-var parseAttraction = function (input) {
+/*var parseAttraction = function (input) {
 	if (Array.isArray(input)) {
 		var rs = [];
 		_.each(input, function (item) {
@@ -21,12 +22,13 @@ var parseAttraction = function (input) {
 		r.imageUrl = input.image ? input.image.secure_url : '';
 		return r;
 	}
-};
+};*/
+
 /** * Get List of Attraction */
 exports.getAllAttraction = function (req, res) {
 	Attraction.model.find().exec(function (err, items) {
 		if (err) return res.apiError('database error', err);
-		return res.apiResponse(parseAttraction(items));
+		return res.apiResponse(helper.parseAttraction(items));
 	});
 };
 
@@ -35,7 +37,7 @@ exports.getAttractionById = function (req, res) {
 	Attraction.model.findById(req.params.id).exec(function (err, item) {
 		if (err) return res.apiError('database error', err);
 		if (!item) return res.apiError('not found');
-		return res.apiResponse(parseAttraction(item));
+		return res.apiResponse(helper.parseAttraction(item));
 	});
 };
 
@@ -50,7 +52,7 @@ exports.getAttractionByCity = function (req, res) {
 				.exec(function (err, item) {
 					if (err) return res.apiError('database error', err);
 					if (!item) return res.apiError('not found');
-					res.apiResponse(parseAttraction(item.attractions));
+					res.apiResponse(helper.parseAttraction(item.attractions));
 				});
 		} else if (query.city.name) {
 			City.model
@@ -58,7 +60,7 @@ exports.getAttractionByCity = function (req, res) {
 				.exec(function (err, item) {
 					if (err) return res.apiError('database error', err);
 					if (!item) return res.apiError('not found');
-					res.apiResponse(parseAttraction(item.attractions));
+					res.apiResponse(helper.parseAttraction(item.attractions));
 				});
 		}
 	} else {
