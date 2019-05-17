@@ -12,7 +12,7 @@ const getPackageDetails = ({request: {id}, sendStatus, socket}) => {
         .findById(id)
         .exec(function (err, item) {
           console.log('>>>>server async calls for event[push:package:get]', item);
-          return callback(null, helper.parseTravelPackage(item);
+          return callback(null, helper.parseTravelPackage(item));
         });
     },
   }, function (err, results) {
