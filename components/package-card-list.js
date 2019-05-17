@@ -17,13 +17,13 @@ class PackageCardList extends React.Component {
 		const getNextAction = (status) => {
 			let nextStatus;
 			switch (status) {
-				case 'draft':
+				case 'Draft':
 					nextStatus = 'Publish';
 					break;
-				case 'published':
+				case 'Published':
 					nextStatus = 'Archive';
 					break;
-				case 'archived':
+				case 'Archived':
 					nextStatus = 'Resume';
 					break;
 			}

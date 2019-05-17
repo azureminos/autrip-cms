@@ -63,16 +63,27 @@ exports.updatePackageState = ({ request: { id, status, isRefreshAll }, sendStatu
 	TravelPackage.model
 		.update({ _id: id }, { state: status })
 		.exec(function (err, res) {
-			console.log(`>>>>TravelPackage.update[${id}: ${status}]`, res);
+			//console.log(`>>>>TravelPackage.update[${id}: ${status}]`, res);
 			if (isRefreshAll) {
 				TravelPackage.model.find(function (err, items) {
-					socket.emit('package:status', { packages: helper.parseTravelPackage(items) });
+					socket.emit('package:refreshAll', { packages: helper.parseTravelPackage(items) });
 				});
 			} else {
 				TravelPackage.model.findById(id)
 					.exec(function (err, item) {
-						socket.emit('package:status', { package: helper.parseTravelPackage(item) });
+						socket.emit('package:refresh', { package: helper.parseTravelPackage(item) });
 					});
 			}
+		});
+};
+
+exports.getFilteredPackages = ({ request, sendStatus, socket }) => {
+	console.log('>>>>server socket received event[push:package:filter]', request);
+	const TravelPackage = keystone.list('TravelPackage');
+
+	TravelPackage.model
+		.find(request)
+		.exec(function (err, items) {
+			socket.emit('package:refreshAll', { packages: helper.parseTravelPackage(items) });
 		});
 };

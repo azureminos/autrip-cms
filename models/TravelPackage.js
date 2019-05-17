@@ -23,8 +23,8 @@ TravelPackage.add({
 	totalDays: { type: Types.Number, default: 0 },
 	maxParticipant: { type: Types.Number, default: 0 },
 	departureDate: { type: Types.Textarea },
-	state: { type: Types.Select, options: 'draft, published, archived', default: 'draft', noedit: true },
-	publishedAt: { type: Types.Date, noedit: true },
+	state: { type: Types.Select, options: 'Draft, Published, Archived', default: 'Draft', noedit: false },
+	//publishedAt: { type: Types.Date, noedit: true },
 	isPromoted: { type: Types.Boolean, default: false },
 	isCustomisable: { type: Types.Boolean, default: false },
 	isExtention: { type: Types.Boolean, default: false },
@@ -41,10 +41,6 @@ TravelPackage.add({
 });
 
 TravelPackage.defaultColumns = 'name, totalDays|15%, maxParticipant|15%, isPromoted|15%, isExtention|15%';
-
-TravelPackage.schema.methods.isPublished = function () {
-	return this.state == 'published';
-}
 
 TravelPackage.schema.methods.cleanupCountry = function (callback) {
 	var pkg = this;
@@ -377,10 +373,6 @@ TravelPackage.schema.methods.updatePackageHotels = function (callback) {
 
 TravelPackage.schema.pre('save', function (next) {
 	console.log('>>>>Before Save PackageItem', this.name);
-	// Update Date[publishedAt]
-	if (this.isModified('state') && this.isPublished() && !this.publishedAt) {
-		this.publishedAt = new Date();
-	}
 	// Handle relationship changes
 	var travelPackage = this;
 	async.series([

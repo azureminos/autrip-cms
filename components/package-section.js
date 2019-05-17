@@ -27,14 +27,14 @@ class PackageSection extends React.Component {
 	getNextStatus (status) {
 		let nextStatus;
 		switch (status) {
-			case 'draft':
-				nextStatus = 'published';
+			case 'Draft':
+				nextStatus = 'Published';
 				break;
-			case 'published':
-				nextStatus = 'archived';
+			case 'Published':
+				nextStatus = 'Archived';
 				break;
-			case 'archived':
-				nextStatus = 'draft';
+			case 'Archived':
+				nextStatus = 'Draft';
 				break;
 		}
 		return nextStatus;
@@ -57,7 +57,7 @@ class PackageSection extends React.Component {
 	};
 
 	render () {
-		const { classes, theme, packages, filters, selectedPackage } = this.props;
+		const { classes, theme, packages, selectedPackage } = this.props;
 
 		return (
 			<div className={classes.root}>

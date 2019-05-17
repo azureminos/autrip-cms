@@ -19,6 +19,7 @@ exports.attachSockets = (io) => {
 		console.log('>>>>User connected', socket.id);
 
 		channel('push:package:get', PackageSocket.getPackageDetails);
+		channel('push:package:filter', PackageSocket.getFilteredPackages);
 		channel('push:package:status', PackageSocket.updatePackageState);
 		channel('disconnect', () => { console.log('>>>>User disconnected'); });
 	});

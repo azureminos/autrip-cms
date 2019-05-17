@@ -93,7 +93,7 @@ class PersistentDrawer extends React.Component {
 
 
   render() {
-    const { classes, theme, children, drawerItems, selectedDrawerItem, handleDrawerItemClick } = this.props;
+    const { classes, theme, children, drawerItems, toolbarItem, selectedDrawerItem, handleDrawerItemClick } = this.props;
     const { open } = this.state;
 
     return (
@@ -117,6 +117,7 @@ class PersistentDrawer extends React.Component {
             <Typography variant="h6" color="inherit" noWrap>
               {drawerItems[selectedDrawerItem]}
             </Typography>
+						{toolbarItem}
           </Toolbar>
         </AppBar>
         <Drawer

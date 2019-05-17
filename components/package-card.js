@@ -29,12 +29,12 @@ const styles = {
 };
 
 class PackageCard extends React.Component {
-	render() {
+	render () {
 		const { classes, item, btnActionMap } = this.props;
 		const buttons = [];
-		const description = item.description.length > 200 ?
-			`${item.description.substring(0, 200)}...` : item.description;
-		console.log('>>>>PackageCard.item', item);
+		const description = item.description.length > 200
+			? `${item.description.substring(0, 200)}...` : item.description;
+		// console.log('>>>>PackageCard.item', item);
 
 		_.each(btnActionMap, (btnAction, btnName) => {
 			buttons.push(
