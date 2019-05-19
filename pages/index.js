@@ -15,7 +15,7 @@ let socket;
 
 class App extends Component {
 
-	static async getInitialProps() {
+	static async getInitialProps () {
 		const urlGetPackages = `${process.env.API_BASE_URL}/api/travelpackage`;
 		let resPackages = await axios.get(urlGetPackages);
 
@@ -27,7 +27,7 @@ class App extends Component {
 		return { drawerItems, packages: resPackages.data, filters: resMetadata.data };
 	}
 
-	constructor(props) {
+	constructor (props) {
 		super(props);
 
 		this.getPackageDetails = this.getPackageDetails.bind(this);
@@ -49,7 +49,7 @@ class App extends Component {
      ============================== */
 
 	/* ----------  Communicate with Server  ---------- */
-	pushToRemote(channel, message) {
+	pushToRemote (channel, message) {
 		console.log(`>>>>Push event[${channel}] with message`, message);
 		this.setState({ updating: true }); // Set the updating spinner
 		socket.emit(
@@ -77,30 +77,30 @@ class App extends Component {
 
 	/* ----------  Package  ------- */
 	// Get package details, Event[push:package:get]
-	getPackageDetails(id) {
+	getPackageDetails (id) {
 		console.log('>>>>App Client >> getPackageDetails', id);
 		this.pushToRemote('package:get', { id: id });
 		this.setState({ updating: true });
 	}
 	// Get package details, Event[push:package:filter]
-	getFilteredPackages(req) {
+	getFilteredPackages (req) {
 		console.log('>>>>App Client >> getFilteredPackages', req);
 		this.pushToRemote('package:filter', req);
 		this.setState({ updating: true });
 	}
 	// Handle response of Get package details, Event[package:get]
-	handleGetPackageDetails(res) {
+	handleGetPackageDetails (res) {
 		console.log('>>>>Event[package:get] response', res);
 		this.setState({ updating: false, packages: [], selectedPackage: res });
 	}
 	// Update package state, Event[push:package:status]
-	updatePackageState(req) {
+	updatePackageState (req) {
 		console.log('>>>>App Client >> updatePackageState', req);
 		this.pushToRemote('package:status', req);
 		this.setState({ updating: true });
 	}
 	// Handle response of refresh all packages, Event[package:refreshAll]
-	handleRefreshAllPackages(res) {
+	handleRefreshAllPackages (res) {
 		console.log('>>>>Event[package:refreshAll] response', res);
 		this.setState({ updating: false, packages: res.packages, selectedPackage: {} });
 	}
@@ -110,7 +110,7 @@ class App extends Component {
      ============================== */
 
 	// connect to WS server and listen event
-	componentDidMount() {
+	componentDidMount () {
 		const socketUrl = publicRuntimeConfig.SOCKET_URL;
 		console.log('>>>>App.SOCKET_URL', socketUrl);
 		socket = io(socketUrl);

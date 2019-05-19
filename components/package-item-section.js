@@ -14,6 +14,7 @@ import MobileViewIcon from '@material-ui/icons/MobileScreenShare';
 import ComputerIcon from '@material-ui/icons/Computer';
 import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
 import PackageSummary from './package-summary-div';
+import PackageItinerary from './package-itinerary-div';
 
 const styles = theme => ({
 	root: {
@@ -155,7 +156,10 @@ class PackageDetails extends React.Component {
 					</li>
 					<Divider component="li" />
 					<ListItem>
-						<div>This is Package Itinerary</div>
+						<PackageItinerary
+							packageItems={packageItems}
+							packageHotels={packageHotels}
+						/>
 					</ListItem>
 					<li>
 						<Typography className={classes.dividerFullWidth} color="textSecondary" variant="caption">

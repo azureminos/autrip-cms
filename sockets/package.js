@@ -3,8 +3,10 @@ const keystone = require('keystone');
 const helper = require('../lib/object-parser');
 
 exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
-	console.log('>>>>server socket received event[push:package:get]', id);
+	//console.log('>>>>server socket received event[push:package:get]', id);
 	const TravelPackage = keystone.list('TravelPackage');
+	const PackageItem = keystone.list('PackageItem');
+	const PackageHotel = keystone.list('PackageHotel');
 	// async calls
 	async.parallel({
 		packageSummary: (callback) => {
@@ -16,17 +18,17 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 				});
 		},
 		packageItems: (callback) => {
-			TravelPackage.model
-				.findById(id).populate('packageItems')
-				.exec(function (err, item) {
-					return callback(null, item.packageItems);
+			PackageItem.model
+				.find({ package: id }).populate('attraction')
+				.exec(function (err, items) {
+					return callback(null, helper.parsePackageItem(items));
 				});
 		},
 		packageHotels: (callback) => {
-			TravelPackage.model
-				.findById(id).populate('packageHotels')
-				.exec(function (err, item) {
-					return callback(null, item.packageHotels);
+			PackageHotel.model
+				.find({ package: id }).populate('hotel')
+				.exec(function (err, items) {
+					return callback(null, helper.parsePackageHotel(items));
 				});
 		},
 		packageRates: (callback) => {
@@ -51,13 +53,13 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 				});
 		},
 	}, function (err, results) {
-		console.log('>>>>server final callback for event[push:package:get]', results);
+		//console.log('>>>>server final callback for event[push:package:get]', results);
 		socket.emit('package:get', results);
 	});
 };
 
 exports.updatePackageState = ({ request: { id, status, isRefreshAll }, sendStatus, socket }) => {
-	console.log('>>>>server socket received event[push:package:status]', id);
+	//console.log('>>>>server socket received event[push:package:status]', id);
 	const TravelPackage = keystone.list('TravelPackage');
 
 	TravelPackage.model
@@ -114,7 +116,7 @@ exports.updatePackageState = ({ request: { id, status, isRefreshAll }, sendStatu
 							});
 					},
 				}, function (err, results) {
-					console.log('>>>>server final callback for event[push:package:get]', results);
+					//console.log('>>>>server final callback for event[push:package:get]', results);
 					socket.emit('package:get', results);
 				});
 			}
@@ -122,7 +124,7 @@ exports.updatePackageState = ({ request: { id, status, isRefreshAll }, sendStatu
 };
 
 exports.getFilteredPackages = ({ request, sendStatus, socket }) => {
-	console.log('>>>>server socket received event[push:package:filter]', request);
+	//console.log('>>>>server socket received event[push:package:filter]', request);
 	const TravelPackage = keystone.list('TravelPackage');
 
 	TravelPackage.model
