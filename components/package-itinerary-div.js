@@ -23,6 +23,20 @@ const styles = theme => ({
 		marginRight: theme.spacing.unit,
 		width: '100%',
 	},
+	activityBlock: {
+		margin: 8,
+	},
+	activityImage: {
+		width: '500px',
+		borderRadius: '10px 10px 0 0',
+	},
+	hotelBlock: {
+		margin: 8,
+	},
+	hotelImage: {
+		width: '500px',
+		borderRadius: '10px 10px 0 0',
+	},
 });
 
 function TabContainer (props) {
@@ -67,19 +81,145 @@ class PackageItinerary extends React.Component {
 		return itinerary;
 	}
 	// Render day activities
-	renderActivity (activities) {
+	renderActivity (activities, classes) {
 		if (!activities || activities.length === 0 || (activities.length === 1 && !activities[0].attraction)) {
-			return (<div>No activity planned.</div>);
+			return (
+				<div>
+					<h3>Activity</h3>
+					<div>No activity planned.</div>
+				</div>
+			);
+		} else {
+			const listActivities = _.map(activities, (a) => {
+				return (
+					<div key={a.id}>
+						<h4>Activity {a.daySeq}</h4>
+						<div className={classes.container}>
+							<Grid container spacing={8}>
+								<Grid item xs className={classes.activityBlock}>
+									<Grid item xs>
+										<TextField
+											id="activity-name"
+											label="Name"
+											defaultValue={String(a.attraction.name)}
+											className={classes.textField}
+											margin="normal"
+											InputProps={{ readOnly: true }}
+										/>
+									</Grid>
+									<Grid item xs>
+										<TextField
+											id="activity-description"
+											label="Description"
+											defaultValue={a.description}
+											className={classes.textField}
+											multiline
+											rowsMax="3"
+											margin="normal"
+											InputProps={{ readOnly: true }}
+										/>
+									</Grid>
+									<Grid item xs>
+										<TextField
+											id="activity-total-time"
+											label="Total Hours"
+											defaultValue={String(a.timePlannable)}
+											className={classes.textField}
+											margin="normal"
+											InputProps={{ readOnly: true }}
+										/>
+									</Grid>
+									<Grid item xs>
+										<TextField
+											id="activity-visit-hours"
+											label="Activity Visit Hours"
+											defaultValue={String(a.attraction.timeVisit)}
+											className={classes.textField}
+											margin="normal"
+											InputProps={{ readOnly: true }}
+										/>
+									</Grid>
+									<Grid item xs>
+										<TextField
+											id="activity-traffic-hours"
+											label="Activity Traffic Hours"
+											defaultValue={String(a.attraction.timeTraffic)}
+											className={classes.textField}
+											margin="normal"
+											InputProps={{ readOnly: true }}
+										/>
+									</Grid>
+								</Grid>
+								<Grid item xs className={classes.activityBlock}>
+									<img src={a.attraction.imageUrl} alt="Avatar" className={classes.activityImage} />
+								</Grid>
+							</Grid>
+						</div>
+					</div>
+				);
+			});
+			return (
+				<div>
+					<h3>Activity</h3>
+					<div>{listActivities}</div>
+				</div>
+			);
 		}
-
-		return (<div>Activity List</div>);
 	}
 	// Render hotel
-	renderHotel (hotel) {
+	renderHotel (hotel, classes) {
 		if (hotel.hotel) {
-			return (<div>Hotel</div>);
+			return (
+				<div>
+					<h3>Hotel</h3>
+					<div className={classes.container}>
+						<Grid container spacing={8}>
+							<Grid item xs className={classes.hotelBlock}>
+								<Grid item xs>
+									<TextField
+										id="hotel-name"
+										label="Name"
+										defaultValue={String(hotel.hotel.name)}
+										className={classes.textField}
+										margin="normal"
+										InputProps={{ readOnly: true }}
+									/>
+								</Grid>
+								<Grid item xs>
+									<TextField
+										id="hotel-stars"
+										label="Stars"
+										defaultValue={hotel.hotel.stars}
+										className={classes.textField}
+										margin="normal"
+										InputProps={{ readOnly: true }}
+									/>
+								</Grid>
+								<Grid item xs>
+									<TextField
+										id="hotel-type"
+										label="Type"
+										defaultValue={hotel.hotel.type}
+										className={classes.textField}
+										margin="normal"
+										InputProps={{ readOnly: true }}
+									/>
+								</Grid>
+							</Grid>
+							<Grid item xs className={classes.hotelBlock}>
+								<img src={hotel.hotel.imageUrl} alt="Avatar" className={classes.hotelImage} />
+							</Grid>
+						</Grid>
+					</div>
+				</div>
+			);
 		}
-		return (<div>Overnight stay is not needed.</div>);
+		return (
+			<div>
+				<h3>Hotel</h3>
+				<div>Overnight stay is not needed.</div>
+			</div>
+		);
 	}
 	// Render itinerary
 	renderItinerary (itinerary, classes, selectedTab) {
@@ -94,8 +234,8 @@ class PackageItinerary extends React.Component {
 					{tabItems}
 				</Tabs>
 				<TabContainer>
-					{this.renderActivity(itinerary[selectedTab].activities)}
-					{this.renderHotel(itinerary[selectedTab].hotel)}
+					{this.renderActivity(itinerary[selectedTab].activities, classes)}
+					{this.renderHotel(itinerary[selectedTab].hotel, classes)}
 				</TabContainer>
 			</div>
 		);
