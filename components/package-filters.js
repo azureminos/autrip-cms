@@ -36,7 +36,7 @@ class PackageFilters extends React.Component {
 	}
 
 	handlePackageStatusChange = event => {
-		console.log('>>>>PackageFilters.handleChange', event.target);
+		// console.log('>>>>PackageFilters.handleChange', event.target);
 		if(event.target.value == 'All') {
 			this.props.getFilteredPackages({});
 		} else {
@@ -46,7 +46,7 @@ class PackageFilters extends React.Component {
 	};
 
 	render () {
-		console.log('>>>>PackageFilters.render', this.props.statusFilterItems);
+		// console.log('>>>>PackageFilters.render', this.props.statusFilterItems);
 		const { classes, statusFilterItems } = this.props;
 		const statusDropdowns = _.map(statusFilterItems, (item) => {
 			return (<MenuItem key={item} value={item}>{item}</MenuItem>);

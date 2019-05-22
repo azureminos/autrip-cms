@@ -247,8 +247,8 @@ class PackageItinerary extends React.Component {
 	};
 
 	render () {
-		console.log('>>>>PackageItinerary.render >> packageItems', this.props.packageItems);
-		console.log('>>>>PackageItinerary.render >> packageHotels', this.props.packageHotels);
+		//console.log('>>>>PackageItinerary.render >> packageItems', this.props.packageItems);
+		//console.log('>>>>PackageItinerary.render >> packageHotels', this.props.packageHotels);
 		const { classes, theme, packageItems, packageHotels } = this.props;
 		const { selectedTab } = this.state;
 		const itinerary = this.getItinerary(packageItems, packageHotels);

@@ -15,6 +15,7 @@ import ComputerIcon from '@material-ui/icons/Computer';
 import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
 import PackageSummary from './package-summary-div';
 import PackageItinerary from './package-itinerary-div';
+import PackageRates from './package-rates-div';
 
 const styles = theme => ({
 	root: {
@@ -104,7 +105,7 @@ class PackageDetails extends React.Component {
 	render () {
 		console.log('>>>>PackageDetails.render', this.props.selectedPackage);
 		const { classes, theme, selectedPackage } = this.props;
-		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates } = selectedPackage;
+		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates, hotelRates } = selectedPackage;
 
 		const nextState = this.getNextState(packageSummary.state);
 		const btnPackageStatus = (
@@ -164,11 +165,16 @@ class PackageDetails extends React.Component {
 					<li>
 						<Typography className={classes.dividerFullWidth} color="textSecondary" variant="caption">
 							Package Rate Plan
-        				</Typography>
+						</Typography>
 					</li>
 					<Divider component="li" />
 					<ListItem>
-						<div>This is Package Rate Plan</div>
+						<PackageRates
+							flightRates={flightRates}
+							carRates={carRates}
+							packageRates={packageRates}
+							hotelRates={hotelRates}
+						/>
 					</ListItem>
 				</List>
 			</div>
