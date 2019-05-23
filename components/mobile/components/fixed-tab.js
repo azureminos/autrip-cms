@@ -1,4 +1,4 @@
-import React, {createElement} from 'react';
+import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import {withStyles} from '@material-ui/core/styles';

@@ -1,3 +1,4 @@
+// ==== MODULES ==========================================
 import React from 'react';
 import _ from 'lodash';
 import { withStyles } from '@material-ui/core/styles';
@@ -13,9 +14,13 @@ import PublishIcon from '@material-ui/icons/Publish';
 import MobileViewIcon from '@material-ui/icons/MobileScreenShare';
 import ComputerIcon from '@material-ui/icons/Computer';
 import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
+
+// ==== COMPONENTS ========================================
 import PackageSummary from './package-summary-div';
 import PackageItinerary from './package-itinerary-div';
 import PackageRates from './package-rates-div';
+import PackageModal from './package-modal-div';
+import MobileApp from './mobile/app';
 
 const styles = theme => ({
 	root: {
@@ -50,9 +55,12 @@ class PackageDetails extends React.Component {
 		this.getNextState = this.getNextState.bind(this);
 		this.handlePackageStatusUpdate = this.handlePackageStatusUpdate.bind(this);
 		this.handleShowPackageList = this.handleShowPackageList.bind(this);
+		this.handleModalOpen = this.handleModalOpen.bind(this);
+		this.handleModalClose = this.handleModalClose.bind(this);
 
 		this.state = {
 			updating: false,
+			openModal: '',
 		};
 	}
 
@@ -101,6 +109,16 @@ class PackageDetails extends React.Component {
 		console.log('>>>>PackageDetails.handleShowPackageList');
 		this.props.getFilteredPackages({});
 	};
+	// Handle modal open
+	handleModalOpen (type) {
+		console.log('>>>>PackageDetails.handleModalOpen', type);
+		this.setState({ openModal: type });
+	};
+	// Handle modal close
+	handleModalClose () {
+		console.log('>>>>PackageDetails.handleModalClose');
+		this.setState({ openModal: '' });
+	};
 
 	render () {
 		console.log('>>>>PackageDetails.render', this.props.selectedPackage);
@@ -122,11 +140,17 @@ class PackageDetails extends React.Component {
 			<div className={classes.root}>
 				<div>
 					{btnPackageStatus}
-					<Button variant="contained" color="default" className={classes.button}>
+					<Button variant="contained" color="default"
+						className={classes.button}
+						onClick={() => this.handleModalOpen('mobile')}
+					>
 						Mobile View
         				<MobileViewIcon className={classes.rightIcon} />
 					</Button>
-					<Button variant="contained" color="default" className={classes.button}>
+					<Button variant="contained" color="default"
+						className={classes.button}
+						onClick={() => this.handleModalOpen('desktop')}
+					>
 						Desktop View
         				<ComputerIcon className={classes.rightIcon} />
 					</Button>
@@ -177,6 +201,13 @@ class PackageDetails extends React.Component {
 						/>
 					</ListItem>
 				</List>
+				<PackageModal
+					open={this.state.openModal}
+					handleClose={this.handleModalClose}
+				>
+					{this.state.openModal === 'mobile' ? (<MobileApp selectedPackage={selectedPackage}/>) : (<div/>)}
+					{this.state.openModal === 'desktop' ? (<div>{this.state.openModal}</div>) : (<div/>)}
+				</PackageModal>
 			</div>
 		);
 	}

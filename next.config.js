@@ -5,7 +5,7 @@ const hostname = process.env.HOSTNAME || 'localhost';
 const { PORT, LOCAL } = process.env;
 const socketAddress = (LOCAL) ? `http://${hostname}:${PORT||3000}` : `wss://${hostname}`;
 
-console.log('>>>>Print env[socketAddress]', socketAddress);
+// console.log('>>>>Print env[socketAddress]', socketAddress);
 
 const nextConfig = {
 	publicRuntimeConfig: {
