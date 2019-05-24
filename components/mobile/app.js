@@ -46,7 +46,7 @@ class MobileApp extends React.Component {
 	render () {
 		const { updating } = this.state;
 		const {selectedPackage} = this.props;
-		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates, hotelRates } = selectedPackage;
+		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates, hotelRates, reference } = selectedPackage;
 		console.log('>>>>MobileApp.render', selectedPackage);
 		/*
 						<PackageAttraction

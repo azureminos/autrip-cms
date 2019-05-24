@@ -1,4 +1,4 @@
-import React, { createElement } from 'react';
+import React from 'react';
 import _ from 'lodash';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -18,13 +18,13 @@ const styles = {
 };
 
 class PackageAttraction extends React.Component {
-	render() {
+	render () {
 		console.log('>>>>PackageAttraction props', this.props);
 		const { classes, instPackage, apiUri, cities, cityAttractions, likeAttractions } = this.props;
 		const cityDays = _.groupBy(instPackage.items, (c) => { return c.city; });
 		const citySections = _.keys(cityAttractions).map((city) => {
 			const tmpCity = _.find(cities, (c) => { return c.name == city; });
-			const cityDesc = !!tmpCity ? tmpCity.description : '';
+			const cityDesc = tmpCity ? tmpCity.description : '';
 			const cityDescShort = cityDesc.substring(0, (cityDesc.length > 80 ? 80 : cityDesc.length)) + '...';
 			// Prepare settings of ChipList
 			const likedItems = _.filter(cityAttractions[city], { isLiked: true });

@@ -8,7 +8,7 @@ import { Paper, Typography } from '@material-ui/core';
 import PersistentDrawer from '../components/persistent-drawer';
 import PackageFilters from '../components/package-filters';
 import PackageCards from '../components/package-list-section';
-import PackageDetails from '../components/package-item-section';
+import PackageDetails from '../components/package-details-section';
 
 const { publicRuntimeConfig } = getConfig();
 let socket;
@@ -91,7 +91,7 @@ class App extends Component {
 	// Handle response of Get package details, Event[package:get]
 	handleGetPackageDetails (res) {
 		console.log('>>>>Event[package:get] response', res);
-		this.setState({ updating: false, packages: [], selectedPackage: res });
+		this.setState({ updating: false, packages: [], selectedPackage: res.selectedPackage });
 	}
 	// Update package state, Event[push:package:status]
 	updatePackageState (req) {

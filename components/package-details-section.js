@@ -97,7 +97,7 @@ class PackageDetails extends React.Component {
 	/* ----------  Event Handlers  ------- */
 	// Handle package state update
 	handlePackageStatusUpdate (pkg) {
-		console.log('>>>>PackageDetails.handlePackageStatusUpdate', pkg);
+		// console.log('>>>>PackageDetails.handlePackageStatusUpdate', pkg);
 		this.props.updatePackageState({
 			id: pkg.id,
 			status: this.getNextState(pkg.state).status,
@@ -106,24 +106,25 @@ class PackageDetails extends React.Component {
 	};
 	// Handle go back to package-list view
 	handleShowPackageList () {
-		console.log('>>>>PackageDetails.handleShowPackageList');
+		// console.log('>>>>PackageDetails.handleShowPackageList');
 		this.props.getFilteredPackages({});
 	};
 	// Handle modal open
 	handleModalOpen (type) {
-		console.log('>>>>PackageDetails.handleModalOpen', type);
+		// console.log('>>>>PackageDetails.handleModalOpen', type);
 		this.setState({ openModal: type });
 	};
 	// Handle modal close
 	handleModalClose () {
-		console.log('>>>>PackageDetails.handleModalClose');
+		// console.log('>>>>PackageDetails.handleModalClose');
 		this.setState({ openModal: '' });
 	};
 
 	render () {
 		console.log('>>>>PackageDetails.render', this.props.selectedPackage);
 		const { classes, theme, selectedPackage } = this.props;
-		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates, hotelRates } = selectedPackage;
+		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates,
+				hotelRates, cityAttractions, cityHotels } = selectedPackage;
 
 		const nextState = this.getNextState(packageSummary.state);
 		const btnPackageStatus = (
@@ -145,14 +146,14 @@ class PackageDetails extends React.Component {
 						onClick={() => this.handleModalOpen('mobile')}
 					>
 						Mobile View
-        				<MobileViewIcon className={classes.rightIcon} />
+						<MobileViewIcon className={classes.rightIcon} />
 					</Button>
 					<Button variant="contained" color="default"
 						className={classes.button}
 						onClick={() => this.handleModalOpen('desktop')}
 					>
 						Desktop View
-        				<ComputerIcon className={classes.rightIcon} />
+						<ComputerIcon className={classes.rightIcon} />
 					</Button>
 					<Button variant="contained" color="default"
 						className={classes.button}
@@ -205,7 +206,7 @@ class PackageDetails extends React.Component {
 					open={this.state.openModal}
 					handleClose={this.handleModalClose}
 				>
-					{this.state.openModal === 'mobile' ? (<MobileApp selectedPackage={selectedPackage}/>) : (<div/>)}
+					{this.state.openModal === 'mobile' ? (<MobileApp selectedPackage={selectedPackage} reference={reference}/>) : (<div/>)}
 					{this.state.openModal === 'desktop' ? (<div>{this.state.openModal}</div>) : (<div/>)}
 				</PackageModal>
 			</div>

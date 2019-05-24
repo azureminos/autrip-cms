@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const async = require('async');
 const keystone = require('keystone');
 const helper = require('../lib/object-parser');
@@ -7,6 +8,7 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 	const TravelPackage = keystone.list('TravelPackage');
 	const PackageItem = keystone.list('PackageItem');
 	const PackageHotel = keystone.list('PackageHotel');
+	const City = keystone.list('City');
 	// async calls
 	async.parallel({
 		packageSummary: (callback) => {
@@ -52,8 +54,40 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 					return callback(null, item.flightRates);
 				});
 		},
+		cityAttractions: (callback) => {
+			PackageItem.model
+				.find({ package: id }).populate('attraction')
+				.exec(function (err, items) {
+					const cities = _.map(items, (item) => {
+						return item.attraction ? item.attraction.city : null;
+					});
+					console.log('>>>>getPackageDetails.cityAttractions : cities', cities);
+					return City.model
+						.find({ _id: { $in: cities } }).populate('attractions')
+						.exec(function (err, items) {
+							console.log('>>>>getPackageDetails.cityAttractions : result', items);
+							return callback(null, helper.parseCity(items, 'attraction'));
+						});
+				});
+		},
+		cityHotels: (callback) => {
+			PackageHotel.model
+				.find({ package: id }).populate('hotel')
+				.exec(function (err, items) {
+					const cities = _.map(items, (item) => {
+						return item.hotel ? item.hotel.city : null;
+					});
+					// console.log('>>>>getPackageDetails.cityHotels : cities', cities);
+					return City.model
+						.find({ _id: { $in: cities } }).populate('hotels')
+						.exec(function (err, items) {
+							// console.log('>>>>getPackageDetails.cityHotels : result', items);
+							return callback(null, helper.parseCity(items, 'hotel'));
+						});
+				});
+		},
 	}, function (err, results) {
-		//console.log('>>>>server final callback for event[push:package:get]', results);
+		// console.log('>>>>server final callback for event[push:package:get]', results);
 		socket.emit('package:get', results);
 	});
 };
