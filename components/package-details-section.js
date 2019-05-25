@@ -206,7 +206,7 @@ class PackageDetails extends React.Component {
 					open={this.state.openModal}
 					handleClose={this.handleModalClose}
 				>
-					{this.state.openModal === 'mobile' ? (<MobileApp selectedPackage={selectedPackage} reference={reference}/>) : (<div/>)}
+					{this.state.openModal === 'mobile' ? (<MobileApp selectedPackage={selectedPackage}/>) : (<div/>)}
 					{this.state.openModal === 'desktop' ? (<div>{this.state.openModal}</div>) : (<div/>)}
 				</PackageModal>
 			</div>

@@ -35,6 +35,7 @@ class App extends Component {
 		this.handleGetPackageDetails = this.handleGetPackageDetails.bind(this);
 		this.updatePackageState = this.updatePackageState.bind(this);
 		this.handleRefreshAllPackages = this.handleRefreshAllPackages.bind(this);
+		this.handleDrawerItemClick = this.handleDrawerItemClick.bind(this);
 
 		this.state = {
 			idxSelectedSection: 0,
@@ -74,8 +75,6 @@ class App extends Component {
 	/* ==============================
 	 = State & Event Handlers     =
 	 ============================== */
-
-	/* ----------  Package  ------- */
 	// Get package details, Event[push:package:get]
 	getPackageDetails (id) {
 		console.log('>>>>App Client >> getPackageDetails', id);
@@ -91,7 +90,7 @@ class App extends Component {
 	// Handle response of Get package details, Event[package:get]
 	handleGetPackageDetails (res) {
 		console.log('>>>>Event[package:get] response', res);
-		this.setState({ updating: false, packages: [], selectedPackage: res.selectedPackage });
+		this.setState({ updating: false, packages: [], selectedPackage: res });
 	}
 	// Update package state, Event[push:package:status]
 	updatePackageState (req) {
@@ -104,6 +103,10 @@ class App extends Component {
 		console.log('>>>>Event[package:refreshAll] response', res);
 		this.setState({ updating: false, packages: res.packages, selectedPackage: {} });
 	}
+	// Handle drawer click
+	handleDrawerItemClick (idx) {
+		this.setState({ idxSelectedSection: idx });
+	};
 
 	/* ==============================
      = React Lifecycle              =
@@ -119,11 +122,6 @@ class App extends Component {
 		socket.on('package:get', (res) => { this.handleGetPackageDetails(res); });
 		socket.on('package:refreshAll', (res) => { this.handleRefreshAllPackages(res); });
 	}
-
-	handleDrawerItemClick (idx) {
-		// Add here for logics to update state
-		this.setState({ idxSelectedSection: idx });
-	};
 
 	render () {
 		console.log('>>>>App.render', this.props.filters);
