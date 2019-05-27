@@ -5,6 +5,7 @@ import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS ========================================
 import FixedTab from './components/fixed-tab';
+import PackageAttraction from './package-attraction';
 
 /* ==============================
    = React Application          =
@@ -14,10 +15,11 @@ class MobileApp extends React.Component {
 	constructor (props) {
 		super(props);
 
-		// this.setLikedAttractions = this.setLikedAttractions.bind(this);
+		this.setLikedAttractions = this.setLikedAttractions.bind(this);
 
 		this.state = {
 			updating: false,
+			likedAttractions: [],
 		};
 	}
 
@@ -32,6 +34,9 @@ class MobileApp extends React.Component {
 	// ----------  Package  ----------
 	/* ----------  Package Instance ------- */
 	/* ----------  Package Instance Items------- */
+	setLikedAttractions (e) {
+		console.log('>>>>MobileApp.setLikedAttractions', e);
+	}
 	/* ----------  Attractions  ---------- */
 	/* ----------  Hotels  ---------- */
 
@@ -49,21 +54,14 @@ class MobileApp extends React.Component {
 		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates,
 			hotelRates, cities } = selectedPackage;
 		console.log('>>>>MobileApp.render', selectedPackage);
-		/*
-						<PackageAttraction
-							instPackage={instPackage}
-							cities={cities}
-							cityAttractions={cityAttractions}
-							likeAttractions={this.setLikedAttractions}
-						/>
-						<Updating updating={updating} />
-		*/
 		const tabs = {
 			Attraction: (
 				<div id="package-attraction">
-					<Typography>
-						This is package attraction
-					</Typography>
+					<PackageAttraction
+						packageItems={packageItems}
+						cities={cities}
+						likeAttractions={this.setLikedAttractions}
+					/>
 				</div>
 			),
 			Itinerary: (

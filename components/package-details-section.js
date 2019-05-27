@@ -20,6 +20,7 @@ import PackageSummary from './package-summary-div';
 import PackageItinerary from './package-itinerary-div';
 import PackageRates from './package-rates-div';
 import PackageModal from './package-modal-div';
+import PackageDialog from './package-dialog-div';
 import MobileApp from './mobile/app';
 
 const styles = theme => ({
@@ -123,8 +124,8 @@ class PackageDetails extends React.Component {
 	render () {
 		console.log('>>>>PackageDetails.render', this.props.selectedPackage);
 		const { classes, theme, selectedPackage } = this.props;
-		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates,
-				hotelRates, cityAttractions, cityHotels } = selectedPackage;
+		const { packageSummary, packageItems, packageHotels, packageRates, carRates,
+			flightRates, hotelRates, cities } = selectedPackage;
 
 		const nextState = this.getNextState(packageSummary.state);
 		const btnPackageStatus = (
@@ -202,13 +203,13 @@ class PackageDetails extends React.Component {
 						/>
 					</ListItem>
 				</List>
-				<PackageModal
+				<PackageDialog
 					open={this.state.openModal}
 					handleClose={this.handleModalClose}
 				>
 					{this.state.openModal === 'mobile' ? (<MobileApp selectedPackage={selectedPackage}/>) : (<div/>)}
 					{this.state.openModal === 'desktop' ? (<div>{this.state.openModal}</div>) : (<div/>)}
-				</PackageModal>
+				</PackageDialog>
 			</div>
 		);
 	}

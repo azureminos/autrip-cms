@@ -19,12 +19,12 @@ const styles = theme => ({
 class ChipList extends React.Component {
 	render () {
 		console.log('>>>>ChipList, render()', this.props);
-		const { tags, apiUri, classes } = this.props;
+		const { tags, classes } = this.props;
 		const chips = tags.map((t) => {
 			return (
 				<Chip
 					key={t.id}
-					avatar={<Avatar alt={t.name} src={`${apiUri}/${t.imageUrl}`} />}
+					avatar={<Avatar alt={t.name} src={t.imageUrl} />}
 					label={t.name}
 					className={classes.chip}
 				/>

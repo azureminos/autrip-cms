@@ -3,10 +3,12 @@ import _ from 'lodash';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
-import AttractionCard from './components/attraction-card.js';
-import CardSlider from './components/card-slider.jsx';
-import ChipList from './components/chip-list.js';
+import AttractionCard from './components/attraction-card';
+import CardSlider from './components/card-slider';
+import ChipList from './components/chip-list';
 import DescPanel from './components/description-panel';
+
+import 'react-id-swiper/src/styles/css/swiper.css';
 
 const styles = {
 	city: {
@@ -20,38 +22,43 @@ const styles = {
 class PackageAttraction extends React.Component {
 	render () {
 		console.log('>>>>PackageAttraction props', this.props);
-		const { classes, instPackage, apiUri, cities, cityAttractions, likeAttractions } = this.props;
-		const cityDays = _.groupBy(instPackage.items, (c) => { return c.city; });
-		const citySections = _.keys(cityAttractions).map((city) => {
-			const tmpCity = _.find(cities, (c) => { return c.name == city; });
-			const cityDesc = tmpCity ? tmpCity.description : '';
-			const cityDescShort = cityDesc.substring(0, (cityDesc.length > 80 ? 80 : cityDesc.length)) + '...';
+		const findcityById = (id, cities) => {
+			var name = '';
+			_.each(cities, (c) => { if (c.id === id) name = c.name; });
+			return name;
+		};
+		const { classes, packageItems, cities, likeAttractions } = this.props;
+		const cityDays = _.groupBy(packageItems, (c) => { return findcityById(c.cityId, cities); });
+		const citySections = cities.map((city) => {
+			const tmpCity = city.name;
+			const cityDesc = tmpCity ? city.description : '';
+			const cityDescShort = cityDesc.length > 80 ? (cityDesc.substring(0, 80) + '...') : cityDesc;
 			// Prepare settings of ChipList
-			const likedItems = _.filter(cityAttractions[city], { isLiked: true });
-			console.log('>>>>Show tags for city[' + city + ']', likedItems);
-
+			const likedItems = _.filter(city.attractions, { isLiked: true });
+			if (likedItems.length === 0) {
+				// Consider attractions of packageItems as default liked attractions
+			}
+			console.log('>>>>Show tags for city[' + city.name + ']', likedItems);
 			const tagSetting = {
 				tags: likedItems.map((item) => { return { id: item.id, name: item.name, imageUrl: item.imageUrl }; }),
-				apiUri: apiUri,
 			};
 
 			// Prepare attraction card list
-			const attractionCards = cityAttractions[city].map((a) => {
+			const attractionCards = city.attractions.map((a) => {
 				return (
 					<AttractionCard
 						key={a.id}
 						item={a}
-						apiUri={apiUri}
 						handleClick={likeAttractions}
 					/>
 				);
 			});
 
-			const days = Object.keys(_.groupBy(cityDays[city], (c) => { return c.dayNo; })).length;
+			const days = Object.keys(_.groupBy(cityDays[tmpCity], (c) => { return c.dayNo; })).length;
 			return (
-				<div key={cityAttractions[city].id} className={classes.city}>
-					<Typography variant='h5' gutterBottom>
-						{city + ' - ' + days + ' Day' + (days == 1 ? '' : 's')}
+				<div key={city.id} className={classes.city}>
+					<Typography variant="h5" gutterBottom>
+						{city.name + ' - ' + days + ' Day' + (days === 1 ? '' : 's')}
 					</Typography>
 					<DescPanel descShort={cityDescShort} descFull={cityDesc} />
 					<ChipList {...tagSetting} />
