@@ -8,13 +8,16 @@ import FlightCar from './components/flight-car';
 import ItineraryItem from './components/itinerary-item';
 import HotelItem from './components/hotel-item';
 
+import Helper from '../../lib/helper';
+
 const triggerText = (dayNo, city) => `Day ${dayNo}, ${city}`;
 
 export default class PackageItinerary extends React.Component {
 	render() {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
-		const { instPackage, cityAttractions, cityHotels, apiUri, selectHotel, isReadonly, showTansport } = this.props;
-		const itineraries = _.groupBy(instPackage.items, (item) => {
+		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates,
+			hotelRates, cities, isReadonly, showTansport } = this.props;
+		const itineraries = _.groupBy(packageItems, (item) => {
 			return item.dayNo;
 		});
 		console.log('>>>>PackageItinerary, Get itineraries', itineraries);
@@ -29,27 +32,27 @@ export default class PackageItinerary extends React.Component {
 		_.forEach(_.keys(itineraries), (dayNo) => {
 			const itinerary = {
 				dayNo: dayNo,
-				city: itineraries[dayNo][0].city,
+				city: Helper.findCityById(itineraries[dayNo][0].cityId, cities),
 				attractions: itineraries[dayNo],
 			};
-			// console.log('>>>>PackageItinerary, formatted itinerary', itinerary);
-			const city = itinerary.city;
-			const title = triggerText(dayNo, city);
-			const hotels = _.filter(cityHotels[city], { id: instPackage.hotels[Number(dayNo - 1)] });
-			// console.log('>>>>PackageItinerary, accordion setting', setting);
+			console.log('>>>>PackageItinerary, formatted itinerary', itinerary);
+			const city = _.find(cities, { name: itinerary.city });
+			const title = triggerText(dayNo, city.name);
+			const hotels = city.hotels;
+			const attractions = city.attractions;
+			console.log(`>>>>PackageItinerary ${title} with hotels`, hotels);
 
 			// Prepare attraction card list
 			const hotelSelector = isReadonly ? (
 				<HotelItem
 					hotels={hotels}
-					apiUri={apiUri}
 				/>
 			) : (
 					<HotelSlider
 						dayNo={Number(dayNo)}
-						instPackage={instPackage}
-						hotels={cityHotels[city]}
-						apiUri={apiUri}
+						packageHotels={packageHotels}
+						hotelRates={hotelRates}
+						hotels={hotels}
 					/>
 				);
 
@@ -58,9 +61,8 @@ export default class PackageItinerary extends React.Component {
 					<div>Attractions</div>
 					<ItineraryItem
 						itinerary={itinerary}
-						attractions={cityAttractions[city]}
-						isCustom={instPackage.isCustom}
-						apiUri={apiUri}
+						attractions={attractions}
+						isCustom={packageSummary.isCustom}
 					/>
 					<div>Hotels</div>
 					{hotelSelector}

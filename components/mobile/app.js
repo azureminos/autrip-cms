@@ -3,9 +3,12 @@ import _ from 'lodash';
 import React from 'react';
 import { Paper, Typography } from '@material-ui/core';
 
-// ==== COMPONENTS ========================================
+// ==== COMPONENTS =======================================
 import FixedTab from './components/fixed-tab';
 import PackageAttraction from './package-attraction';
+
+// ==== CSS ==============================================
+import 'react-id-swiper/src/styles/css/swiper.css';
 
 /* ==============================
    = React Application          =

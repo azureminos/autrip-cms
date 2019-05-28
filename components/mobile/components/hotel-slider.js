@@ -5,9 +5,10 @@ import HotelCard from './hotel-card';
 class HotelSlider extends React.Component {
 	constructor (props) {
 		super(props);
-		const { dayNo, instPackage } = props;
+		const { dayNo, packageHotels, hotelRates, hotels } = props;
+		const dayHotel = _.find(packageHotels, { dayNo: dayNo });
 		this.state = {
-			idxSelected: instPackage.hotels[dayNo - 1] || -1,
+			idxSelected: (dayHotel && dayHotel.isOvernight) ? dayHotel.hotel.id : -1,
 		};
 		this.handleSelectHotel = this.handleSelectHotel.bind(this);
 	}
@@ -32,9 +33,9 @@ class HotelSlider extends React.Component {
 
 		console.log('>>>>HotelSlider, render()', this.props);
 		const { idxSelected } = this.state;
-		const { dayNo, instPackage, hotels, apiUri } = this.props;
+		const { dayNo, packageHotels, hotelRates, hotels } = this.props;
 		const hotelSlider = hotels.map((h, idx) => {
-			console.log('>>>>HotelSlider, to check Selected', { hotel: h, comparator: instPackage.hotels[dayNo - 1] });
+			console.log('>>>>HotelSlider, to check Selected', { hotel: h, target: idxSelected });
 			h.isSelected = (h.id === idxSelected);
 			console.log('>>>>HotelSlider, checked Selected', h);
 			return (
@@ -42,7 +43,6 @@ class HotelSlider extends React.Component {
 					<HotelCard
 						key={h.id}
 						item={h}
-						apiUri={apiUri}
 						handleSelectHotel={this.handleSelectHotel}
 					/>
 				</div>

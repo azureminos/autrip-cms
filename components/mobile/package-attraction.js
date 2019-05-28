@@ -8,7 +8,7 @@ import CardSlider from './components/card-slider';
 import ChipList from './components/chip-list';
 import DescPanel from './components/description-panel';
 
-import 'react-id-swiper/src/styles/css/swiper.css';
+import Helper from '../../lib/helper';
 
 const styles = {
 	city: {
@@ -22,13 +22,8 @@ const styles = {
 class PackageAttraction extends React.Component {
 	render () {
 		console.log('>>>>PackageAttraction props', this.props);
-		const findcityById = (id, cities) => {
-			var name = '';
-			_.each(cities, (c) => { if (c.id === id) name = c.name; });
-			return name;
-		};
 		const { classes, packageItems, cities, likeAttractions } = this.props;
-		const cityDays = _.groupBy(packageItems, (c) => { return findcityById(c.cityId, cities); });
+		const cityDays = _.groupBy(packageItems, (c) => { return Helper.findCityById(c.cityId, cities); });
 		const citySections = cities.map((city) => {
 			const tmpCity = city.name;
 			const cityDesc = tmpCity ? city.description : '';
