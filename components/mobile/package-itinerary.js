@@ -13,33 +13,42 @@ import Helper from '../../lib/helper';
 const triggerText = (dayNo, city) => `Day ${dayNo}, ${city}`;
 
 export default class PackageItinerary extends React.Component {
-	render() {
+	render () {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
 		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates,
-			hotelRates, cities, isReadonly, showTansport } = this.props;
-		const itineraries = _.groupBy(packageItems, (item) => {
+			hotelRates, cities, isReadonly, showTransport } = this.props;
+		const itAttractions = _.groupBy(packageItems, (item) => {
 			return item.dayNo;
 		});
-		console.log('>>>>PackageItinerary, Get itineraries', itineraries);
+		const itHotels = _.groupBy(packageHotels, (item) => {
+			return item.dayNo;
+		});
+		console.log('>>>>PackageItinerary, Get itineraries', {itAttractions, itHotels});
 		// Generate itinerary accordion
 		const elItineraries = {};
-		if (showTansport) {
+		if (showTransport) {
 			// Add Flight and Cars
 			elItineraries['Flight and Car'] = isReadonly ? (<div><FlightCar isReadonly /></div>) : (<div><FlightCar /></div>);
 		}
 
 		// Add itinerary for each days
-		_.forEach(_.keys(itineraries), (dayNo) => {
+		let lastCity = {};
+		_.forEach(_.keys(itAttractions), (dayNo) => {
 			const itinerary = {
 				dayNo: dayNo,
-				city: Helper.findCityById(itineraries[dayNo][0].cityId, cities),
-				attractions: itineraries[dayNo],
+				isPlannable: !!itAttractions[dayNo][0].timePlannable,
+				isOvernight: itHotels[dayNo][0].isOvernight,
+				city: Helper.findCityById(itAttractions[dayNo][0].cityId || itHotels[dayNo][0].cityId, cities),
+				attractions: itAttractions[dayNo],
+				hotel: itHotels[dayNo],
 			};
 			console.log('>>>>PackageItinerary, formatted itinerary', itinerary);
-			const city = _.find(cities, { name: itinerary.city });
+			const tmpCity = _.find(cities, { name: itinerary.city });
+			const city = tmpCity ? tmpCity : lastCity;
+			lastCity = city;
 			const title = triggerText(dayNo, city.name);
-			const hotels = city.hotels;
-			const attractions = city.attractions;
+			const hotels = itinerary.isOvernight ? city.hotels : [];
+			const attractions = itinerary.isPlannable ? city.attractions : [];
 			console.log(`>>>>PackageItinerary ${title} with hotels`, hotels);
 
 			// Prepare attraction card list

@@ -6,6 +6,7 @@ import { Paper, Typography } from '@material-ui/core';
 // ==== COMPONENTS =======================================
 import FixedTab from './components/fixed-tab';
 import PackageAttraction from './package-attraction';
+import PackageItinerary from './package-itinerary';
 
 // ==== CSS ==============================================
 import 'react-id-swiper/src/styles/css/swiper.css';
@@ -69,9 +70,14 @@ class MobileApp extends React.Component {
 			),
 			Itinerary: (
 				<div id="package-itinerary">
-					<Typography>
-						This is package itinerary
-					</Typography>
+					<PackageItinerary
+						showTransport
+						packageSummary={packageSummary}
+						packageItems={packageItems}
+						packageHotels={packageHotels}
+						hotelRates={hotelRates}
+						cities={cities}
+					/>
 				</div>
 			),
 		};

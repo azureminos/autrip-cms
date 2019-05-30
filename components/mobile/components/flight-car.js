@@ -44,7 +44,7 @@ class FlightCar extends React.Component {
 		};
 	}
 
-	handleCarChang (event) {
+	handleCarChange (event) {
 		this.setState({ [event.target.name]: event.target.value });
 	};
 
