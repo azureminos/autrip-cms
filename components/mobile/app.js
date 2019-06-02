@@ -50,7 +50,11 @@ class MobileApp extends React.Component {
 		const city = Helper.findCityByAttraction(attraction.id, cities);
 		// Logic starts here
 		if (action === 'ADD') {
-
+/*
+rule 1: same city, has nearby attractions and not overlaoded => add in the same day
+rule 2: same city, has no nearby attractions and not overlaoded => add in the same day 
+rule 3: same city, all days are overlaoded => add to the first day and popup message
+*/
 		}
 	}
 	// ----------  Package Instance Hotel  ----------
