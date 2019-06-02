@@ -89,7 +89,7 @@ class ControlledAccordion extends React.Component {
               <Typography className={classes.heading} variant='h5'>{title}</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>
-              <Typography>{mapContents[title]}</Typography>
+							{mapContents[title]}
             </ExpansionPanelDetails>
           </ExpansionPanel>
         </div>

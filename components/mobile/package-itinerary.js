@@ -15,20 +15,20 @@ const triggerText = (dayNo, city) => `Day ${dayNo}, ${city}`;
 export default class PackageItinerary extends React.Component {
 	render () {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
-		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates,
-			hotelRates, cities, isReadonly, showTransport } = this.props;
-		const itAttractions = _.groupBy(packageItems, (item) => {
+		const { instPackage, rates, cities, isReadonly, showTransport, handleSelectHotel } = this.props;
+		const { packageRates, carRates, flightRates, hotelRates } = rates;
+		const itAttractions = _.groupBy(instPackage.items, (item) => {
 			return item.dayNo;
 		});
-		const itHotels = _.groupBy(packageHotels, (item) => {
+		const itHotels = _.groupBy(instPackage.hotels, (item) => {
 			return item.dayNo;
 		});
-		console.log('>>>>PackageItinerary, Get itineraries', {itAttractions, itHotels});
+		console.log('>>>>PackageItinerary, Get itineraries', { itAttractions, itHotels });
 		// Generate itinerary accordion
 		const elItineraries = {};
 		if (showTransport) {
 			// Add Flight and Cars
-			elItineraries['Flight and Car'] = isReadonly ? (<div><FlightCar isReadonly /></div>) : (<div><FlightCar /></div>);
+			elItineraries['Flight and Car'] = isReadonly ? (<FlightCar isReadonly />) : (<FlightCar />);
 		}
 
 		// Add itinerary for each days
@@ -36,11 +36,11 @@ export default class PackageItinerary extends React.Component {
 		_.forEach(_.keys(itAttractions), (dayNo) => {
 			const itinerary = {
 				dayNo: dayNo,
-				isPlannable: !!itAttractions[dayNo][0].timePlannable,
-				isOvernight: itHotels[dayNo][0].isOvernight,
-				city: Helper.findCityById(itAttractions[dayNo][0].cityId || itHotels[dayNo][0].cityId, cities),
+				isPlannable: !!itAttractions[dayNo][0].timePlannable || false,
+				isOvernight: itHotels[dayNo][0].isOvernight || !!itHotels[dayNo][0].hotel,
+				city: Helper.findCityByAttraction(itAttractions[dayNo][0].attraction, cities) || Helper.findCityByHotel(itHotels[dayNo][0].hotel, cities),
 				attractions: itAttractions[dayNo],
-				hotel: itHotels[dayNo],
+				hotel: itHotels[dayNo][0],
 			};
 			console.log('>>>>PackageItinerary, formatted itinerary', itinerary);
 			const tmpCity = _.find(cities, { name: itinerary.city });
@@ -58,22 +58,20 @@ export default class PackageItinerary extends React.Component {
 				/>
 			) : (
 					<HotelSlider
-						dayNo={Number(dayNo)}
-						packageHotels={packageHotels}
+						dayNo={dayNo}
+						dayHotel={itinerary.hotel}
 						hotelRates={hotelRates}
 						hotels={hotels}
+						handleSelectHotel={handleSelectHotel}
 					/>
 				);
 
 			elItineraries[title] = (
 				<div>
-					<div>Attractions</div>
 					<ItineraryItem
 						itinerary={itinerary}
 						attractions={attractions}
-						isCustom={packageSummary.isCustom}
 					/>
-					<div>Hotels</div>
 					{hotelSelector}
 				</div>
 			);

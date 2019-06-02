@@ -4,26 +4,13 @@ import HotelCard from './hotel-card';
 
 class HotelSlider extends React.Component {
 	constructor (props) {
+		console.log('>>>>HotelSlider.constructor', props);
 		super(props);
-		const { dayNo, packageHotels, hotelRates, hotels } = props;
-		const dayHotel = _.find(packageHotels, { dayNo: dayNo });
+		const { dayHotel } = props;
 		this.state = {
-			idxSelected: (dayHotel && dayHotel.isOvernight) ? dayHotel.hotel.id : -1,
+			idxSelected: (dayHotel && dayHotel.isOverNight) ? dayHotel.hotel : -1,
 		};
-		this.handleSelectHotel = this.handleSelectHotel.bind(this);
 	}
-
-	handleSelectHotel (hotel) {
-		console.log('>>>>HotelSlider, handleChange()', { hotel: hotel, state: this.state, props: this.props });
-		const { dayNo, instPackage } = this.props;
-		if (this.state.idxSelected !== hotel.id) {
-			instPackage.hotels[dayNo - 1] = hotel.id;
-			this.setState({ idxSelected: hotel.id });
-		} else {
-			instPackage.hotels[dayNo - 1] = -1;
-			this.setState({ idxSelected: -1 });
-		}
-	};
 
 	render () {
 		const params = {
@@ -33,26 +20,41 @@ class HotelSlider extends React.Component {
 
 		console.log('>>>>HotelSlider, render()', this.props);
 		const { idxSelected } = this.state;
-		const { dayNo, packageHotels, hotelRates, hotels } = this.props;
-		const hotelSlider = hotels.map((h, idx) => {
-			console.log('>>>>HotelSlider, to check Selected', { hotel: h, target: idxSelected });
-			h.isSelected = (h.id === idxSelected);
-			console.log('>>>>HotelSlider, checked Selected', h);
+		const { dayNo, dayHotel, hotels, hotelRates, handleSelectHotel } = this.props;
+		const doSelectHotel = (item) => {
+			handleSelectHotel(dayNo, item);
+			this.setState({ idxSelected: item.id });
+		};
+
+		if (dayHotel.isOverNight) {
+			const hotelSlider = hotels.map((h, idx) => {
+				console.log('>>>>HotelSlider, to check Selected', { hotel: h, target: idxSelected });
+				h.isSelected = (h.id === idxSelected);
+				console.log('>>>>HotelSlider, checked Selected', h);
+				return (
+					<div className="hotel-slide" key={idx}>
+						<HotelCard
+							key={h.id}
+							item={h}
+							doSelectHotel={doSelectHotel}
+						/>
+					</div>
+				);
+			});
 			return (
-				<div className="hotel-slide" key={idx}>
-					<HotelCard
-						key={h.id}
-						item={h}
-						handleSelectHotel={this.handleSelectHotel}
-					/>
+				<div>
+					<div>Hotels</div>
+					<Swiper {...params}>
+						{hotelSlider}
+					</Swiper>
 				</div>
 			);
-		});
+		}
 
 		return (
-			<Swiper {...params}>
-				{hotelSlider}
-			</Swiper>
+			<div>
+				After breakfast, transfer to airport to board your flight to Australia. The trip may be over, but the experiences and memories will certainly last a lifetime.
+			</div>
 		);
 	}
 }

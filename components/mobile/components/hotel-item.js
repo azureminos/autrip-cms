@@ -21,6 +21,7 @@ export default class HotelItem extends React.Component {
 
 		return (
 			<div className="hotel-day-item">
+				<div>Hotels</div>
 				<div className="dnd-container">
 					<ChipList {...getTagSetting(hotels)} />
 				</div>

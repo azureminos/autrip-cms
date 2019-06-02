@@ -15,6 +15,9 @@ const styles = theme => ({
 		padding: theme.spacing.unit * 4,
 		outline: 'none',
 	},
+	mobileView: {
+		height: '700px',
+	},
 });
 
 class PackageDialog extends React.Component {
@@ -27,7 +30,7 @@ class PackageDialog extends React.Component {
 					open={!!open}
 					onClose={handleClose}
 				>
-					<DialogContent>
+					<DialogContent className={classes.mobileView}>
 						{this.props.children}
 					</DialogContent>
 					<DialogActions>

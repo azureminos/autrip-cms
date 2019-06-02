@@ -22,29 +22,33 @@ const styles = {
 class PackageAttraction extends React.Component {
 	render () {
 		console.log('>>>>PackageAttraction props', this.props);
-		const { classes, packageItems, cities, likeAttractions } = this.props;
-		const cityDays = _.groupBy(packageItems, (c) => { return Helper.findCityById(c.cityId, cities); });
+		const { classes, instPackage, cities, handleLikeAttraction, isReadonly } = this.props;
+		const packageItems = instPackage.items;
+		const cityDays = _.groupBy(_.filter(packageItems, (i) => { return i.attraction; }), (item) => {
+			return Helper.findCityByAttraction(item.attraction, cities);
+		});
 		const citySections = cities.map((city) => {
 			const tmpCity = city.name;
 			const cityDesc = tmpCity ? city.description : '';
 			const cityDescShort = cityDesc.length > 80 ? (cityDesc.substring(0, 80) + '...') : cityDesc;
+			const attractions = _.map(city.attractions, (a) => {
+				a.isLiked = _.findIndex(packageItems, (pi) => { return pi.attraction === a.id; }) !== -1;
+				return a;
+			});
 			// Prepare settings of ChipList
-			const likedItems = _.filter(city.attractions, { isLiked: true });
-			if (likedItems.length === 0) {
-				// Consider attractions of packageItems as default liked attractions
-			}
+			const likedItems = _.filter(attractions, { isLiked: true });
 			console.log('>>>>Show tags for city[' + city.name + ']', likedItems);
 			const tagSetting = {
 				tags: likedItems.map((item) => { return { id: item.id, name: item.name, imageUrl: item.imageUrl }; }),
 			};
 
 			// Prepare attraction card list
-			const attractionCards = city.attractions.map((a) => {
+			const attractionCards = attractions.map((a) => {
 				return (
 					<AttractionCard
 						key={a.id}
 						item={a}
-						handleClick={likeAttractions}
+						handleClick={handleLikeAttraction}
 					/>
 				);
 			});

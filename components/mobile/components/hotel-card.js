@@ -34,21 +34,21 @@ class HotelCard extends React.Component {
 	}
 
 	render () {
-		const { classes, item, handleSelectHotel } = this.props;
+		const { classes, item, doSelectHotel } = this.props;
 		console.log('>>>>HotelCard render()', item);
 		return (
 			<Card className={classes.card}>
 				<CardHeader
 					classes={{ root: classes.headerRoot, title: classes.headerTitle }}
 					action={
-						<IconButton onClick={() => handleSelectHotel(item)}>
+						<IconButton onClick={() => doSelectHotel(item)}>
 							<CheckIcon style={{ display: this.props.item.isSelected ? 'none' : 'block', color: grey[500] }} />
 							<SolidCheckIcon style={{ display: this.props.item.isSelected ? 'block' : 'none', color: blue[500] }} />
 						</IconButton>
 					}
 					title={item.name}
 				/>
-				<CardActionArea onClick={() => handleSelectHotel(item)}>
+				<CardActionArea onClick={() => doSelectHotel(item)}>
 					<CardMedia
 						className={classes.media}
 						image={item.imageUrl}

@@ -4,6 +4,7 @@ import React from 'react';
 import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS =======================================
+import Helper from '../../lib/helper';
 import FixedTab from './components/fixed-tab';
 import PackageAttraction from './package-attraction';
 import PackageItinerary from './package-itinerary';
@@ -19,11 +20,13 @@ class MobileApp extends React.Component {
 	constructor (props) {
 		super(props);
 
-		this.setLikedAttractions = this.setLikedAttractions.bind(this);
+		this.handleLikeAttraction = this.handleLikeAttraction.bind(this);
+		this.handleSelectHotel = this.handleSelectHotel.bind(this);
 
 		this.state = {
 			updating: false,
-			likedAttractions: [],
+			message: '',
+			instPackage: props.instPackage,
 		};
 	}
 
@@ -36,15 +39,33 @@ class MobileApp extends React.Component {
 	   = State & Event Handlers     =
 	   ============================== */
 	// ----------  Package  ----------
-	/* ----------  Package Instance ------- */
-	/* ----------  Package Instance Items------- */
-	setLikedAttractions (e) {
-		console.log('>>>>MobileApp.setLikedAttractions', e);
+	// ----------  Package Instance -------
+	// ----------  Package Instance Items-------
+	handleLikeAttraction (attraction) {
+		console.log('>>>>MobileApp.setLikedAttractions', attraction);
+		const action = attraction.isLiked ? 'DELETE' : 'ADD';
+		const { instPackage, message } = this.state;
+		const { reference } = this.props;
+		const { cities } = reference;
+		const city = Helper.findCityByAttraction(attraction.id, cities);
+		// Logic starts here
+		if (action === 'ADD') {
+
+		}
 	}
-	/* ----------  Attractions  ---------- */
-	/* ----------  Hotels  ---------- */
-
-
+	// ----------  Package Instance Hotel  ----------
+	handleSelectHotel (dayNo, item) {
+		console.log(`>>>>MobileApp.handleSelectHotel of Day[${dayNo}]`, item);
+		this.setState({ updating: true });
+		const { instPackage } = this.state;
+		for (var i = 0; i < instPackage.hotels.length; i++) {
+			const hotel = instPackage.hotels[i];
+			if (Number(hotel.dayNo) === Number(dayNo)) {
+				hotel.hotel = item.id;
+			}
+		}
+		this.setState({ instPackage: instPackage, updating: false });
+	}
 	/* ==============================
 	   = React Lifecycle            =
 	   ============================== */
@@ -53,18 +74,18 @@ class MobileApp extends React.Component {
 	}
 
 	render () {
-		const { updating } = this.state;
-		const {selectedPackage} = this.props;
-		const { packageSummary, packageItems, packageHotels, packageRates, carRates, flightRates,
-			hotelRates, cities } = selectedPackage;
-		console.log('>>>>MobileApp.render', selectedPackage);
+		const { updating, instPackage } = this.state;
+		const { rates, reference } = this.props;
+		const { packageRates, carRates, flightRates, hotelRates } = rates;
+		const { cities } = reference;
+		console.log('>>>>MobileApp.render', instPackage);
 		const tabs = {
 			Attraction: (
 				<div id="package-attraction">
 					<PackageAttraction
-						packageItems={packageItems}
+						instPackage={instPackage}
 						cities={cities}
-						likeAttractions={this.setLikedAttractions}
+						handleLikeAttraction={this.handleLikeAttraction}
 					/>
 				</div>
 			),
@@ -72,11 +93,10 @@ class MobileApp extends React.Component {
 				<div id="package-itinerary">
 					<PackageItinerary
 						showTransport
-						packageSummary={packageSummary}
-						packageItems={packageItems}
-						packageHotels={packageHotels}
-						hotelRates={hotelRates}
+						instPackage={instPackage}
+						rates={rates}
 						cities={cities}
+						handleSelectHotel={this.handleSelectHotel}
 					/>
 				</div>
 			),

@@ -16,6 +16,7 @@ import ComputerIcon from '@material-ui/icons/Computer';
 import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
 
 // ==== COMPONENTS ========================================
+import Helper from '../lib/helper';
 import PackageSummary from './package-summary-div';
 import PackageItinerary from './package-itinerary-div';
 import PackageRates from './package-rates-div';
@@ -207,12 +208,19 @@ class PackageDetails extends React.Component {
 					open={this.state.openModal}
 					handleClose={this.handleModalClose}
 				>
-					{this.state.openModal === 'mobile' ? (<MobileApp selectedPackage={selectedPackage}/>) : (<div/>)}
+					{this.state.openModal === 'mobile' ?
+						(<MobileApp
+							instPackage={Helper.dummyInstance({ packageSummary, packageItems, packageHotels })}
+							rates={{ packageRates, carRates, flightRates, hotelRates }}
+							reference={{ cities }}
+						/>) :
+						(<div/>)
+					}
 					{this.state.openModal === 'desktop' ? (<div>{this.state.openModal}</div>) : (<div/>)}
 				</PackageDialog>
 			</div>
 		);
-	}
+	}Helper
 }
 
 export default withStyles(styles, { withTheme: true })(PackageDetails);
