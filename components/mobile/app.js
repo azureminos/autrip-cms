@@ -42,19 +42,67 @@ class MobileApp extends React.Component {
 	// ----------  Package Instance -------
 	// ----------  Package Instance Items-------
 	handleLikeAttraction (attraction) {
+		const enhanceItem = (item, cities) => {
+			item.attraction = Helper.findAttractionById(item.attraction, cities);
+			return item;
+		};
+		const isPlannable = (dayItem) => {
+			return dayItem && dayItem.length > 0 && dayItem[0].timePlannable > 0;
+		};
+		const isOverloaded = (dayItem) => {
+			const timePlannable = dayItem[0].timePlannable;
+			let timePlanned = 0;
+			for (var i = 0; i < dayItem.length; i++) {
+				const attraction = dayItem[i].attraction;
+				timePlanned = timePlanned + attraction.timeTraffic + attraction.timeVisit;
+				if (i > 0 && _.findIndex(dayItem[i].attraction.nearByAttractions, (item) => { return item === dayItem[i - 1].attraction.id; }) > -1) {
+					timePlanned = timePlanned - 1;
+				}
+			}
+			return timePlannable > timePlanned;
+		};
+		const isSameCity = (item, cities) => {
+			item.attraction = Helper.findAttractionById(item.attraction, cities);
+			return item;
+		};
+		const getLastNearby = (item, cities) => {
+			item.attraction = Helper.findAttractionById(item.attraction, cities);
+			return item;
+		};
 		console.log('>>>>MobileApp.setLikedAttractions', attraction);
 		const action = attraction.isLiked ? 'DELETE' : 'ADD';
 		const { instPackage, message } = this.state;
 		const { reference } = this.props;
 		const { cities } = reference;
 		const city = Helper.findCityByAttraction(attraction.id, cities);
+		const cityItems = _.find(cities, (o) => { return o.name === city; });
+		const instItems = _.map(instPackage.items, (item) => {
+			return item.attraction ? enhanceItem(item, cities) : item;
+		});
+		const dayItems = _.groupBy(instItems, (item) => {
+			return item.dayNo;
+		});
+		const posLastNearby = getLastNearby(dayItem);
 		// Logic starts here
+		let isAddible = false;
 		if (action === 'ADD') {
-/*
-rule 1: same city, has nearby attractions and not overlaoded => add in the same day
-rule 2: same city, has no nearby attractions and not overlaoded => add in the same day 
-rule 3: same city, all days are overlaoded => add to the first day and popup message
-*/
+			if (posLastNearby) {
+				isAddible = true;
+				// Do something
+			} else {
+				// Group by Day
+				for (var i = 0; i < Object.keys(dayItems).length; i++) {
+					const dayItem = dayItems[Object.keys(dayItems)[i]];
+					if (isPlannable(dayItem) && isSameCity(dayItem) && !isOverloaded(dayItem)) {
+						isAddible = true;
+						// Do something
+					}
+				}
+			}
+
+			if (!isAddible) {
+				// Do nothing but show warning message
+			}
 		}
 	}
 	// ----------  Package Instance Hotel  ----------
