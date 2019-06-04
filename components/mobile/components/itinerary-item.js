@@ -13,9 +13,9 @@ import ChipList from './chip-list';
 const getTagSetting = (attractions, allAttractions) => {
 	const tags = attractions.map((a) => {
 		const item = _.find(allAttractions, (aa) => {
-			return aa.id === a.attraction;
+			return aa.id === a.attraction.id;
 		});
-		return { id: a.attraction, name: item.name, imageUrl: item.imageUrl };
+		return { id: a.attraction.id, name: item.name, imageUrl: item.imageUrl };
 	});
 
 	return {

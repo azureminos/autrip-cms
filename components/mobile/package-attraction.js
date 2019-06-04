@@ -25,14 +25,14 @@ class PackageAttraction extends React.Component {
 		const { classes, instPackage, cities, handleLikeAttraction, isReadonly } = this.props;
 		const packageItems = instPackage.items;
 		const cityDays = _.groupBy(_.filter(packageItems, (i) => { return i.attraction; }), (item) => {
-			return Helper.findCityByAttraction(item.attraction, cities);
+			return Helper.findCityByAttraction(item.attraction.id, cities);
 		});
 		const citySections = cities.map((city) => {
 			const tmpCity = city.name;
 			const cityDesc = tmpCity ? city.description : '';
 			const cityDescShort = cityDesc.length > 80 ? (cityDesc.substring(0, 80) + '...') : cityDesc;
 			const attractions = _.map(city.attractions, (a) => {
-				a.isLiked = _.findIndex(packageItems, (pi) => { return pi.attraction === a.id; }) !== -1;
+				a.isLiked = _.findIndex(packageItems, (pi) => { return pi.attraction && pi.attraction.id === a.id; }) !== -1;
 				return a;
 			});
 			// Prepare settings of ChipList

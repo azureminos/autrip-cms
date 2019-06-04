@@ -34,13 +34,16 @@ export default class PackageItinerary extends React.Component {
 		// Add itinerary for each days
 		let lastCity = {};
 		_.forEach(_.keys(itAttractions), (dayNo) => {
+			const ita = itAttractions[dayNo];
+			const ith = itHotels[dayNo];
 			const itinerary = {
 				dayNo: dayNo,
-				isPlannable: !!itAttractions[dayNo][0].timePlannable || false,
-				isOvernight: itHotels[dayNo][0].isOvernight || !!itHotels[dayNo][0].hotel,
-				city: Helper.findCityByAttraction(itAttractions[dayNo][0].attraction, cities) || Helper.findCityByHotel(itHotels[dayNo][0].hotel, cities),
-				attractions: itAttractions[dayNo],
-				hotel: itHotels[dayNo][0],
+				isPlannable: !!ita[0].timePlannable || false,
+				isOvernight: ith[0].isOvernight || !!ith[0].hotel,
+				city: (ita[0].attraction ? Helper.findCityByAttraction(ita[0].attraction.id, cities) : '')
+					|| (ith[0].hotel ? Helper.findCityByHotel(ith[0].hotel, cities) : ''),
+				attractions: ita,
+				hotel: ith[0],
 			};
 			console.log('>>>>PackageItinerary, formatted itinerary', itinerary);
 			const tmpCity = _.find(cities, { name: itinerary.city });

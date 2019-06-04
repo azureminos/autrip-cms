@@ -23,10 +23,14 @@ class MobileApp extends React.Component {
 		this.handleLikeAttraction = this.handleLikeAttraction.bind(this);
 		this.handleSelectHotel = this.handleSelectHotel.bind(this);
 
+		var instItems = _.map(props.instPackage.items, (item) => {
+			return item.attraction ? Helper.enhanceItem(item, props.reference.cities) : item;
+		});
+
 		this.state = {
 			updating: false,
 			message: '',
-			instPackage: props.instPackage,
+			instPackage: { ...props.instPackage, items: instItems },
 		};
 	}
 
@@ -42,66 +46,134 @@ class MobileApp extends React.Component {
 	// ----------  Package Instance -------
 	// ----------  Package Instance Items-------
 	handleLikeAttraction (attraction) {
-		const enhanceItem = (item, cities) => {
-			item.attraction = Helper.findAttractionById(item.attraction, cities);
-			return item;
-		};
-		const isPlannable = (dayItem) => {
+		var isPlannable = (dayItem) => {
 			return dayItem && dayItem.length > 0 && dayItem[0].timePlannable > 0;
 		};
-		const isOverloaded = (dayItem) => {
-			const timePlannable = dayItem[0].timePlannable;
-			let timePlanned = 0;
+		var isOverloaded = (dayItem) => {
+			var timePlannable = dayItem[0].timePlannable;
+			if (timePlannable === 0) {
+				return true;
+			}
+			var timePlanned = 0;
 			for (var i = 0; i < dayItem.length; i++) {
-				const attraction = dayItem[i].attraction;
+				var attraction = dayItem[i].attraction;
 				timePlanned = timePlanned + attraction.timeTraffic + attraction.timeVisit;
 				if (i > 0 && _.findIndex(dayItem[i].attraction.nearByAttractions, (item) => { return item === dayItem[i - 1].attraction.id; }) > -1) {
 					timePlanned = timePlanned - 1;
 				}
 			}
-			return timePlannable > timePlanned;
+			return timePlannable <= timePlanned;
 		};
-		const isSameCity = (item, cities) => {
-			item.attraction = Helper.findAttractionById(item.attraction, cities);
-			return item;
+		var isSameCity = (item, comp, cities) => {
+			var iCity = Helper.findCityByAttraction(item.id, cities);
+			var cCity = Helper.findCityByAttraction(comp[0].attraction.id, cities);
+			return iCity === cCity;
 		};
-		const getLastNearby = (item, cities) => {
-			item.attraction = Helper.findAttractionById(item.attraction, cities);
-			return item;
+		var getLastNearby = (item, dayItems) => {
+			var pos = null;
+			var days = Object.keys(dayItems);
+			for (var i = 0; i < days.length; i++) {
+				var iDayItem = dayItems[days[i]];
+				if (!isOverloaded(iDayItem)) {
+					for (var n = 0; n < iDayItem.length; n++) {
+						if (_.findIndex((iDayItem[n].attraction.nearByAttractions || []), (nba) => {
+							return nba === item.id;
+						}) > -1) {
+							pos = { dayNo: iDayItem[n].dayNo, daySeq: iDayItem[n].daySeq };
+						}
+					}
+				}
+			}
+			return pos;
 		};
+		var mergeDayItems = (dayItems) => {
+			var items = [];
+			var days = Object.keys(dayItems);
+			_.each(days, (day) => {
+				_.each(dayItems[day], (item) => {
+					items.push(item);
+				});
+			});
+			return items;
+		};
+		// Logic starts here
 		console.log('>>>>MobileApp.setLikedAttractions', attraction);
-		const action = attraction.isLiked ? 'DELETE' : 'ADD';
-		const { instPackage, message } = this.state;
-		const { reference } = this.props;
-		const { cities } = reference;
-		const city = Helper.findCityByAttraction(attraction.id, cities);
-		const cityItems = _.find(cities, (o) => { return o.name === city; });
-		const instItems = _.map(instPackage.items, (item) => {
-			return item.attraction ? enhanceItem(item, cities) : item;
-		});
-		const dayItems = _.groupBy(instItems, (item) => {
+		this.setState({ updating: true });
+		var action = attraction.isLiked ? 'DELETE' : 'ADD';
+		var { instPackage, message } = this.state;
+		var { reference } = this.props;
+		var { cities } = reference;
+		var instItems = instPackage.items;
+		var dayItems = _.groupBy(instItems, (item) => {
 			return item.dayNo;
 		});
-		const posLastNearby = getLastNearby(dayItem);
+		var posLastNearby = getLastNearby(attraction, dayItems);
 		// Logic starts here
-		let isAddible = false;
+		var isAddible = false;
 		if (action === 'ADD') {
 			if (posLastNearby) {
 				isAddible = true;
 				// Do something
+				var dayItem = dayItems[posLastNearby.dayNo];
+				for (var i = dayItem.length; i >= posLastNearby.daySeq; i--) {
+					dayItem[i] = dayItem[i] || {};
+					dayItem[i].id = dayItem[i].id || '-1';
+					dayItem[i].dayNo = dayItem[i - 1].dayNo;
+					dayItem[i].daySeq = dayItem[i - 1].daySeq + 1;
+					dayItem[i].attraction = dayItem[i - 1].attraction;
+					dayItem[i].timePlannable = dayItem[i - 1].timePlannable;
+				}
+				dayItem[posLastNearby.daySeq - 1].attraction = attraction;
+				instPackage.items = mergeDayItems(dayItems);
+				this.setState({ updating: false, instPackage: instPackage });
 			} else {
 				// Group by Day
-				for (var i = 0; i < Object.keys(dayItems).length; i++) {
-					const dayItem = dayItems[Object.keys(dayItems)[i]];
-					if (isPlannable(dayItem) && isSameCity(dayItem) && !isOverloaded(dayItem)) {
+				var days = Object.keys(dayItems);
+				for (var i = 0; i < days.length; i++) {
+					var dayItem = dayItems[days[i]];
+					if (isPlannable(dayItem) && isSameCity(attraction, dayItem, cities)
+						&& !isOverloaded(dayItem)) {
 						isAddible = true;
 						// Do something
+						var idx = dayItem.length;
+						dayItem[idx] = {};
+						dayItem[idx].id = '-1';
+						dayItem[idx].dayNo = dayItem[idx - 1].dayNo;
+						dayItem[idx].daySeq = dayItem[idx - 1].daySeq + 1;
+						dayItem[idx].attraction = attraction;
+						dayItem[idx].timePlannable = dayItem[idx - 1].timePlannable;
+						instPackage.items = mergeDayItems(dayItems);
+						this.setState({ updating: false, instPackage: instPackage });
+						break;
 					}
 				}
 			}
-
 			if (!isAddible) {
 				// Do nothing but show warning message
+				this.setState({ updating: false, message: 'You have a full itinerary.' });
+			}
+		} else if (action === 'DELETE') {
+			var days = Object.keys(dayItems);
+			for (var i = 0; i < days.length; i++) {
+				var dayItem = dayItems[days[i]];
+				var idx = _.findIndex(dayItem, (item) => {
+					return attraction.id === (item.attraction ? item.attraction.id : null);
+				});
+
+				if (idx > -1 && dayItem.length === 1) {
+					// if it's the only item of the day, show warning and ignore the change
+					this.setState({ updating: false, message: 'Can not remove. It is the only attraction to visit for that day.' });
+					break;
+				} else if (idx > -1 && dayItem.length > 1) {
+					// if not the only item of the day, allow change
+					dayItem.splice(idx, 1);
+					_.each(dayItem, (item, index) => {
+						item.daySeq = index + 1;
+					});
+					instPackage.items = mergeDayItems(dayItems);
+					this.setState({ updating: false, instPackage: instPackage });
+					break;
+				}
 			}
 		}
 	}
@@ -126,12 +198,12 @@ class MobileApp extends React.Component {
 	}
 
 	render () {
-		const { updating, instPackage } = this.state;
-		const { rates, reference } = this.props;
-		const { packageRates, carRates, flightRates, hotelRates } = rates;
-		const { cities } = reference;
+		var { updating, instPackage } = this.state;
+		var { rates, reference } = this.props;
+		var { packageRates, carRates, flightRates, hotelRates } = rates;
+		var { cities } = reference;
 		console.log('>>>>MobileApp.render', instPackage);
-		const tabs = {
+		var tabs = {
 			Attraction: (
 				<div id="package-attraction">
 					<PackageAttraction
