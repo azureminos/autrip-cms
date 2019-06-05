@@ -7,6 +7,8 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 
+import BotHeader from './bot-header';
+
 
 function TabContainer({children, dir}) {
   return (
@@ -54,6 +56,7 @@ class FullWidthTabs extends React.Component {
     return (
       <div className={classes.root}>
         <AppBar position='sticky' color='default'>
+					<BotHeader />
           <Tabs
             value={this.state.tabIndex}
             onChange={this.handleChange}
