@@ -1,4 +1,4 @@
-import React, { createElement } from 'react';
+import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -30,12 +30,7 @@ class BotHeader extends React.Component {
 		this.state = {
 			adults: 0,
 			kids: 0,
-			totalAdults: 7,
-			totalKids: 4,
-			cost: 1500,
-			tier: 15,
-			discount: 200,
-			maxTotal: 30,
+			finalCost: 0,
 		};
 
 		this.handleAdultdsChange = this.handleAdultdsChange.bind(this);
@@ -55,10 +50,29 @@ class BotHeader extends React.Component {
 	render () {
 		console.log('>>>>BotHeader, render()', this.state);
 		const { classes, instPackage, rates } = this.props;
-		const { adults, kids, totalAdults, totalKids, cost, tier, discount, maxTotal } = this.state;
-		let promo1 = '';
-		let promo2 = '';
-		let finalCost = 0;
+		const { packageRates, carRates, flightRates, hotelRates } = rates;
+		const { isCustomised, hotels, items, totalAdults, totalKids,
+			startDate, endDate, carOption } = instPackage;
+		const { adults, kids } = this.state;
+		const finalCost = 0;
+
+		if (!isCustomised) {
+			/* ==== Regular tour group ====
+			* - packageRates: totalAdults, totalKids
+			* - flightRates: startDate, endDate
+			* ============================ */
+			const curRatePackage = calPackageRateReg(adults, kids, packageRates); // {price, maxParticipant}
+			const curRateFlight = calFlightRate(startDate, flightRates);
+			if (curRatePackage.maxParticipant && instPackage.maxParticipant > curRatePackage.maxParticipant) {
+				const nxtRatePackage = calPackageRateReg((curRatePackage.maxParticipant + 1), kids, packageRates);
+			}
+			finalCost = 
+			
+		}
+
+
+
+
 		if (tier > totalAdults + adults + totalKids + kids) {
 			promo1 = (tier - totalAdults - adults - totalKids - kids) + ' more people';
 			promo2 = '$' + (cost - discount) + ' pp';

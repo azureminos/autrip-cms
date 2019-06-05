@@ -6,6 +6,7 @@ import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS =======================================
 import Helper from '../../lib/helper';
+import BotHeader from './bot-header';
 import FixedTab from './components/fixed-tab';
 import PackageAttraction from './package-attraction';
 import PackageItinerary from './package-itinerary';
@@ -258,9 +259,12 @@ class MobileApp extends React.Component {
 		return (
 			<div id="app">
 				<Paper>
-					<FixedTab
-						tabs={tabs}
-					/>
+					<FixedTab tabs={tabs} >
+						<BotHeader
+							instPackage={instPackage}
+							rates={rates}
+						/>
+					</FixedTab>
 				</Paper>
 			</div>
 		);
