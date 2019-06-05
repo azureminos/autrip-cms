@@ -37,7 +37,7 @@ class PackageAttraction extends React.Component {
 			});
 			// Prepare settings of ChipList
 			const likedItems = _.filter(attractions, { isLiked: true });
-			console.log('>>>>Show tags for city[' + city.name + ']', likedItems);
+			// console.log('>>>>Show tags for city[' + city.name + ']', likedItems);
 			const tagSetting = {
 				tags: likedItems.map((item) => { return { id: item.id, name: item.name, imageUrl: item.imageUrl }; }),
 			};

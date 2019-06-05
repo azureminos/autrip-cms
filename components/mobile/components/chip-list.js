@@ -18,7 +18,7 @@ const styles = theme => ({
 
 class ChipList extends React.Component {
 	render () {
-		console.log('>>>>ChipList, render()', this.props);
+		// console.log('>>>>ChipList, render()', this.props);
 		const { tags, classes } = this.props;
 		const chips = tags.map((t) => {
 			return (

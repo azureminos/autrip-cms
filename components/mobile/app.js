@@ -1,5 +1,6 @@
 // ==== MODULES ==========================================
 import _ from 'lodash';
+import Moment from 'moment';
 import React from 'react';
 import { Paper, Typography } from '@material-ui/core';
 
@@ -22,6 +23,8 @@ class MobileApp extends React.Component {
 
 		this.handleLikeAttraction = this.handleLikeAttraction.bind(this);
 		this.handleSelectHotel = this.handleSelectHotel.bind(this);
+		this.handleSelectFlight = this.handleSelectFlight.bind(this);
+		this.handleSelectCar = this.handleSelectCar.bind(this);
 
 		var instItems = _.map(props.instPackage.items, (item) => {
 			return item.attraction ? Helper.enhanceItem(item, props.reference.cities) : item;
@@ -190,6 +193,25 @@ class MobileApp extends React.Component {
 		}
 		this.setState({ instPackage: instPackage, updating: false });
 	}
+	// ----------  Package Instance Flight  ----------
+	handleSelectFlight (selectedVal) {
+		console.log(`>>>>MobileApp.handleSelectFlight`, selectedVal);
+		this.setState({ updating: true });
+		const { instPackage } = this.state;
+		const dtDepart = Moment(selectedVal, 'DD/MM/YYYY');
+		const dtReturn = Moment(dtDepart).add(instPackage.totalDays, 'days');
+		instPackage.startDate = selectedVal;
+		instPackage.endDate = dtReturn.format('DD/MM/YYYY');
+		this.setState({ instPackage: instPackage, updating: false });
+	}
+	// ----------  Package Instance Car  ----------
+	handleSelectCar (selectedVal) {
+		console.log(`>>>>MobileApp.handleSelectCar`, selectedVal);
+		this.setState({ updating: true });
+		const { instPackage } = this.state;
+		instPackage.carOption = selectedVal;
+		this.setState({ instPackage: instPackage, updating: false });
+	}
 	/* ==============================
 	   = React Lifecycle            =
 	   ============================== */
@@ -201,8 +223,10 @@ class MobileApp extends React.Component {
 		var { updating, instPackage } = this.state;
 		var { rates, reference } = this.props;
 		var { packageRates, carRates, flightRates, hotelRates } = rates;
-		var { cities } = reference;
-		console.log('>>>>MobileApp.render', instPackage);
+		var { cities, packageSummary } = reference;
+		console.log('>>>>MobileApp.render >> instPackage', instPackage);
+		console.log('>>>>MobileApp.render >> reference', reference);
+		console.log('>>>>MobileApp.render >> rates', rates);
 		var tabs = {
 			Attraction: (
 				<div id="package-attraction">
@@ -219,8 +243,11 @@ class MobileApp extends React.Component {
 						showTransport
 						instPackage={instPackage}
 						rates={rates}
+						packageSummary={packageSummary}
 						cities={cities}
 						handleSelectHotel={this.handleSelectHotel}
+						handleSelectFlight={this.handleSelectFlight}
+						handleSelectCar={this.handleSelectCar}
 					/>
 				</div>
 			),

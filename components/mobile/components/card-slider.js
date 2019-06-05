@@ -2,8 +2,7 @@ import React from 'react';
 import Swiper from 'react-id-swiper';
 
 const CardSlider = ({ cards }) => {
-	console.log('>>>>CardSlider', { cards: cards });
-
+	// console.log('>>>>CardSlider', { cards: cards });
 	const params = {
 		slidesPerView: 'auto',
 		spaceBetween: 8,

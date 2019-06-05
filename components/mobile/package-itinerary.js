@@ -15,7 +15,8 @@ const triggerText = (dayNo, city) => `Day ${dayNo}, ${city}`;
 export default class PackageItinerary extends React.Component {
 	render () {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
-		const { instPackage, rates, cities, isReadonly, showTransport, handleSelectHotel } = this.props;
+		const { instPackage, rates, cities, packageSummary, isReadonly, showTransport,
+			handleSelectHotel, handleSelectFlight, handleSelectCar } = this.props;
 		const { packageRates, carRates, flightRates, hotelRates } = rates;
 		const itAttractions = _.groupBy(instPackage.items, (item) => {
 			return item.dayNo;
@@ -27,8 +28,33 @@ export default class PackageItinerary extends React.Component {
 		// Generate itinerary accordion
 		const elItineraries = {};
 		if (showTransport) {
+			const departDates = _.map(packageSummary.departureDate.split(','), (d) => {
+				return d.trim();
+			});
+			const carOptions = _.map(carRates, (carRate) => {
+				return carRate.type;
+			});
 			// Add Flight and Cars
-			elItineraries['Flight and Car'] = isReadonly ? (<FlightCar isReadonly />) : (<FlightCar />);
+			elItineraries['Flight and Car'] = isReadonly
+				? (<FlightCar
+					departDates={departDates}
+					selectedDepartDate = {instPackage.startDate}
+					selectedReturnDate = {instPackage.endDate}
+					carOptions={carOptions}
+					selectedCarOption={instPackage.carOption}
+					handleSelectFlight={handleSelectFlight}
+					handleSelectCar={handleSelectCar}
+					isReadonly
+				/>)
+				: (<FlightCar
+					departDates={departDates}
+					selectedDepartDate = {instPackage.startDate}
+					selectedReturnDate = {instPackage.endDate}
+					carOptions={carOptions}
+					selectedCarOption={instPackage.carOption}
+					handleSelectFlight={handleSelectFlight}
+					handleSelectCar={handleSelectCar}
+				/>);
 		}
 
 		// Add itinerary for each days

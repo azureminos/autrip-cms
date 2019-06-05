@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { createElement } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -36,25 +37,27 @@ class FlightCar extends React.Component {
 		super(props);
 
 		this.handleCarChange = this.handleCarChange.bind(this);
-
-		this.state = {
-			departDate: '',
-			returnDate: '',
-			typeGroundTransport: 'Basic',
-		};
+		this.handleFlightChange = this.handleFlightChange.bind(this);
 	}
 
 	handleCarChange (event) {
-		this.setState({ [event.target.name]: event.target.value });
+		this.props.handleSelectCar(event.target.value);
 	};
 
 	handleFlightChange (event) {
-		this.setState({ departDate: event.target.value });
+		this.props.handleSelectFlight(event.target.value);
 	};
-
 	render () {
 		console.log('>>>>FlightCar, render()', this.props);
-		const { classes, isReadonly } = this.props;
+		const { classes, isReadonly, departDates, carOptions,
+			selectedDepartDate, selectedReturnDate, selectedCarOption } = this.props;
+		const miDepartDates = _.map(departDates, (i) => {
+			return (<MenuItem key={i} value={i}>{i}</MenuItem>);
+		});
+		const miReturnDates = (<MenuItem value={selectedReturnDate}>{selectedReturnDate}</MenuItem>);
+		const miCarOptions = _.map(carOptions, (i) => {
+			return (<MenuItem key={i} value={i}>{i}</MenuItem>);
+		});
 
 		return (
 			<List className={classes.list}>
@@ -69,7 +72,7 @@ class FlightCar extends React.Component {
 								disabled={isReadonly ? true : false}
 							>
 								<Select
-									value={this.state.departDate}
+									value={selectedDepartDate || ''}
 									onChange={this.handleFlightChange}
 									displayEmpty
 									inputProps={{
@@ -80,24 +83,18 @@ class FlightCar extends React.Component {
 									<MenuItem value="" disabled>
 										<em>Depart</em>
 									</MenuItem>
-									<MenuItem value={10}>03 Feb 2019</MenuItem>
-									<MenuItem value={20}>08 Feb 2019</MenuItem>
-									<MenuItem value={30}>10 Mar 2019</MenuItem>
-									<MenuItem value={40}>03 April 2019</MenuItem>
+									{miDepartDates}
 								</Select>
 							</FormControl>
 							<FormControl
 								className={classes.formControl}
 								disabled
 							>
-								<Select value={this.state.departDate} displayEmpty>
+								<Select value={selectedReturnDate || ''} displayEmpty>
 									<MenuItem value="">
 										<em>Arrive</em>
 									</MenuItem>
-									<MenuItem value={10}>07 Feb 2019</MenuItem>
-									<MenuItem value={20}>14 Feb 2019</MenuItem>
-									<MenuItem value={30}>16 Mar 2019</MenuItem>
-									<MenuItem value={40}>09 April 2019</MenuItem>
+									{miReturnDates}
 								</Select>
 							</FormControl>
 						</div>
@@ -114,7 +111,7 @@ class FlightCar extends React.Component {
 							disabled={isReadonly ? true : false}
 						>
 							<Select
-								value={this.state.typeGroundTransport}
+								value={selectedCarOption || ''}
 								onChange={this.handleCarChange}
 								displayEmpty
 								inputProps={{
@@ -125,8 +122,7 @@ class FlightCar extends React.Component {
 								<MenuItem value="" disabled>
 									<em>Ground Transport</em>
 								</MenuItem>
-								<MenuItem value="Basic">Basic</MenuItem>
-								<MenuItem value="Luxury">Luxury</MenuItem>
+								{miCarOptions}
 							</Select>
 						</FormControl>
 					</ListItemSecondaryAction>

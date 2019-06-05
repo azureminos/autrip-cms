@@ -212,7 +212,7 @@ class PackageDetails extends React.Component {
 						(<MobileApp
 							instPackage={Helper.dummyInstance({ packageSummary, packageItems, packageHotels })}
 							rates={{ packageRates, carRates, flightRates, hotelRates }}
-							reference={{ cities }}
+							reference={{ packageSummary, cities }}
 						/>) :
 						(<div/>)
 					}
