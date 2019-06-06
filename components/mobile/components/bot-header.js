@@ -30,7 +30,6 @@ class BotHeader extends React.Component {
 		this.state = {
 			adults: 0,
 			kids: 0,
-			finalCost: 0,
 		};
 
 		this.handleAdultdsChange = this.handleAdultdsChange.bind(this);
@@ -47,6 +46,23 @@ class BotHeader extends React.Component {
 		this.setState({ kids: e.target.value });
 	}
 
+	buildMenuItems (maxSelect, itemText) {
+		const rs = [];
+		rs[rs.length] = (<MenuItem key={0} value={0}>----Select----</MenuItem>);
+		for (let ct = 0; ct < maxSelect; ct++) {
+			rs[rs.length] = (<MenuItem key={ct+1} value={ct+1}>{ct+1} {itemText}{(ct === 0) ? '' : 's'}</MenuItem>);
+		}
+	}
+
+	calPackageRateReg(adults, kids, packageRates) {
+
+	}
+
+	calFlightRate(startDate, flightRates) {
+
+	}
+
+
 	render () {
 		console.log('>>>>BotHeader, render()', this.state);
 		const { classes, instPackage, rates } = this.props;
@@ -54,41 +70,41 @@ class BotHeader extends React.Component {
 		const { isCustomised, hotels, items, totalAdults, totalKids,
 			startDate, endDate, carOption } = instPackage;
 		const { adults, kids } = this.state;
-		const finalCost = 0;
+		const finalCost = {rate: 0, promo: ''};
+		const maxSelect = 30;
 
 		if (!isCustomised) {
 			/* ==== Regular tour group ====
 			* - packageRates: totalAdults, totalKids
 			* - flightRates: startDate, endDate
 			* ============================ */
-			const curRatePackage = calPackageRateReg(adults, kids, packageRates); // {price, maxParticipant}
+			const curRatePackage = calPackageRateReg(adults + totalAdults, kids + totalKids, packageRates); // {price, maxParticipant}
 			const curRateFlight = calFlightRate(startDate, flightRates);
+			const nxtRatePackage;
 			if (curRatePackage.maxParticipant && instPackage.maxParticipant > curRatePackage.maxParticipant) {
-				const nxtRatePackage = calPackageRateReg((curRatePackage.maxParticipant + 1), kids, packageRates);
+				nxtRatePackage = calPackageRateReg((curRatePackage.maxParticipant + 1), kids, packageRates);
+			} else {
+				nxtRatePackage = null;
 			}
-			finalCost = 
-			
-		}
-
-
-
-
-		if (tier > totalAdults + adults + totalKids + kids) {
-			promo1 = (tier - totalAdults - adults - totalKids - kids) + ' more people';
-			promo2 = '$' + (cost - discount) + ' pp';
-			finalCost = cost;
+			const gap = adults + totalAdults + kids + totalKids - curRatePackage.maxParticipant;
+			finalCost = {
+				rate: curRatePackage.price + curRateFlight,
+				promo: nxtRatePackage ? `${gap} more people $${nxtRatePackage.price} pp` : `Max group size is ${curRatePackage.maxParticipant}`,
+			};
 		} else {
-			promo1 = 'Max group size is ' + maxTotal;
-			finalCost = (cost - discount);
+
 		}
 
+		const miAdults = buildMenuItems(maxSelect, 'Adult');
+		const miKids = buildMenuItems(maxSelect, 'Kid');
+		
 		return (
 			<Table className={classes.table}>
 				<TableBody>
 					<TableRow>
 						<TableCell style={{ padding: '4px', width: '22%' }}>{totalAdults + adults} Adults<br />{totalKids + kids} Kids</TableCell>
-						<TableCell style={{ padding: '4px', width: '20%' }}>${finalCost} pp</TableCell>
-						<TableCell style={{ padding: '4px', width: '33%' }}>{promo1}<br />{promo2}</TableCell>
+						<TableCell style={{ padding: '4px', width: '20%' }}>${finalCost.price} pp</TableCell>
+						<TableCell style={{ padding: '4px', width: '33%' }}>{finalCost.promo}</TableCell>
 						<TableCell style={{ padding: '4px', width: '25%' }}>
 							<FormControl className={classes.formControl}>
 								<Select
@@ -99,12 +115,7 @@ class BotHeader extends React.Component {
 									name='adults'
 									className={classes.selectEmpty}
 								>
-									<MenuItem value={0}>0 Adult</MenuItem>
-									<MenuItem value={1}>1 Adult</MenuItem>
-									<MenuItem value={2}>2 Adults</MenuItem>
-									<MenuItem value={3}>3 Adults</MenuItem>
-									<MenuItem value={4}>4 Adults</MenuItem>
-									<MenuItem value={5}>5 Adults</MenuItem>
+									{miAdults}
 								</Select>
 							</FormControl>
 							<FormControl className={classes.formControl}>
@@ -116,12 +127,7 @@ class BotHeader extends React.Component {
 									name='kids'
 									className={classes.selectEmpty}
 								>
-									<MenuItem value={0}>0 Kid</MenuItem>
-									<MenuItem value={1}>1 Kid</MenuItem>
-									<MenuItem value={2}>2 kids</MenuItem>
-									<MenuItem value={3}>3 kids</MenuItem>
-									<MenuItem value={4}>4 kids</MenuItem>
-									<MenuItem value={5}>5 kids</MenuItem>
+									{miKids}
 								</Select>
 							</FormControl>
 						</TableCell>
