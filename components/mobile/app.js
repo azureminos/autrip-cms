@@ -263,6 +263,7 @@ class MobileApp extends React.Component {
 						<BotHeader
 							instPackage={instPackage}
 							rates={rates}
+							cities={cities}
 						/>
 					</FixedTab>
 				</Paper>

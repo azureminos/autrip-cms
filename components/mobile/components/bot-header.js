@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -8,6 +9,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
+import Helper from '../../../lib/helper';
 
 const styles = theme => ({
 	table: {
@@ -28,7 +30,7 @@ class BotHeader extends React.Component {
 		super(props);
 
 		this.state = {
-			adults: 0,
+			adults: 1,
 			kids: 0,
 		};
 
@@ -48,77 +50,168 @@ class BotHeader extends React.Component {
 
 	buildMenuItems (maxSelect, itemText) {
 		const rs = [];
-		rs[rs.length] = (<MenuItem key={0} value={0}>----Select----</MenuItem>);
+		rs[rs.length] = (<MenuItem key={0} value={0}>0 {itemText}</MenuItem>);
 		for (let ct = 0; ct < maxSelect; ct++) {
-			rs[rs.length] = (<MenuItem key={ct+1} value={ct+1}>{ct+1} {itemText}{(ct === 0) ? '' : 's'}</MenuItem>);
+			rs[rs.length] = (<MenuItem key={ct + 1} value={ct + 1}>{ct + 1} {itemText}{(ct === 0) ? '' : 's'}</MenuItem>);
 		}
+		return rs;
 	}
 
-	calPackageRateReg(startDate, adults, kids, packageRates) {
-		const { minParticipant, maxParticipant, rate, rangeFrom, rangeTo } = packageRates;
-		for (var i = 0; i < packageRates.length; i++) {
-			const total = (adults || 0) + (kids || 0);
-			if (total > minParticipant && total < maxParticipant
-				&& startDate.getTime() > rangeFrom.getTime() && startDate.getTime() < rangeTo.getTime()) {
-				return { price: rate, maxParticipant: maxParticipant };
+	calPackageRate (params, packageRates) {
+		const { startDate, adults, kids } = params;
+		const total = (adults || 0) + (kids || 0);
+		if (startDate) {
+			for (var i = 0; i < packageRates.length; i++) {
+				const { minParticipant, maxParticipant, rate, premiumFee, rangeFrom, rangeTo } = packageRates[i];
+				if (total >= minParticipant && total <= maxParticipant
+					&& startDate.getTime() >= rangeFrom.getTime() && startDate.getTime() <= rangeTo.getTime()) {
+					return { price: rate, premiumFee: premiumFee, maxParticipant: maxParticipant };
+				}
+			}
+		} else {
+			const matchedRates = _.filter(packageRates, (o) => { return (total >= o.minParticipant && total <= o.maxParticipant); });
+			if (matchedRates && matchedRates.length > 0) {
+				const minRate = _.minBy(matchedRates, (r) => { return r.rate; });
+				return { price: minRate.rate, premiumFee: minRate.premiumFee, maxParticipant: minRate.maxParticipant };
 			}
 		}
 		return null;
 	}
 
-	calFlightRate(startDate, flightRates) {
-		const { rate, rangeFrom, rangeTo } = flightRates;
-		for (var i = 0; i < packageRates.length; i++) {
-			if (startDate.getTime() > rangeFrom.getTime() && startDate.getTime() < rangeTo.getTime()) {
-				return rate;
+	calCarRate (params, carRates) {
+		const { startDate, adults, kids, totalDays, carOption } = params;
+		const total = (adults || 0) + (kids || 0);
+		if (startDate && carOption) {
+			for (var i = 0; i < carRates.length; i++) {
+				const { minParticipant, maxParticipant, rate, rangeFrom, rangeTo, type } = carRates[i];
+				if (total >= minParticipant && total <= maxParticipant && carOption === type
+					&& startDate.getTime() >= rangeFrom.getTime() && startDate.getTime() <= rangeTo.getTime()) {
+					return rate * totalDays;
+				}
+			}
+		} else {
+			const matchedRates = _.filter(carRates, (o) => {
+				return (total >= o.minParticipant && total <= o.maxParticipant && (!carOption || carOption === o.type)
+					&& (!startDate || (startDate.getTime() >= o.rangeFrom.getTime() && startDate.getTime() <= o.rangeTo.getTime())));
+			});
+			if (matchedRates && matchedRates.length > 0) {
+				const minRate = _.minBy(matchedRates, (r) => { return r.rate; });
+				return minRate.rate * totalDays;
 			}
 		}
 		return 9999;
 	}
 
+	calFlightRate (startDate, flightRates) {
+		if (startDate) {
+			for (var i = 0; i < flightRates.length; i++) {
+				const { rate, rangeFrom, rangeTo } = flightRates[i];
+				if (startDate.getTime() >= rangeFrom.getTime() && startDate.getTime() <= rangeTo.getTime()) {
+					return rate;
+				}
+			}
+		} else {
+			const minRate = _.minBy(flightRates, (r) => { return r.rate; });
+			return minRate.rate;
+		}
+
+		return 9999;
+	}
+
+	calItemRate (items, cities) {
+		let totalPrice = 0;
+		for (var i = 0; items && i < items.length; i++) {
+			const item = Helper.findAttractionById(items[i].id, cities);
+			totalPrice = totalPrice + item.rate;
+		}
+		return totalPrice;
+	}
+
+	calHotelRate (params, hotels, cities) {
+		return 0;
+	}
 
 	render () {
 		console.log('>>>>BotHeader, render()', this.state);
-		const { classes, instPackage, rates } = this.props;
-		const { packageRates, carRates, flightRates, hotelRates } = rates;
+		const { classes, instPackage, rates, cities } = this.props;
+		const { packageRates, carRates, flightRates } = rates;
 		const { isCustomised, hotels, items, totalAdults, totalKids,
-			startDate, endDate, carOption } = instPackage;
+			startDate, carOption, totalDays } = instPackage;
 		const { adults, kids } = this.state;
-		const finalCost = {price: 0, promo: ''};
+		const finalCost = { price: 0, promo: '' };
 		const maxSelect = 30;
+
+		const params = {
+			startDate: startDate,
+			adults: adults + totalAdults,
+			kids: kids + totalKids,
+		};
 
 		if (!isCustomised) {
 			/* ==== Regular tour group ====
 			* - packageRates: totalAdults, totalKids
 			* - flightRates: startDate, endDate
 			* ============================ */
-			const curRatePackage = calPackageRateReg(startDate, adults + totalAdults, kids + totalKids, packageRates);
-			if (curRatePackage) {
-				const curRateFlight = calFlightRate(startDate, flightRates);
-				var nxtRatePackage;
-				if (curRatePackage.maxParticipant && instPackage.maxParticipant > curRatePackage.maxParticipant) {
-					nxtRatePackage = calPackageRateReg((curRatePackage.maxParticipant + 1), kids, packageRates);
+			const curRatePackageReg = this.calPackageRate(params, packageRates);
+			if (curRatePackageReg) {
+				const curRateFlight = this.calFlightRate(startDate, flightRates);
+				var nxtRatePackageReq;
+				if (curRatePackageReg.maxParticipant && instPackage.maxParticipant > curRatePackageReg.maxParticipant) {
+					params.adults = curRatePackageReg.maxParticipant + 1;
+					params.kids = 0;
+					nxtRatePackageReq = this.calPackageRate(params, packageRates);
 				} else {
-					nxtRatePackage = null;
+					nxtRatePackageReq = null;
 				}
-				const gap = adults + totalAdults + kids + totalKids - curRatePackage.maxParticipant;
-				finalCost = {
-					price: curRatePackage.price + curRateFlight,
-					promo: nxtRatePackage ? `${gap} more people $${nxtRatePackage.price} pp` : `Max group size is ${curRatePackage.maxParticipant}`,
-				};
+				const gap = curRatePackageReg.maxParticipant + 1 - (adults + totalAdults + kids + totalKids);
+				finalCost.price = curRatePackageReg.price + curRateFlight;
+				finalCost.promo = nxtRatePackageReq
+					? `${gap} more people $${nxtRatePackageReq.price + curRateFlight} pp`
+					: `Max group size is ${curRatePackageReg.maxParticipant}`;
 			} else {
-				finalCost = {
-					price: 'ERROR',
-					promo: 'ERROR',
-				};
+				finalCost.price = 'ERROR';
+				finalCost.promo = 'ERROR';
 			}
 		} else {
+			/* ==== DIY tour group ====
+			* - packageRates: totalAdults, totalKids, [startDate]
+			* - flightRates: [startDate], [type]
+			* - carRates: totalAdults, totalKids, [startDate], [type]
+			* - packageItems: all package items
+			* - packageHotels: To Be Added
+			* ============================ */
+			const curRatePackageDiy = this.calPackageRate(params, packageRates);
+			if (curRatePackageDiy) {
+				const curRateFlightDiy = this.calFlightRate(startDate, flightRates);
+				const curRateCarDiy = this.calCarRate({ ...params, totalDays, carOption }, carRates);
+				const curRateItemDiy = this.calItemRate(items, cities);
+				const curRateHotelDiy = this.calHotelRate({ startDate }, hotels, cities);
 
+				var nxtRatePackageDiy, nxtRateCarDiy;
+				if (curRateFlightDiy.maxParticipant && instPackage.maxParticipant > curRateFlightDiy.maxParticipant) {
+					params.adults = curRateFlightDiy.maxParticipant + 1;
+					params.kids = 0;
+					nxtRatePackageDiy = this.calPackageRate(params, packageRates);
+					nxtRateCarDiy = this.calCarRate({ ...params, totalDays, carOption }, carRates);
+				} else {
+					nxtRatePackageDiy = null;
+					nxtRateCarDiy = null;
+				}
+				const gap = curRateFlightDiy.maxParticipant + 1 - (adults + totalAdults + kids + totalKids);
+				const nextPrice = nxtRatePackageDiy.price + curRateFlightDiy + nxtRateCarDiy + curRateItemDiy + curRateHotelDiy;
+				finalCost.price = curRateFlightDiy.price + curRateFlightDiy + curRateCarDiy + curRateItemDiy + curRateHotelDiy;
+				finalCost.promo = nxtRatePackageDiy
+					? `${gap} more people $${nextPrice} pp`
+					: `Max group size is ${curRateFlightDiy.maxParticipant}`;
+			} else {
+				finalCost.price = 'ERROR';
+				finalCost.promo = 'ERROR';
+			}
 		}
 
-		const miAdults = buildMenuItems(maxSelect, 'Adult');
-		const miKids = buildMenuItems(maxSelect, 'Kid');
-		
+		const miAdults = this.buildMenuItems(maxSelect, 'Adult');
+		const miKids = this.buildMenuItems(maxSelect, 'Kid');
+
 		return (
 			<Table className={classes.table}>
 				<TableBody>
@@ -131,9 +224,9 @@ class BotHeader extends React.Component {
 								<Select
 									value={adults}
 									onChange={this.handleAdultdsChange}
-									input={<Input name='adults' id='adults-label-placeholder' />}
+									input={<Input name="adults" id="adults-label-placeholder" />}
 									displayEmpty
-									name='adults'
+									name="adults"
 									className={classes.selectEmpty}
 								>
 									{miAdults}
@@ -143,9 +236,9 @@ class BotHeader extends React.Component {
 								<Select
 									value={kids}
 									onChange={this.handleKidsChange}
-									input={<Input name='kids' id='kids-label-placeholder' />}
+									input={<Input name="kids" id="kids-label-placeholder" />}
 									displayEmpty
-									name='kids'
+									name="kids"
 									className={classes.selectEmpty}
 								>
 									{miKids}
