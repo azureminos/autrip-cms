@@ -54,12 +54,26 @@ class BotHeader extends React.Component {
 		}
 	}
 
-	calPackageRateReg(adults, kids, packageRates) {
-
+	calPackageRateReg(startDate, adults, kids, packageRates) {
+		const { minParticipant, maxParticipant, rate, rangeFrom, rangeTo } = packageRates;
+		for (var i = 0; i < packageRates.length; i++) {
+			const total = (adults || 0) + (kids || 0);
+			if (total > minParticipant && total < maxParticipant
+				&& startDate.getTime() > rangeFrom.getTime() && startDate.getTime() < rangeTo.getTime()) {
+				return { price: rate, maxParticipant: maxParticipant };
+			}
+		}
+		return null;
 	}
 
 	calFlightRate(startDate, flightRates) {
-
+		const { rate, rangeFrom, rangeTo } = flightRates;
+		for (var i = 0; i < packageRates.length; i++) {
+			if (startDate.getTime() > rangeFrom.getTime() && startDate.getTime() < rangeTo.getTime()) {
+				return rate;
+			}
+		}
+		return 9999;
 	}
 
 
@@ -70,7 +84,7 @@ class BotHeader extends React.Component {
 		const { isCustomised, hotels, items, totalAdults, totalKids,
 			startDate, endDate, carOption } = instPackage;
 		const { adults, kids } = this.state;
-		const finalCost = {rate: 0, promo: ''};
+		const finalCost = {price: 0, promo: ''};
 		const maxSelect = 30;
 
 		if (!isCustomised) {
@@ -78,19 +92,26 @@ class BotHeader extends React.Component {
 			* - packageRates: totalAdults, totalKids
 			* - flightRates: startDate, endDate
 			* ============================ */
-			const curRatePackage = calPackageRateReg(adults + totalAdults, kids + totalKids, packageRates); // {price, maxParticipant}
-			const curRateFlight = calFlightRate(startDate, flightRates);
-			const nxtRatePackage;
-			if (curRatePackage.maxParticipant && instPackage.maxParticipant > curRatePackage.maxParticipant) {
-				nxtRatePackage = calPackageRateReg((curRatePackage.maxParticipant + 1), kids, packageRates);
+			const curRatePackage = calPackageRateReg(startDate, adults + totalAdults, kids + totalKids, packageRates);
+			if (curRatePackage) {
+				const curRateFlight = calFlightRate(startDate, flightRates);
+				const nxtRatePackage;
+				if (curRatePackage.maxParticipant && instPackage.maxParticipant > curRatePackage.maxParticipant) {
+					nxtRatePackage = calPackageRateReg((curRatePackage.maxParticipant + 1), kids, packageRates);
+				} else {
+					nxtRatePackage = null;
+				}
+				const gap = adults + totalAdults + kids + totalKids - curRatePackage.maxParticipant;
+				finalCost = {
+					price: curRatePackage.price + curRateFlight,
+					promo: nxtRatePackage ? `${gap} more people $${nxtRatePackage.price} pp` : `Max group size is ${curRatePackage.maxParticipant}`,
+				};
 			} else {
-				nxtRatePackage = null;
+				finalCost = {
+					price: 'ERROR',
+					promo: 'ERROR',
+				};
 			}
-			const gap = adults + totalAdults + kids + totalKids - curRatePackage.maxParticipant;
-			finalCost = {
-				rate: curRatePackage.price + curRateFlight,
-				promo: nxtRatePackage ? `${gap} more people $${nxtRatePackage.price} pp` : `Max group size is ${curRatePackage.maxParticipant}`,
-			};
 		} else {
 
 		}
