@@ -95,7 +95,7 @@ class BotHeader extends React.Component {
 			const curRatePackage = calPackageRateReg(startDate, adults + totalAdults, kids + totalKids, packageRates);
 			if (curRatePackage) {
 				const curRateFlight = calFlightRate(startDate, flightRates);
-				const nxtRatePackage;
+				var nxtRatePackage;
 				if (curRatePackage.maxParticipant && instPackage.maxParticipant > curRatePackage.maxParticipant) {
 					nxtRatePackage = calPackageRateReg((curRatePackage.maxParticipant + 1), kids, packageRates);
 				} else {
