@@ -37,21 +37,24 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 			TravelPackage.model
 				.findById(id).populate('packageRates')
 				.exec(function (err, item) {
-					return callback(null, item.packageRates);
+					const sortedRates = _.groupBy(item.packageRates || [], [function(o) { return 0 - (o.priority || 0); }])
+					return callback(null, sortedRates);
 				});
 		},
 		carRates: (callback) => {
 			TravelPackage.model
 				.findById(id).populate('carRates')
 				.exec(function (err, item) {
-					return callback(null, item.carRates);
+					const sortedRates = _.groupBy(item.carRates || [], [function(o) { return 0 - (o.priority || 0); }])
+					return callback(null, sortedRates);
 				});
 		},
 		flightRates: (callback) => {
 			TravelPackage.model
 				.findById(id).populate('flightRates')
 				.exec(function (err, item) {
-					return callback(null, item.flightRates);
+					const sortedRates = _.groupBy(item.flightRates || [], [function(o) { return 0 - (o.priority || 0); }])
+					return callback(null, sortedRates);
 				});
 		},
 		cities: (callback) => {
