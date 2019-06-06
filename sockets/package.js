@@ -37,7 +37,7 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 			TravelPackage.model
 				.findById(id).populate('packageRates')
 				.exec(function (err, item) {
-					const sortedRates = _.groupBy(item.packageRates || [], [function(o) { return 0 - (o.priority || 0); }])
+					const sortedRates = (item.packageRates || []).sort(function (a, b) { return (b.priority - a.priority); });
 					return callback(null, sortedRates);
 				});
 		},
@@ -45,7 +45,7 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 			TravelPackage.model
 				.findById(id).populate('carRates')
 				.exec(function (err, item) {
-					const sortedRates = _.groupBy(item.carRates || [], [function(o) { return 0 - (o.priority || 0); }])
+					const sortedRates = (item.carRates || []).sort(function (a, b) { return (b.priority - a.priority); });
 					return callback(null, sortedRates);
 				});
 		},
@@ -53,7 +53,7 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 			TravelPackage.model
 				.findById(id).populate('flightRates')
 				.exec(function (err, item) {
-					const sortedRates = _.groupBy(item.flightRates || [], [function(o) { return 0 - (o.priority || 0); }])
+					const sortedRates = (item.flightRates || []).sort(function (a, b) { return (b.priority - a.priority); });
 					return callback(null, sortedRates);
 				});
 		},
