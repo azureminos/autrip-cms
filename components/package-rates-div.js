@@ -54,8 +54,7 @@ class PackageRates extends React.Component {
 	// Render Flight Rates
 	renderFlightRates (flightRates, classes) {
 		// console.log('>>>>PackageRates.renderFlightRates', flightRates);
-		const sortedRates = flightRates.sort(function (a, b) { return (b.priority - a.priority); });
-		const rates = _.map(sortedRates, (rate) =>
+		const rates = _.map(flightRates, (rate) =>
 			(_.pick(rate, '_id', 'name', 'priority', 'rangeFrom', 'rangeTo', 'airline', 'type', 'cost', 'rate')));
 
 		return (
@@ -94,8 +93,7 @@ class PackageRates extends React.Component {
 	// Render Car Rates
 	renderCarRates (carRates, classes) {
 		//console.log('>>>>PackageRates.renderCarRates', carRates);
-		const sortedRates = carRates.sort(function (a, b) { return (b.priority - a.priority); });
-		const rates = _.map(sortedRates, (rate) =>
+		const rates = _.map(carRates, (rate) =>
 			(_.pick(rate, '_id', 'name', 'priority', 'type', 'rangeFrom', 'rangeTo', 'minParticipant', 'maxParticipant', 'cost', 'rate')));
 
 		return (
@@ -136,8 +134,7 @@ class PackageRates extends React.Component {
 	// Render Package Rates
 	renderPackageRates (packageRates, classes) {
 		// console.log('>>>>PackageRates.renderPackageRates', packageRates);
-		const sortedRates = packageRates.sort(function (a, b) { return (b.priority - a.priority); });
-		const rates = _.map(sortedRates, (rate) =>
+		const rates = _.map(packageRates, (rate) =>
 			(_.pick(rate, '_id', 'name', 'priority', 'rangeFrom', 'rangeTo', 'minParticipant', 'maxParticipant', 'premiumFee', 'cost', 'rate')));
 
 		return (
