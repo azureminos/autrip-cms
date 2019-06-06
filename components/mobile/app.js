@@ -6,7 +6,7 @@ import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS =======================================
 import Helper from '../../lib/helper';
-import BotHeader from './bot-header';
+import BotHeader from './components/bot-header';
 import FixedTab from './components/fixed-tab';
 import PackageAttraction from './package-attraction';
 import PackageItinerary from './package-itinerary';
