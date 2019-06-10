@@ -9,7 +9,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
-import Helper from '../../../lib/helper';
 
 const styles = theme => ({
 	table: {
@@ -120,9 +119,14 @@ class BotHeader extends React.Component {
 
 	calItemRate (items, cities) {
 		let totalPrice = 0;
-		for (var i = 0; items && i < items.length; i++) {
-			const item = Helper.findAttractionById(items[i].id, cities);
-			totalPrice = totalPrice + item.rate;
+		const tmpItems = _.filter(items, (it) => { return it.attraction; });
+		for (var i = 0; tmpItems && i < tmpItems.length; i++) {
+			var item = null;
+			_.each(cities, (c) => {
+				const matcher = _.find(c.attractions, function (a) { return a.id === tmpItems[i].attraction.id; });
+				if (matcher) item = matcher;
+			});
+			totalPrice = totalPrice + (item ? item.rate : 0);
 		}
 		return totalPrice;
 	}
@@ -188,8 +192,8 @@ class BotHeader extends React.Component {
 				const curRateHotelDiy = this.calHotelRate({ startDate }, hotels, cities);
 
 				var nxtRatePackageDiy, nxtRateCarDiy;
-				if (curRateFlightDiy.maxParticipant && instPackage.maxParticipant > curRateFlightDiy.maxParticipant) {
-					params.adults = curRateFlightDiy.maxParticipant + 1;
+				if (curRatePackageDiy.maxParticipant && instPackage.maxParticipant > curRatePackageDiy.maxParticipant) {
+					params.adults = curRatePackageDiy.maxParticipant + 1;
 					params.kids = 0;
 					nxtRatePackageDiy = this.calPackageRate(params, packageRates);
 					nxtRateCarDiy = this.calCarRate({ ...params, totalDays, carOption }, carRates);
@@ -197,12 +201,12 @@ class BotHeader extends React.Component {
 					nxtRatePackageDiy = null;
 					nxtRateCarDiy = null;
 				}
-				const gap = curRateFlightDiy.maxParticipant + 1 - (adults + totalAdults + kids + totalKids);
+				const gap = curRatePackageDiy.maxParticipant + 1 - (adults + totalAdults + kids + totalKids);
 				const nextPrice = nxtRatePackageDiy.price + curRateFlightDiy + nxtRateCarDiy + curRateItemDiy + curRateHotelDiy;
-				finalCost.price = curRateFlightDiy.price + curRateFlightDiy + curRateCarDiy + curRateItemDiy + curRateHotelDiy;
+				finalCost.price = curRatePackageDiy.price + curRateFlightDiy + curRateCarDiy + curRateItemDiy + curRateHotelDiy;
 				finalCost.promo = nxtRatePackageDiy
 					? `${gap} more people $${nextPrice} pp`
-					: `Max group size is ${curRateFlightDiy.maxParticipant}`;
+					: `Max group size is ${curRatePackageDiy.maxParticipant}`;
 			} else {
 				finalCost.price = 'ERROR';
 				finalCost.promo = 'ERROR';
