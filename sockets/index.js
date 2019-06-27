@@ -23,4 +23,4 @@ exports.attachSockets = (io) => {
 		channel('push:package:status', PackageSocket.updatePackageState);
 		channel('disconnect', () => { console.log('>>>>User disconnected'); });
 	});
-}
+};
