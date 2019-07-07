@@ -32,50 +32,62 @@ keystone.init({
 keystone.import('models');
 
 // Start Next app
-nextApp.prepare()
-	.then(() => {
-		app.get('*', (req, res) => {
-			return nextHandler(req, res);
-		});
-
-		// Setup common locals for your templates. The following are required for the
-		// bundled templates and layouts. Any runtime locals (that should be set uniquely
-		// for each request) should be added to ./routes/middleware.js
-		keystone.set('locals', {
-			_: require('lodash'),
-			env: keystone.get('env'),
-			utils: keystone.utils,
-			editable: keystone.content.editable,
-		});
-
-		// Load your project's Routes
-		keystone.set('routes', require('./routes')(nextApp));
-
-
-		// Configure the navigation bar in Keystone's Admin UI
-		keystone.set('nav', {
-			destinations: ['countries', 'cities', 'attractions'],
-			hotels: ['hotels', 'hotel-rooms'],
-			packages: ['travel-packages', 'package-items', 'package-hotels', 'package-rates', 'flight-rates', 'car-rates'],
-			users: 'users',
-		});
-
-		keystone.start({
-			onHttpServerCreated: function () {
-				const server = keystone.httpsServer ? keystone.httpsServer : keystone.httpServer;
-				keystone.set('io', socketIO.listen(server));
-			},
-			onStart: function () {
-				var io = keystone.get('io');
-				var session = keystone.expressSession;
-
-				// Share session between express and socketio
-				io.use(function (socket, next) {
-					session(socket.handshake, {}, next);
-				});
-				// Attach socket channels
-				socket.attachSockets(io);
-			},
-		});
+nextApp.prepare().then(() => {
+	app.get('*', (req, res) => {
+		return nextHandler(req, res);
 	});
 
+	// Setup common locals for your templates. The following are required for the
+	// bundled templates and layouts. Any runtime locals (that should be set uniquely
+	// for each request) should be added to ./routes/middleware.js
+	keystone.set('locals', {
+		_: require('lodash'),
+		env: keystone.get('env'),
+		utils: keystone.utils,
+		editable: keystone.content.editable,
+	});
+
+	// Load your project's Routes
+	keystone.set('routes', require('./routes')(nextApp));
+
+	// Configure the navigation bar in Keystone's Admin UI
+	keystone.set('nav', {
+		destinations: ['countries', 'cities', 'attractions'],
+		hotels: ['hotels', 'hotel-rooms'],
+		packages: [
+			'travel-packages',
+			'package-items',
+			'package-hotels',
+			'package-rates',
+			'flight-rates',
+			'car-rates',
+		],
+		instance: [
+			'inst-packages',
+			'inst-package-items',
+			'inst-package-hotels',
+			'inst-package-members',
+		],
+		users: 'users',
+	});
+
+	keystone.start({
+		onHttpServerCreated: function () {
+			const server = keystone.httpsServer
+				? keystone.httpsServer
+				: keystone.httpServer;
+			keystone.set('io', socketIO.listen(server));
+		},
+		onStart: function () {
+			var io = keystone.get('io');
+			var session = keystone.expressSession;
+
+			// Share session between express and socketio
+			io.use(function (socket, next) {
+				session(socket.handshake, {}, next);
+			});
+			// Attach socket channels
+			socket.attachSockets(io);
+		},
+	});
+});
