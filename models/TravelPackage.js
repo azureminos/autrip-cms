@@ -19,6 +19,7 @@ TravelPackage.add({
 	name: { type: Types.Text, required: true, index: true },
 	description: { type: Types.Textarea },
 	finePrint: { type: Types.Textarea },
+	highlight: { type: Types.Textarea },
 	country: { type: Types.Relationship, ref: 'Country' },
 	totalDays: { type: Types.Number, default: 0 },
 	maxParticipant: { type: Types.Number, default: 0 },

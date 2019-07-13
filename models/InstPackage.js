@@ -17,6 +17,7 @@ var InstPackage = new keystone.List('InstPackage', {
 
 InstPackage.add({
 	package: { type: Types.Relationship, ref: 'TravelPackage' },
+	status: { type: Types.Text },
 	startDate: { type: Types.Date },
 	endDate: { type: Types.Date },
 	isCustomised: { type: Types.Boolean },
