@@ -67,11 +67,11 @@ class PackageItinerary extends React.Component {
 	// Format itinerary from package items and hotels
 	getItinerary (items, hotels) {
 		const itinerary = [];
-		const itItems = _.groupBy(items, (item) => {
+		const itItems = _.groupBy(items, item => {
 			return item.dayNo;
 		});
 
-		_.each(Object.keys(itItems), (key) => {
+		_.each(Object.keys(itItems), key => {
 			itinerary[Number(key) - 1] = {
 				activities: itItems[key],
 				hotel: hotels[Number(key) - 1],
@@ -82,7 +82,11 @@ class PackageItinerary extends React.Component {
 	}
 	// Render day activities
 	renderActivity (activities, classes) {
-		if (!activities || activities.length === 0 || (activities.length === 1 && !activities[0].attraction)) {
+		if (
+			!activities
+			|| activities.length === 0
+			|| (activities.length === 1 && !activities[0].attraction)
+		) {
 			return (
 				<div>
 					<h3>Activity</h3>
@@ -90,7 +94,7 @@ class PackageItinerary extends React.Component {
 				</div>
 			);
 		} else {
-			const listActivities = _.map(activities, (a) => {
+			const listActivities = _.map(activities, a => {
 				return (
 					<div key={a.id}>
 						<h4>Activity {a.daySeq}</h4>
@@ -151,7 +155,11 @@ class PackageItinerary extends React.Component {
 									</Grid>
 								</Grid>
 								<Grid item xs className={classes.activityBlock}>
-									<img src={a.attraction.imageUrl} alt="Avatar" className={classes.activityImage} />
+									<img
+										src={a.attraction.imageUrl}
+										alt="Avatar"
+										className={classes.activityImage}
+									/>
 								</Grid>
 							</Grid>
 						</div>
@@ -168,7 +176,7 @@ class PackageItinerary extends React.Component {
 	}
 	// Render hotel
 	renderHotel (hotel, classes) {
-		if (hotel.hotel) {
+		if (hotel && hotel.hotel) {
 			return (
 				<div>
 					<h3>Hotel</h3>
@@ -207,7 +215,11 @@ class PackageItinerary extends React.Component {
 								</Grid>
 							</Grid>
 							<Grid item xs className={classes.hotelBlock}>
-								<img src={hotel.hotel.imageUrl} alt="Avatar" className={classes.hotelImage} />
+								<img
+									src={hotel.hotel.imageUrl}
+									alt="Avatar"
+									className={classes.hotelImage}
+								/>
 							</Grid>
 						</Grid>
 					</div>
@@ -228,15 +240,24 @@ class PackageItinerary extends React.Component {
 			const tabName = `Day ${idx + 1}`;
 			tabItems.push(<Tab key={idx} label={tabName} />);
 		});
+		const tabContainer = itinerary[selectedTab] ? (
+			<TabContainer>
+				{this.renderActivity(itinerary[selectedTab].activities, classes)}
+				{this.renderHotel(itinerary[selectedTab].hotel, classes)}
+			</TabContainer>
+		) : (
+			<TabContainer>Undefined</TabContainer>
+		);
 		return (
 			<div className={classes.root}>
-				<Tabs value={selectedTab} onChange={this.handleTabChange} variant="fullWidth">
+				<Tabs
+					value={selectedTab}
+					onChange={this.handleTabChange}
+					variant="fullWidth"
+				>
 					{tabItems}
 				</Tabs>
-				<TabContainer>
-					{this.renderActivity(itinerary[selectedTab].activities, classes)}
-					{this.renderHotel(itinerary[selectedTab].hotel, classes)}
-				</TabContainer>
+				{tabContainer}
 			</div>
 		);
 	}
@@ -244,16 +265,16 @@ class PackageItinerary extends React.Component {
 	/* ----------  Event Handlers  ------- */
 	handleTabChange (event, value) {
 		this.setState({ selectedTab: value });
-	};
+	}
 
 	render () {
-		//console.log('>>>>PackageItinerary.render >> packageItems', this.props.packageItems);
-		//console.log('>>>>PackageItinerary.render >> packageHotels', this.props.packageHotels);
+		// console.log('>>>>PackageItinerary.render >> packageItems', this.props.packageItems);
+		// console.log('>>>>PackageItinerary.render >> packageHotels', this.props.packageHotels);
 		const { classes, theme, packageItems, packageHotels } = this.props;
 		const { selectedTab } = this.state;
 		const itinerary = this.getItinerary(packageItems, packageHotels);
 
-		return (this.renderItinerary(itinerary, classes, selectedTab));
+		return this.renderItinerary(itinerary, classes, selectedTab);
 	}
 }
 
