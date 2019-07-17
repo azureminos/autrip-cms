@@ -62,12 +62,6 @@ nextApp.prepare().then(() => {
 			'flight-rates',
 			'car-rates',
 		],
-		instance: [
-			'inst-packages',
-			'inst-package-items',
-			'inst-package-hotels',
-			'inst-package-members',
-		],
 		users: 'users',
 	});
 
