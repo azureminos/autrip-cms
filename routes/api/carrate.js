@@ -9,13 +9,37 @@ var parseCarRate = function (input) {
 	if (Array.isArray(input)) {
 		var rs = [];
 		_.each(input, function (item) {
-			var r = _.pick(item, 'type', 'priority', 'cost', 'rate', 'rangeFrom', 'rangeTo', 'minParticipant', 'maxParticipant');
+			var r = _.pick(
+				item,
+				'package',
+				'city',
+				'type',
+				'priority',
+				'cost',
+				'rate',
+				'rangeFrom',
+				'rangeTo',
+				'minParticipant',
+				'maxParticipant'
+			);
 			r.id = item._id;
 			rs.push(r);
 		});
 		return rs;
 	} else {
-		var r = _.pick(input, 'type', 'priority', 'cost', 'rate', 'rangeFrom', 'rangeTo', 'minParticipant', 'maxParticipant');
+		var r = _.pick(
+			input,
+			'package',
+			'city',
+			'type',
+			'priority',
+			'cost',
+			'rate',
+			'rangeFrom',
+			'rangeTo',
+			'minParticipant',
+			'maxParticipant'
+		);
 		r.id = input._id;
 		return r;
 	}
@@ -45,7 +69,8 @@ exports.getCarRateByPackage = function (req, res) {
 	if (query.package) {
 		if (query.package.id) {
 			TravelPackage.model
-				.findById(query.package.id).populate('carRates')
+				.findById(query.package.id)
+				.populate('carRates')
 				.exec(function (err, item) {
 					if (err) return res.apiError('database error', err);
 					if (!item) return res.apiError('not found');
@@ -53,7 +78,8 @@ exports.getCarRateByPackage = function (req, res) {
 				});
 		} else if (query.package.name) {
 			TravelPackage.model
-				.findOne({ name: query.package.name }).populate('carRates')
+				.findOne({ name: query.package.name })
+				.populate('carRates')
 				.exec(function (err, item) {
 					if (err) return res.apiError('database error', err);
 					if (!item) return res.apiError('not found');

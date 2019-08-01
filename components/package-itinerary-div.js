@@ -66,19 +66,22 @@ class PackageItinerary extends React.Component {
 	/* ----------  Helpers  ------- */
 	// Format itinerary from package items and hotels
 	getItinerary (items, hotels) {
-		const itinerary = [];
 		const itItems = _.groupBy(items, item => {
 			return item.dayNo;
 		});
-
-		_.each(Object.keys(itItems), key => {
-			itinerary[Number(key) - 1] = {
-				activities: itItems[key],
-				hotel: hotels[Number(key) - 1],
-			};
+		const itHotels = _.groupBy(hotels, hotel => {
+			return hotel.dayNo;
 		});
-		console.log('>>>>PackageItinerary.getItinerary', itinerary);
-		return itinerary;
+
+		const result = _.map(Object.keys(itItems), key => {
+			const item = {};
+			item.activities = itItems[key];
+			item.hotel
+				= itHotels[key] && itHotels[key].length > 0 ? itHotels[key][0] : {};
+			return item;
+		});
+		console.log('>>>>PackageItinerary.getItinerary', result);
+		return result;
 	}
 	// Render day activities
 	renderActivity (activities, classes) {
@@ -105,7 +108,7 @@ class PackageItinerary extends React.Component {
 										<TextField
 											id="activity-name"
 											label="Name"
-											defaultValue={String(a.attraction.name)}
+											value={String(a.attraction.name)}
 											className={classes.textField}
 											margin="normal"
 											InputProps={{ readOnly: true }}
@@ -115,7 +118,7 @@ class PackageItinerary extends React.Component {
 										<TextField
 											id="activity-description"
 											label="Description"
-											defaultValue={a.description}
+											value={a.description}
 											className={classes.textField}
 											multiline
 											rowsMax="3"
@@ -127,7 +130,7 @@ class PackageItinerary extends React.Component {
 										<TextField
 											id="activity-total-time"
 											label="Total Hours"
-											defaultValue={String(a.timePlannable)}
+											value={String(a.timePlannable)}
 											className={classes.textField}
 											margin="normal"
 											InputProps={{ readOnly: true }}
@@ -137,7 +140,7 @@ class PackageItinerary extends React.Component {
 										<TextField
 											id="activity-visit-hours"
 											label="Activity Visit Hours"
-											defaultValue={String(a.attraction.timeVisit)}
+											value={String(a.attraction.timeVisit)}
 											className={classes.textField}
 											margin="normal"
 											InputProps={{ readOnly: true }}
@@ -147,7 +150,7 @@ class PackageItinerary extends React.Component {
 										<TextField
 											id="activity-traffic-hours"
 											label="Activity Traffic Hours"
-											defaultValue={String(a.attraction.timeTraffic)}
+											value={String(a.attraction.timeTraffic)}
 											className={classes.textField}
 											margin="normal"
 											InputProps={{ readOnly: true }}
@@ -187,7 +190,7 @@ class PackageItinerary extends React.Component {
 									<TextField
 										id="hotel-name"
 										label="Name"
-										defaultValue={String(hotel.hotel.name)}
+										value={String(hotel.hotel.name)}
 										className={classes.textField}
 										margin="normal"
 										InputProps={{ readOnly: true }}
@@ -197,7 +200,7 @@ class PackageItinerary extends React.Component {
 									<TextField
 										id="hotel-stars"
 										label="Stars"
-										defaultValue={hotel.hotel.stars}
+										value={hotel.hotel.stars}
 										className={classes.textField}
 										margin="normal"
 										InputProps={{ readOnly: true }}
@@ -207,7 +210,7 @@ class PackageItinerary extends React.Component {
 									<TextField
 										id="hotel-type"
 										label="Type"
-										defaultValue={hotel.hotel.type}
+										value={hotel.hotel.type}
 										className={classes.textField}
 										margin="normal"
 										InputProps={{ readOnly: true }}

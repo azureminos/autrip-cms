@@ -92,7 +92,7 @@ CarRate.schema.methods.updatePackage = function (callback) {
 				if (err || !item) return callback();
 				// console.log('>>>>package retrieved', item);
 				var isFound = _.find(item.carRates, function (o) {
-					return o.toString() == carRate._id.toString();
+					return o.toString() === carRate._id.toString();
 				});
 				if (!isFound) {
 					item.carRates.push(carRate._id);

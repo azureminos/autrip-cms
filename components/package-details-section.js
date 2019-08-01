@@ -14,6 +14,7 @@ import PublishIcon from '@material-ui/icons/Publish';
 import MobileViewIcon from '@material-ui/icons/MobileScreenShare';
 import ComputerIcon from '@material-ui/icons/Computer';
 import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
+import SpellCheckIcon from '@material-ui/icons/Spellcheck';
 
 // ==== COMPONENTS ========================================
 import Helper from '../lib/helper';
@@ -75,26 +76,26 @@ class PackageDetails extends React.Component {
 				nextState = {
 					status: 'Published',
 					action: 'Publish',
-					icon: (<PublishIcon className={this.props.classes.rightIcon} />),
+					icon: <PublishIcon className={this.props.classes.rightIcon} />,
 				};
 				break;
 			case 'Published':
 				nextState = {
 					status: 'Archived',
 					action: 'Archive',
-					icon: (<DeleteIcon className={this.props.classes.rightIcon} />),
+					icon: <DeleteIcon className={this.props.classes.rightIcon} />,
 				};
 				break;
 			case 'Archived':
 				nextState = {
 					status: 'Draft',
 					action: 'Edit',
-					icon: (<EditIcon className={this.props.classes.rightIcon} />),
+					icon: <EditIcon className={this.props.classes.rightIcon} />,
 				};
 				break;
 		}
 		return nextState;
-	};
+	}
 
 	/* ----------  Event Handlers  ------- */
 	// Handle package state update
@@ -105,32 +106,42 @@ class PackageDetails extends React.Component {
 			status: this.getNextState(pkg.state).status,
 			isRefreshAll: true,
 		});
-	};
+	}
 	// Handle go back to package-list view
 	handleShowPackageList () {
 		// console.log('>>>>PackageDetails.handleShowPackageList');
 		this.props.getFilteredPackages({});
-	};
+	}
 	// Handle modal open
 	handleModalOpen (type) {
 		// console.log('>>>>PackageDetails.handleModalOpen', type);
 		this.setState({ openModal: type });
-	};
+	}
 	// Handle modal close
 	handleModalClose () {
 		// console.log('>>>>PackageDetails.handleModalClose');
 		this.setState({ openModal: '' });
-	};
+	}
 
 	render () {
 		console.log('>>>>PackageDetails.render', this.props.selectedPackage);
 		const { classes, theme, selectedPackage } = this.props;
-		const { packageSummary, packageItems, packageHotels, packageRates, carRates,
-			flightRates, hotelRates, cities } = selectedPackage;
+		const {
+			packageSummary,
+			packageItems,
+			packageHotels,
+			packageRates,
+			carRates,
+			flightRates,
+			hotelRates,
+			cities,
+		} = selectedPackage;
 
 		const nextState = this.getNextState(packageSummary.state);
 		const btnPackageStatus = (
-			<Button variant="contained" color="default"
+			<Button
+				variant="contained"
+				color="default"
 				className={classes.button}
 				onClick={() => this.handlePackageStatusUpdate(packageSummary)}
 			>
@@ -142,43 +153,63 @@ class PackageDetails extends React.Component {
 		return (
 			<div className={classes.root}>
 				<div>
-					{btnPackageStatus}
-					<Button variant="contained" color="default"
-						className={classes.button}
-						onClick={() => this.handleModalOpen('mobile')}
-					>
-						Mobile View
-						<MobileViewIcon className={classes.rightIcon} />
-					</Button>
-					<Button variant="contained" color="default"
-						className={classes.button}
-						onClick={() => this.handleModalOpen('desktop')}
-					>
-						Desktop View
-						<ComputerIcon className={classes.rightIcon} />
-					</Button>
-					<Button variant="contained" color="default"
+					<Button
+						variant="contained"
+						color="primary"
 						className={classes.button}
 						onClick={() => this.handleShowPackageList()}
 					>
 						Return
 						<GoBackIcon className={classes.rightIcon} />
 					</Button>
+					{btnPackageStatus}
+					<Button
+						variant="contained"
+						color="default"
+						className={classes.button}
+					>
+						Validate
+						<SpellCheckIcon className={classes.rightIcon} />
+					</Button>
+					<Button
+						variant="contained"
+						color="default"
+						className={classes.button}
+						onClick={() => this.handleModalOpen('mobile')}
+					>
+						Mobile View
+						<MobileViewIcon className={classes.rightIcon} />
+					</Button>
+					<Button
+						variant="contained"
+						color="default"
+						className={classes.button}
+						onClick={() => this.handleModalOpen('desktop')}
+					>
+						Desktop View
+						<ComputerIcon className={classes.rightIcon} />
+					</Button>
 				</div>
 				<List className={classes.root}>
 					<li>
-						<Typography className={classes.dividerFullWidth} color="textSecondary" variant="caption">
+						<Typography
+							className={classes.dividerFullWidth}
+							color="textSecondary"
+							variant="caption"
+						>
 							Package Summary
 						</Typography>
 					</li>
 					<Divider component="li" />
 					<ListItem>
-						<PackageSummary
-							packageSummary={packageSummary}
-						/>
+						<PackageSummary packageSummary={packageSummary} />
 					</ListItem>
 					<li>
-						<Typography className={classes.dividerFullWidth} color="textSecondary" variant="caption">
+						<Typography
+							className={classes.dividerFullWidth}
+							color="textSecondary"
+							variant="caption"
+						>
 							Package Itinerary
 						</Typography>
 					</li>
@@ -190,7 +221,11 @@ class PackageDetails extends React.Component {
 						/>
 					</ListItem>
 					<li>
-						<Typography className={classes.dividerFullWidth} color="textSecondary" variant="caption">
+						<Typography
+							className={classes.dividerFullWidth}
+							color="textSecondary"
+							variant="caption"
+						>
 							Package Rate Plan
 						</Typography>
 					</li>
@@ -208,19 +243,28 @@ class PackageDetails extends React.Component {
 					open={this.state.openModal}
 					handleClose={this.handleModalClose}
 				>
-					{this.state.openModal === 'mobile' ?
-						(<MobileApp
-							instPackage={Helper.dummyInstance({ packageSummary, packageItems, packageHotels })}
+					{this.state.openModal === 'mobile' ? (
+						<MobileApp
+							instPackage={Helper.dummyInstance({
+								packageSummary,
+								packageItems,
+								packageHotels,
+							})}
 							rates={{ packageRates, carRates, flightRates, hotelRates }}
 							reference={{ packageSummary, cities }}
-						/>) :
-						(<div/>)
-					}
-					{this.state.openModal === 'desktop' ? (<div>{this.state.openModal}</div>) : (<div/>)}
+						/>
+					) : (
+						<div />
+					)}
+					{this.state.openModal === 'desktop' ? (
+						<div>{this.state.openModal}</div>
+					) : (
+						<div />
+					)}
 				</PackageDialog>
 			</div>
 		);
-	}Helper
+	}
 }
 
 export default withStyles(styles, { withTheme: true })(PackageDetails);
