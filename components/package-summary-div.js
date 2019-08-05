@@ -18,7 +18,7 @@ const styles = theme => ({
 });
 
 class PackageSummary extends React.Component {
-	constructor(props) {
+	constructor (props) {
 		super(props);
 
 		// this.getNextState = this.getNextState.bind(this);
@@ -32,7 +32,7 @@ class PackageSummary extends React.Component {
 
 	/* ----------  Event Handlers  ------- */
 
-	render() {
+	render () {
 		console.log('>>>>PackageSummary.render', this.props.packageSummary);
 		const { classes, theme, packageSummary } = this.props;
 
@@ -63,7 +63,10 @@ class PackageSummary extends React.Component {
 						<TextField
 							id="package-summary-effective-from"
 							label="Effective From"
-							defaultValue={packageSummary.effectiveFrom.substring(0, packageSummary.effectiveFrom.indexOf('T'))}
+							defaultValue={packageSummary.effectiveFrom.substring(
+								0,
+								packageSummary.effectiveFrom.indexOf('T')
+							)}
 							className={classes.textField}
 							margin="normal"
 							InputProps={{ readOnly: true }}
@@ -73,7 +76,10 @@ class PackageSummary extends React.Component {
 						<TextField
 							id="package-summary-effective-to"
 							label="Effective To"
-							defaultValue={packageSummary.effectiveTo.substring(0, packageSummary.effectiveTo.indexOf('T'))}
+							defaultValue={packageSummary.effectiveTo.substring(
+								0,
+								packageSummary.effectiveTo.indexOf('T')
+							)}
 							className={classes.textField}
 							margin="normal"
 							InputProps={{ readOnly: true }}

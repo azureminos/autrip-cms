@@ -18,6 +18,7 @@ import SpellCheckIcon from '@material-ui/icons/Spellcheck';
 
 // ==== COMPONENTS ========================================
 import Helper from '../lib/helper';
+import Validator from '../lib/validator';
 import PackageSummary from './package-summary-div';
 import PackageItinerary from './package-itinerary-div';
 import PackageRates from './package-rates-div';
@@ -58,12 +59,14 @@ class PackageDetails extends React.Component {
 		this.getNextState = this.getNextState.bind(this);
 		this.handlePackageStatusUpdate = this.handlePackageStatusUpdate.bind(this);
 		this.handleShowPackageList = this.handleShowPackageList.bind(this);
+		this.handleValidation = this.handleValidation.bind(this);
 		this.handleModalOpen = this.handleModalOpen.bind(this);
 		this.handleModalClose = this.handleModalClose.bind(this);
 
 		this.state = {
 			updating: false,
 			openModal: '',
+			validation: null,
 		};
 	}
 
@@ -107,6 +110,10 @@ class PackageDetails extends React.Component {
 			isRefreshAll: true,
 		});
 	}
+	handleValidation () {
+		const validation = Validator.validate(this.state.selectedPackage);
+		this.setState({ validation: validation });
+	}
 	// Handle go back to package-list view
 	handleShowPackageList () {
 		// console.log('>>>>PackageDetails.handleShowPackageList');
@@ -149,6 +156,35 @@ class PackageDetails extends React.Component {
 				{nextState.icon}
 			</Button>
 		);
+		// Validation errors
+		let divMsgValidation = '';
+		const validation = this.state.validation;
+		if (!validation) {
+			console.log('>>>>No validation, hide message');
+		} else if (validation && validation.isValid) {
+			console.log('>>>>Passed validation, show success message');
+			divMsgValidation = (
+				<Typography
+					className={classes.dividerFullWidth}
+					style={{ backgroundColor: 'lightgreen' }}
+				>
+					{validation.messages[0]}
+				</Typography>
+			);
+		} else if (validation && !validation.isValid && validation.messages) {
+			console.log('>>>>Failed validation, show error message');
+			const divErrors = _.map(validation.messages, (err, idx) => {
+				return <div key={idx}>{err}</div>;
+			});
+			divMsgValidation = (
+				<Typography
+					className={classes.dividerFullWidth}
+					style={{ backgroundColor: 'red' }}
+				>
+					{divErrors}
+				</Typography>
+			);
+		}
 
 		return (
 			<div className={classes.root}>
@@ -167,6 +203,7 @@ class PackageDetails extends React.Component {
 						variant="contained"
 						color="default"
 						className={classes.button}
+						onClick={() => this.handleValidation()}
 					>
 						Validate
 						<SpellCheckIcon className={classes.rightIcon} />
@@ -180,16 +217,34 @@ class PackageDetails extends React.Component {
 						Mobile View
 						<MobileViewIcon className={classes.rightIcon} />
 					</Button>
-					<Button
-						variant="contained"
-						color="default"
-						className={classes.button}
-						onClick={() => this.handleModalOpen('desktop')}
-					>
-						Desktop View
-						<ComputerIcon className={classes.rightIcon} />
-					</Button>
+					{this.state.validation && this.state.validation.length === 0 ? (
+						<Button
+							variant="contained"
+							color="default"
+							className={classes.button}
+							onClick={() => this.handleModalOpen('mobile')}
+						>
+							Mobile View
+							<MobileViewIcon className={classes.rightIcon} />
+						</Button>
+					) : (
+						''
+					)}
+					{this.state.validation && this.state.validation.length === 0 ? (
+						<Button
+							variant="contained"
+							color="default"
+							className={classes.button}
+							onClick={() => this.handleModalOpen('desktop')}
+						>
+							Desktop View
+							<ComputerIcon className={classes.rightIcon} />
+						</Button>
+					) : (
+						''
+					)}
 				</div>
+				{divMsgValidation}
 				<List className={classes.root}>
 					<li>
 						<Typography

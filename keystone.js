@@ -52,7 +52,7 @@ nextApp.prepare().then(() => {
 
 	// Configure the navigation bar in Keystone's Admin UI
 	keystone.set('nav', {
-		destinations: ['countries', 'cities', 'attractions'],
+		destinations: ['countries', 'cities', 'attractions', 'car-rates'],
 		hotels: ['hotels', 'hotel-rooms'],
 		packages: [
 			'travel-packages',
@@ -60,7 +60,6 @@ nextApp.prepare().then(() => {
 			'package-hotels',
 			'package-rates',
 			'flight-rates',
-			'car-rates',
 		],
 		users: 'users',
 	});

@@ -25,6 +25,12 @@ TravelPackage.add({
 	maxParticipant: { type: Types.Number, default: 0 },
 	departureDate: { type: Types.Textarea },
 	retailPrice: { type: Types.Number, default: 0 },
+	type: {
+		type: Types.Select,
+		options: 'Template, Snapshot',
+		default: 'Template',
+		noedit: false,
+	},
 	state: {
 		type: Types.Select,
 		options: 'Draft, Published, Archived',
@@ -41,7 +47,6 @@ TravelPackage.add({
 	effectiveFrom: { type: Types.Date, default: Date.now },
 	effectiveTo: { type: Types.Date, default: Date.now },
 	flightRates: { type: Types.Relationship, ref: 'FlightRate', many: true },
-	carRates: { type: Types.Relationship, ref: 'CarRate', many: true },
 	packageRates: { type: Types.Relationship, ref: 'PackageRate', many: true },
 	packageItems: { type: Types.Relationship, ref: 'PackageItem', many: true },
 	packageHotels: { type: Types.Relationship, ref: 'PackageHotel', many: true },
@@ -50,7 +55,7 @@ TravelPackage.add({
 });
 
 TravelPackage.defaultColumns
-	= 'name, totalDays|15%, maxParticipant|15%, isPromoted|15%, isExtention|15%';
+	= 'type, state, name, totalDays, maxParticipant, isPromoted';
 
 TravelPackage.schema.methods.cleanupCountry = function (callback) {
 	var pkg = this;
@@ -113,73 +118,6 @@ TravelPackage.schema.methods.updateCountry = function (callback) {
 	} else {
 		return callback();
 	}
-};
-
-// Handle CarRate
-TravelPackage.schema.methods.cleanupCarRates = function (callback) {
-	var pkg = this;
-	keystone
-		.list('CarRate')
-		.model.find({ pkg: pkg._id })
-		.exec(function (err, items) {
-			if (err || !items) return callback();
-			var promises = [];
-			_.each(items, function (item) {
-				promises.push(function (callback) {
-					// console.log(`>>>>TravelPackage.cleanupCarRates, Checking carRate[${item.name}] against [${pkg.name}, ${pkg._id}]`, pkg.carRates);
-					var isFound = _.find(pkg.carRates, function (o) {
-						return o.toString() == item.toString();
-					});
-					if (!pkg.carRates || !isFound) {
-						// console.log(`>>>>TravelPackage.cleanupCarRates, Removing [${pkg.name}] from CarRate[${item.name}].package`, item.package);
-						keystone
-							.list('CarRate')
-							.model.findByIdAndUpdate(
-								item._id,
-								{ package: undefined },
-								callback
-							);
-					} else {
-						return callback();
-					}
-				});
-			});
-			async.series(promises, callback);
-		});
-};
-
-TravelPackage.schema.methods.updateCarRates = function (callback) {
-	var pkg = this;
-	var promises = [];
-	// Get all CarRate
-	// console.log(`>>>>TravelPackage.updateCarRates, Looping through package[${pkg.name}].carRates`, pkg.carRates);
-	_.forEach(pkg.carRates, function (id) {
-		// Loop through and check if current carRate.package is the same as package
-		promises.push(function (callback) {
-			keystone
-				.list('CarRate')
-				.model.findById(id)
-				.exec(function (err, item) {
-					if (err || !item) return callback();
-					// If yes, bypass; if no, update carRate.package
-					// console.log(`>>>>TravelPackage.updateCarRates, Checking if carRate[${item.name}].package is [${pkg.name}, ${pkg._id.toString()}]`, item.package);
-					if (!item.package || pkg._id.toString() != item.package.toString()) {
-						item.package = pkg._id;
-						// console.log(`>>>>TravelPackage.updateCarRates, Set [${pkg.name}, ${pkg._id.toString()}] as carRate[${item.name}].package`, item.package);
-						keystone
-							.list('CarRate')
-							.model.findByIdAndUpdate(
-								item._id,
-								{ package: item.package },
-								callback
-							);
-					} else {
-						return callback();
-					}
-				});
-		});
-	});
-	async.series(promises, callback);
 };
 
 // Handle FlightRate
@@ -472,26 +410,6 @@ TravelPackage.schema.pre('save', function (next) {
 						'>>>>travelPackage.country changed, calling travelPackage.updateCountry'
 					);
 					travelPackage.updateCountry(callback);
-				} else {
-					return callback();
-				}
-			},
-			function (callback) {
-				if (travelPackage.isModified('carRates')) {
-					console.log(
-						'>>>>travelPackage.carRates changed, calling travelPackage.cleanupCarRates'
-					);
-					travelPackage.cleanupCarRates(callback);
-				} else {
-					return callback();
-				}
-			},
-			function (callback) {
-				if (travelPackage.isModified('carRates')) {
-					console.log(
-						'>>>>travelPackage.carRates changed, calling travelPackage.updateCarRates'
-					);
-					travelPackage.updateCarRates(callback);
 				} else {
 					return callback();
 				}
