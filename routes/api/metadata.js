@@ -14,13 +14,13 @@ var parseCountry = function (input) {
 			r.name = item.name;
 			rs.push(r);
 		});
-		//console.log('>>>>Metadata.parseCountry', rs);
+		// console.log('>>>>Metadata.parseCountry', rs);
 		return rs;
 	} else {
 		var r = {};
 		r.id = item._id;
 		r.name = item.name;
-		//console.log('>>>>Metadata.parseCountry', r);
+		// console.log('>>>>Metadata.parseCountry', r);
 		return r;
 	}
 };
@@ -30,18 +30,21 @@ exports.getMetadata = function (req, res) {
 	const query = req.body;
 
 	const result = {
-		status: ['Draft', 'Published', 'Archived'],
+		status: [
+			{ type: 'Template', state: 'Draft' },
+			{ type: 'Snapshot', state: 'Archived' },
+			{ type: 'Snapshot', state: 'Published' },
+		],
 	};
 
 	const getCountryList = function (callback) {
-		Country.model.find()
-			.exec(function (err, items) {
-				//console.log('>>>>Metadata.getCountryList', {err, items});
-				if (err || !items) return callback();
-				// If yes, bypass; if no, update carRate.package
-				result.country = parseCountry(items);
-				return callback();
-			});
+		Country.model.find().exec(function (err, items) {
+			// console.log('>>>>Metadata.getCountryList', {err, items});
+			if (err || !items) return callback();
+			// If yes, bypass; if no, update carRate.package
+			result.country = parseCountry(items);
+			return callback();
+		});
 	};
 
 	const returnMetadata = function () {
@@ -56,10 +59,7 @@ exports.getMetadata = function (req, res) {
 			rs = result;
 		}
 		return res.apiResponse(rs);
-	}
+	};
 
-	async.series(
-		[
-			getCountryList,
-		], returnMetadata);
+	async.series([getCountryList], returnMetadata);
 };

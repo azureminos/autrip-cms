@@ -14,9 +14,10 @@ const { publicRuntimeConfig } = getConfig();
 let socket;
 
 class App extends Component {
-
 	static async getInitialProps () {
-		const urlGetPackages = `${process.env.API_BASE_URL}/api/travelpackage`;
+		const urlGetPackages = `${
+			process.env.API_BASE_URL
+		}/api/travelpackage/template`;
 		let resPackages = await axios.get(urlGetPackages);
 
 		const urlGetMetadata = `${process.env.API_BASE_URL}/api/metadata`;
@@ -24,7 +25,11 @@ class App extends Component {
 
 		const drawerItems = ['Package', 'Country', 'City', 'Attraction', 'Hotel'];
 
-		return { drawerItems, packages: resPackages.data, filters: resMetadata.data };
+		return {
+			drawerItems,
+			packages: resPackages.data,
+			reference: resMetadata.data,
+		};
 	}
 
 	constructor (props) {
@@ -53,23 +58,16 @@ class App extends Component {
 	pushToRemote (channel, message) {
 		console.log(`>>>>Push event[${channel}] with message`, message);
 		this.setState({ updating: true }); // Set the updating spinner
-		socket.emit(
-			`push:${channel}`,
-			message,
-			(status) => {
-				// Finished successfully with a special 'ok' message from socket server
-				if (status !== 'ok') {
-					console.error(
-						`Problem pushing to ${channel}`,
-						JSON.stringify(message)
-					);
-				}
-
-				this.setState({
-					updating: false, // Turn spinner off
-				});
+		socket.emit(`push:${channel}`, message, status => {
+			// Finished successfully with a special 'ok' message from socket server
+			if (status !== 'ok') {
+				console.error(`Problem pushing to ${channel}`, JSON.stringify(message));
 			}
-		);
+
+			this.setState({
+				updating: false, // Turn spinner off
+			});
+		});
 	}
 
 	/* ==============================
@@ -101,12 +99,16 @@ class App extends Component {
 	// Handle response of refresh all packages, Event[package:refreshAll]
 	handleRefreshAllPackages (res) {
 		console.log('>>>>Event[package:refreshAll] response', res);
-		this.setState({ updating: false, packages: res.packages, selectedPackage: {} });
+		this.setState({
+			updating: false,
+			packages: res.packages,
+			selectedPackage: {},
+		});
 	}
 	// Handle drawer click
 	handleDrawerItemClick (idx) {
 		this.setState({ idxSelectedSection: idx });
-	};
+	}
 
 	/* ==============================
      = React Lifecycle              =
@@ -118,15 +120,19 @@ class App extends Component {
 		console.log('>>>>App.SOCKET_URL', socketUrl);
 		socket = io(socketUrl);
 
-		//Register socket listeners
-		socket.on('package:get', (res) => { this.handleGetPackageDetails(res); });
-		socket.on('package:refreshAll', (res) => { this.handleRefreshAllPackages(res); });
+		// Register socket listeners
+		socket.on('package:get', res => {
+			this.handleGetPackageDetails(res);
+		});
+		socket.on('package:refreshAll', res => {
+			this.handleRefreshAllPackages(res);
+		});
 	}
 
 	render () {
-		console.log('>>>>App.render', this.props.filters);
-		const { filters, drawerItems } = this.props;
+		const { reference, drawerItems } = this.props;
 		const { idxSelectedSection, packages, selectedPackage } = this.state;
+		console.log('>>>>App.render', { reference, packages, drawerItems });
 		let page, viewPackage;
 
 		// Init package related view
@@ -140,7 +146,11 @@ class App extends Component {
 						updatePackageState={this.updatePackageState}
 					/>
 				);
-			} else if (packages.length === 0 && selectedPackage && selectedPackage.packageSummary) {
+			} else if (
+				packages.length === 0
+				&& selectedPackage
+				&& selectedPackage.packageSummary
+			) {
 				// Init tab content to display selected package
 				viewPackage = (
 					<PackageDetails
@@ -150,19 +160,19 @@ class App extends Component {
 					/>
 				);
 			} else {
-				viewPackage = (<div />);
+				viewPackage = <div />;
 			}
 		}
 
-		// Init toolbar items (filters, search, ...)
-		const toolbarItem = (
-			(idxSelectedSection === 0 && (
+		// Init toolbar items (reference, search, ...)
+		const toolbarItem
+			= (idxSelectedSection === 0 && (
 				<PackageFilters
-					statusFilterItems={filters.status}
+					statusFilterItems={reference.status}
 					getFilteredPackages={this.getFilteredPackages}
-				/>))
-			|| (idxSelectedSection !== 0 && (<div />))
-		);
+				/>
+			))
+			|| (idxSelectedSection !== 0 && <div />);
 
 		// Init page
 		page = (
@@ -179,11 +189,11 @@ class App extends Component {
 					{idxSelectedSection === 3 && <div>This is Attraction</div>}
 					{idxSelectedSection === 4 && <div>This is Hotel</div>}
 				</PersistentDrawer>
-			</Paper >
+			</Paper>
 		);
 
-		return (page);
-	};
+		return page;
+	}
 }
 
 export default App;

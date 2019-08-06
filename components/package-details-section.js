@@ -14,6 +14,7 @@ import PublishIcon from '@material-ui/icons/Publish';
 import MobileViewIcon from '@material-ui/icons/MobileScreenShare';
 import ComputerIcon from '@material-ui/icons/Computer';
 import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
+import HomeIcon from '@material-ui/icons/Home';
 import SpellCheckIcon from '@material-ui/icons/Spellcheck';
 
 // ==== COMPONENTS ========================================
@@ -50,6 +51,9 @@ const styles = theme => ({
 	rightIcon: {
 		marginLeft: theme.spacing.unit,
 	},
+	leftIcon: {
+		marginRight: theme.spacing.unit,
+	},
 });
 
 class PackageDetails extends React.Component {
@@ -79,21 +83,21 @@ class PackageDetails extends React.Component {
 				nextState = {
 					status: 'Published',
 					action: 'Publish',
-					icon: <PublishIcon className={this.props.classes.rightIcon} />,
+					icon: <PublishIcon className={this.props.classes.leftIcon} />,
 				};
 				break;
 			case 'Published':
 				nextState = {
 					status: 'Archived',
 					action: 'Archive',
-					icon: <DeleteIcon className={this.props.classes.rightIcon} />,
+					icon: <DeleteIcon className={this.props.classes.leftIcon} />,
 				};
 				break;
 			case 'Archived':
 				nextState = {
 					status: 'Draft',
 					action: 'Edit',
-					icon: <EditIcon className={this.props.classes.rightIcon} />,
+					icon: <EditIcon className={this.props.classes.leftIcon} />,
 				};
 				break;
 		}
@@ -117,7 +121,7 @@ class PackageDetails extends React.Component {
 	// Handle go back to package-list view
 	handleShowPackageList () {
 		// console.log('>>>>PackageDetails.handleShowPackageList');
-		this.props.getFilteredPackages({});
+		this.props.getFilteredPackages({ type: 'Template' });
 	}
 	// Handle modal open
 	handleModalOpen (type) {
@@ -145,17 +149,48 @@ class PackageDetails extends React.Component {
 		} = selectedPackage;
 
 		const nextState = this.getNextState(packageSummary.state);
-		const btnPackageStatus = (
-			<Button
-				variant="contained"
-				color="default"
-				className={classes.button}
-				onClick={() => this.handlePackageStatusUpdate(packageSummary)}
-			>
-				{nextState.action}
-				{nextState.icon}
-			</Button>
-		);
+		const btnPackageStatus
+			= this.state.validation && this.state.validation.length === 0 ? (
+				<Button
+					variant="contained"
+					color="secondary"
+					className={classes.button}
+					onClick={() => this.handlePackageStatusUpdate(packageSummary)}
+				>
+					{nextState.action}
+					{nextState.icon}
+				</Button>
+			) : (
+				''
+			);
+		const btnMobileView
+			= this.state.validation && this.state.validation.length === 0 ? (
+				<Button
+					variant="contained"
+					color="secondary"
+					className={classes.button}
+					onClick={() => this.handleModalOpen('mobile')}
+				>
+					<MobileViewIcon className={classes.leftIcon} />
+					Mobile View
+				</Button>
+			) : (
+				''
+			);
+		const btnDesktopView
+			= this.state.validation && this.state.validation.length === 0 ? (
+				<Button
+					variant="contained"
+					color="secondary"
+					className={classes.button}
+					onClick={() => this.handleModalOpen('desktop')}
+				>
+					<ComputerIcon className={classes.leftIcon} />
+					Desktop View
+				</Button>
+			) : (
+				''
+			);
 		// Validation errors
 		let divMsgValidation = '';
 		const validation = this.state.validation;
@@ -191,58 +226,25 @@ class PackageDetails extends React.Component {
 				<div>
 					<Button
 						variant="contained"
-						color="primary"
+						color="default"
 						className={classes.button}
 						onClick={() => this.handleShowPackageList()}
 					>
-						Return
-						<GoBackIcon className={classes.rightIcon} />
+						<HomeIcon className={classes.leftIcon} />
+						Home
 					</Button>
-					{btnPackageStatus}
 					<Button
 						variant="contained"
-						color="default"
+						color="primary"
 						className={classes.button}
 						onClick={() => this.handleValidation()}
 					>
+						<SpellCheckIcon className={classes.leftIcon} />
 						Validate
-						<SpellCheckIcon className={classes.rightIcon} />
 					</Button>
-					<Button
-						variant="contained"
-						color="default"
-						className={classes.button}
-						onClick={() => this.handleModalOpen('mobile')}
-					>
-						Mobile View
-						<MobileViewIcon className={classes.rightIcon} />
-					</Button>
-					{this.state.validation && this.state.validation.length === 0 ? (
-						<Button
-							variant="contained"
-							color="default"
-							className={classes.button}
-							onClick={() => this.handleModalOpen('mobile')}
-						>
-							Mobile View
-							<MobileViewIcon className={classes.rightIcon} />
-						</Button>
-					) : (
-						''
-					)}
-					{this.state.validation && this.state.validation.length === 0 ? (
-						<Button
-							variant="contained"
-							color="default"
-							className={classes.button}
-							onClick={() => this.handleModalOpen('desktop')}
-						>
-							Desktop View
-							<ComputerIcon className={classes.rightIcon} />
-						</Button>
-					) : (
-						''
-					)}
+					{btnPackageStatus}
+					{btnMobileView}
+					{btnDesktopView}
 				</div>
 				{divMsgValidation}
 				<List className={classes.root}>

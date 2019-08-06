@@ -29,24 +29,33 @@ const styles = {
 		fontSize: '35px',
 		textShadow: '0px 0px 5px rgba(0,0,0,0.42)',
 	},
+	title: {
+		height: 70,
+	},
 };
 
 class PackageCard extends React.Component {
 	render () {
 		const { classes, item, btnActionMap } = this.props;
 		const buttons = [];
-		const description = item.description.length > 200
-			? `${item.description.substring(0, 200)}...` : item.description;
+		const description
+			= item.description.length > 200
+				? `${item.description.substring(0, 200)}...`
+				: item.description;
+		const status = `${item.type} - ${item.state}`;
 		// console.log('>>>>PackageCard.item', item);
 
 		_.each(btnActionMap, (btnAction, btnName) => {
 			buttons.push(
-				(<Button key={btnName} size='small' color='primary'
+				<Button
+					key={btnName}
+					size="small"
+					color="primary"
 					onClick={() => btnAction(item)}
 					className={classes.button}
 				>
 					{btnName}
-				</Button>)
+				</Button>
 			);
 		});
 
@@ -59,12 +68,11 @@ class PackageCard extends React.Component {
 						title={item.name}
 					/>
 					<CardContent>
-						<Typography gutterBottom variant='h5'>
-							{item.name} <span className={classes.state}>{item.state}</span>
+						<Typography gutterBottom variant="h5">
+							<div className={classes.state}>{status}</div>
+							<div className={classes.title}>{item.name}</div>
 						</Typography>
-						<Typography component='p'>
-							{description}
-						</Typography>
+						<Typography component="p">{description}</Typography>
 					</CardContent>
 				</CardActionArea>
 				<CardActions>{buttons}</CardActions>

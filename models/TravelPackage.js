@@ -55,7 +55,7 @@ TravelPackage.add({
 });
 
 TravelPackage.defaultColumns
-	= 'type, state, name, totalDays, maxParticipant, isPromoted';
+	= 'name, type, state, totalDays, maxParticipant, isPromoted';
 
 TravelPackage.schema.methods.cleanupCountry = function (callback) {
 	var pkg = this;

@@ -5,7 +5,6 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 
-
 const styles = theme => ({
 	root: {
 		display: 'flex',
@@ -35,21 +34,27 @@ class PackageFilters extends React.Component {
 		};
 	}
 
-	handlePackageStatusChange = event => {
-		// console.log('>>>>PackageFilters.handleChange', event.target);
-		if(event.target.value == 'All') {
-			this.props.getFilteredPackages({});
+	handlePackageStatusChange (event) {
+		console.log('>>>>PackageFilters.handleChange', event.target);
+		if (event.target.value === '') {
+			this.props.getFilteredPackages({ type: 'Template' });
 		} else {
-			this.props.getFilteredPackages({state: event.target.value});
+			const vals = event.target.value.split(' - ');
+			this.props.getFilteredPackages({ type: vals[0], state: vals[1] });
 		}
 		this.setState({ [event.target.name]: event.target.value });
-	};
+	}
 
 	render () {
 		// console.log('>>>>PackageFilters.render', this.props.statusFilterItems);
 		const { classes, statusFilterItems } = this.props;
-		const statusDropdowns = _.map(statusFilterItems, (item) => {
-			return (<MenuItem key={item} value={item}>{item}</MenuItem>);
+		const statusDropdowns = _.map(statusFilterItems, item => {
+			const valItem = `${item.type} - ${item.state}`;
+			return (
+				<MenuItem key={valItem} value={valItem}>
+					{valItem}
+				</MenuItem>
+			);
 		});
 
 		return (
@@ -62,8 +67,9 @@ class PackageFilters extends React.Component {
 						onChange={this.handlePackageStatusChange}
 						inputProps={{ name: 'status', id: 'package-status' }}
 					>
-						<MenuItem key="Select" value="" disabled >Status</MenuItem>
-						<MenuItem key="All" value="All" >All</MenuItem>
+						<MenuItem key="Select" value="" disabled>
+							Status
+						</MenuItem>
 						{statusDropdowns}
 					</Select>
 				</FormControl>
