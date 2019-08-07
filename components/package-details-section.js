@@ -8,13 +8,13 @@ import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import PublishIcon from '@material-ui/icons/Publish';
 import MobileViewIcon from '@material-ui/icons/MobileScreenShare';
 import ComputerIcon from '@material-ui/icons/Computer';
 import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
 import HomeIcon from '@material-ui/icons/Home';
+import SnapshotIcon from '@material-ui/icons/TableChartOutlined';
 import SpellCheckIcon from '@material-ui/icons/Spellcheck';
 
 // ==== COMPONENTS ========================================
@@ -23,7 +23,6 @@ import Validator from '../lib/validator';
 import PackageSummary from './package-summary-div';
 import PackageItinerary from './package-itinerary-div';
 import PackageRates from './package-rates-div';
-import PackageModal from './package-modal-div';
 import PackageDialog from './package-dialog-div';
 import MobileApp from './mobile/app';
 
@@ -60,8 +59,8 @@ class PackageDetails extends React.Component {
 	constructor (props) {
 		super(props);
 
-		this.getNextState = this.getNextState.bind(this);
-		this.handlePackageStatusUpdate = this.handlePackageStatusUpdate.bind(this);
+		this.handlePublishProduct = this.handlePublishProduct.bind(this);
+		this.handleArchiveSnapshot = this.handleArchiveSnapshot.bind(this);
 		this.handleShowPackageList = this.handleShowPackageList.bind(this);
 		this.handleValidation = this.handleValidation.bind(this);
 		this.handleModalOpen = this.handleModalOpen.bind(this);
@@ -75,44 +74,16 @@ class PackageDetails extends React.Component {
 	}
 
 	/* ----------  Helpers  ------- */
-	// Get next status
-	getNextState (status) {
-		let nextState;
-		switch (status) {
-			case 'Draft':
-				nextState = {
-					status: 'Published',
-					action: 'Publish',
-					icon: <PublishIcon className={this.props.classes.leftIcon} />,
-				};
-				break;
-			case 'Published':
-				nextState = {
-					status: 'Archived',
-					action: 'Archive',
-					icon: <DeleteIcon className={this.props.classes.leftIcon} />,
-				};
-				break;
-			case 'Archived':
-				nextState = {
-					status: 'Draft',
-					action: 'Edit',
-					icon: <EditIcon className={this.props.classes.leftIcon} />,
-				};
-				break;
-		}
-		return nextState;
-	}
-
 	/* ----------  Event Handlers  ------- */
-	// Handle package state update
-	handlePackageStatusUpdate (pkg) {
+	// Publish template snapshot
+	handlePublishProduct (params) {
 		// console.log('>>>>PackageDetails.handlePackageStatusUpdate', pkg);
-		this.props.updatePackageState({
-			id: pkg.id,
-			status: this.getNextState(pkg.state).status,
-			isRefreshAll: true,
-		});
+		this.props.publishProduct(params);
+	}
+	// Archive snapshot
+	handleArchiveSnapshot (pkg) {
+		// console.log('>>>>PackageDetails.handlePackageStatusUpdate', pkg);
+		this.props.archiveSnapshot(pkg.id);
 	}
 	handleValidation () {
 		const validation = Validator.validate(this.state.selectedPackage);
@@ -136,35 +107,76 @@ class PackageDetails extends React.Component {
 
 	render () {
 		console.log('>>>>PackageDetails.render', this.props.selectedPackage);
+		const { validation } = this.state;
+		const isValid = validation && validation.isValid;
 		const { classes, theme, selectedPackage } = this.props;
 		const {
 			packageSummary,
 			packageItems,
 			packageHotels,
 			packageRates,
-			carRates,
 			flightRates,
-			hotelRates,
 			cities,
+			carRates,
+			hotelRates,
 		} = selectedPackage;
+		const isTemplate = packageSummary.type === 'Template';
 
-		const nextState = this.getNextState(packageSummary.state);
-		const btnPackageStatus
-			= this.state.validation && this.state.validation.length === 0 ? (
+		const btnSnapshotList = isTemplate ? (
+			<Button
+				variant="contained"
+				color="primary"
+				className={classes.button}
+				onClick={() => this.handleModalOpen('snapshot')}
+			>
+				<SnapshotIcon className={classes.leftIcon} />
+				All Snapshots
+			</Button>
+		) : (
+			''
+		);
+		const btnValidateTemplate = isTemplate ? (
+			<Button
+				variant="contained"
+				color="primary"
+				className={classes.button}
+				onClick={() => this.handleValidation()}
+			>
+				<SpellCheckIcon className={classes.leftIcon} />
+				Validate
+			</Button>
+		) : (
+			''
+		);
+		const btnArchiveSnapshot = !isTemplate ? (
+			<Button
+				variant="contained"
+				color="default"
+				className={classes.button}
+				onClick={() => this.handleArchiveSnapshot(packageSummary)}
+			>
+				<DeleteIcon className={this.props.classes.leftIcon} />
+				Archive
+			</Button>
+		) : (
+			''
+		);
+		const btnPublishProduct
+			= isValid && isTemplate ? (
 				<Button
 					variant="contained"
-					color="secondary"
+					color="default"
 					className={classes.button}
-					onClick={() => this.handlePackageStatusUpdate(packageSummary)}
+					onClick={() => this.handlePublishProduct(packageSummary)}
 				>
-					{nextState.action}
-					{nextState.icon}
+					<PublishIcon className={this.props.classes.leftIcon} />
+					Publish
 				</Button>
 			) : (
 				''
 			);
 		const btnMobileView
-			= this.state.validation && this.state.validation.length === 0 ? (
+			= isValid || !isTemplate ? (
 				<Button
 					variant="contained"
 					color="secondary"
@@ -178,7 +190,7 @@ class PackageDetails extends React.Component {
 				''
 			);
 		const btnDesktopView
-			= this.state.validation && this.state.validation.length === 0 ? (
+			= isValid || !isTemplate ? (
 				<Button
 					variant="contained"
 					color="secondary"
@@ -193,10 +205,9 @@ class PackageDetails extends React.Component {
 			);
 		// Validation errors
 		let divMsgValidation = '';
-		const validation = this.state.validation;
 		if (!validation) {
 			console.log('>>>>No validation, hide message');
-		} else if (validation && validation.isValid) {
+		} else if (isValid) {
 			console.log('>>>>Passed validation, show success message');
 			divMsgValidation = (
 				<Typography
@@ -206,9 +217,9 @@ class PackageDetails extends React.Component {
 					{validation.messages[0]}
 				</Typography>
 			);
-		} else if (validation && !validation.isValid && validation.messages) {
+		} else {
 			console.log('>>>>Failed validation, show error message');
-			const divErrors = _.map(validation.messages, (err, idx) => {
+			const divErrors = _.map(validation.messages || [], (err, idx) => {
 				return <div key={idx}>{err}</div>;
 			});
 			divMsgValidation = (
@@ -233,18 +244,12 @@ class PackageDetails extends React.Component {
 						<HomeIcon className={classes.leftIcon} />
 						Home
 					</Button>
-					<Button
-						variant="contained"
-						color="primary"
-						className={classes.button}
-						onClick={() => this.handleValidation()}
-					>
-						<SpellCheckIcon className={classes.leftIcon} />
-						Validate
-					</Button>
-					{btnPackageStatus}
+					{btnSnapshotList}
+					{btnValidateTemplate}
 					{btnMobileView}
 					{btnDesktopView}
+					{btnArchiveSnapshot}
+					{btnPublishProduct}
 				</div>
 				{divMsgValidation}
 				<List className={classes.root}>
@@ -314,6 +319,11 @@ class PackageDetails extends React.Component {
 						<div />
 					)}
 					{this.state.openModal === 'desktop' ? (
+						<div>{this.state.openModal}</div>
+					) : (
+						<div />
+					)}
+					{this.state.openModal === 'snapshot' ? (
 						<div>{this.state.openModal}</div>
 					) : (
 						<div />

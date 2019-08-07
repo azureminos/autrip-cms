@@ -32,8 +32,8 @@ exports.getMetadata = function (req, res) {
 	const result = {
 		status: [
 			{ type: 'Template', state: 'Draft' },
-			{ type: 'Snapshot', state: 'Archived' },
 			{ type: 'Snapshot', state: 'Published' },
+			{ type: 'Snapshot', state: 'Archived' },
 		],
 	};
 

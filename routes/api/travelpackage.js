@@ -4,61 +4,6 @@ var keystone = require('keystone');
 var Parser = require('../../lib/object-parser');
 var TravelPackage = keystone.list('TravelPackage');
 
-var parseTravelPackage = function (input) {
-	console.log('>>>>TravelPackage.parseTravelPackage', input);
-	if (Array.isArray(input)) {
-		var rs = [];
-		_.each(input, function (item) {
-			var r = _.pick(
-				item,
-				'slug',
-				'name',
-				'description',
-				'finePrint',
-				'notes',
-				'departureDate',
-				'effectiveTo',
-				'effectiveFrom',
-				'isExtention',
-				'isCustomisable',
-				'isPromoted',
-				'type',
-				'state',
-				'maxParticipant',
-				'totalDays',
-				'additionalField'
-			);
-			r.id = item._id;
-			r.imageUrl = item.image.secure_url;
-			rs.push(r);
-		});
-		return rs;
-	} else {
-		var r = _.pick(
-			input,
-			'slug',
-			'name',
-			'description',
-			'finePrint',
-			'notes',
-			'departureDate',
-			'effectiveTo',
-			'effectiveFrom',
-			'isExtention',
-			'isCustomisable',
-			'isPromoted',
-			'type',
-			'state',
-			'maxParticipant',
-			'totalDays',
-			'additionalField'
-		);
-		r.id = input._id;
-		r.imageUrl = input.image.secure_url;
-		return r;
-	}
-};
-
 /** * Get List of TravelPackage */
 exports.getAllTravelPackage = function (req, res) {
 	TravelPackage.model.find(function (err, items) {
