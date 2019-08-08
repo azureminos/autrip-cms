@@ -61,7 +61,9 @@ class PackageCard extends React.Component {
 
 		return (
 			<Card className={classes.card}>
-				<CardActionArea>
+				<CardActionArea
+					onClick={() => btnAction(item)}
+				>
 					<CardMedia
 						className={classes.media}
 						image={item.imageUrl}
