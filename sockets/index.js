@@ -20,7 +20,8 @@ exports.attachSockets = (io) => {
 
 		channel('push:package:get', PackageSocket.getPackageDetails);
 		channel('push:package:filter', PackageSocket.getFilteredPackages);
-		channel('push:package:status', PackageSocket.updatePackageState);
+		channel('push:package:publish', PackageSocket.publishPackage);
+		channel('push:package:archive', PackageSocket.archivePackage);
 		channel('disconnect', () => { console.log('>>>>User disconnected'); });
 	});
 };
