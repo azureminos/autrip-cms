@@ -37,9 +37,9 @@ class App extends Component {
 
 		this.getPackageDetails = this.getPackageDetails.bind(this);
 		this.getFilteredPackages = this.getFilteredPackages.bind(this);
-		this.handleGetPackageDetails = this.handleGetPackageDetails.bind(this);
 		this.publishProduct = this.publishProduct.bind(this);
 		this.archiveSnapshot = this.archiveSnapshot.bind(this);
+		this.handleGetPackageDetails = this.handleGetPackageDetails.bind(this);
 		this.handleRefreshAllPackages = this.handleRefreshAllPackages.bind(this);
 		this.handleDrawerItemClick = this.handleDrawerItemClick.bind(this);
 
@@ -93,8 +93,8 @@ class App extends Component {
 		this.setState({ updating: true });
 	}
 	// Archive snapshot, Event[push:package:archive]
-	archiveProduct (req) {
-		console.log('>>>>App Client >> archiveProduct', req);
+	archiveSnapshot (req) {
+		console.log('>>>>App Client >> archiveSnapshot', req);
 		this.pushToRemote('package:archive', req);
 		this.setState({ updating: true });
 	}
