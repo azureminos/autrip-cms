@@ -59,7 +59,7 @@ class PackageDetails extends React.Component {
 	constructor (props) {
 		super(props);
 
-		this.handlePublishProduct = this.handlePublishProduct.bind(this);
+		this.handlePublishTemplate = this.handlePublishTemplate.bind(this);
 		this.handleArchiveSnapshot = this.handleArchiveSnapshot.bind(this);
 		this.handleShowPackageList = this.handleShowPackageList.bind(this);
 		this.handleValidation = this.handleValidation.bind(this);
@@ -76,9 +76,9 @@ class PackageDetails extends React.Component {
 	/* ----------  Helpers  ------- */
 	/* ----------  Event Handlers  ------- */
 	// Publish template snapshot
-	handlePublishProduct (params) {
+	handlePublishTemplate (id) {
 		// console.log('>>>>PackageDetails.handlePackageStatusUpdate', pkg);
-		this.props.publishProduct(params);
+		this.props.publishProduct(id);
 	}
 	// Archive snapshot
 	handleArchiveSnapshot (pkg) {
@@ -153,7 +153,7 @@ class PackageDetails extends React.Component {
 				variant="contained"
 				color="default"
 				className={classes.button}
-				onClick={() => this.handleArchiveSnapshot(packageSummary)}
+				onClick={() => this.handleArchiveSnapshot(packageSummary.id)}
 			>
 				<DeleteIcon className={this.props.classes.leftIcon} />
 				Archive
@@ -167,7 +167,7 @@ class PackageDetails extends React.Component {
 					variant="contained"
 					color="default"
 					className={classes.button}
-					onClick={() => this.handlePublishProduct(packageSummary)}
+					onClick={() => this.handlePublishTemplate(packageSummary.id)}
 				>
 					<PublishIcon className={this.props.classes.leftIcon} />
 					Publish
