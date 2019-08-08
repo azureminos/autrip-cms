@@ -16,7 +16,6 @@ class PackageCards extends React.Component {
 		this.getNextStatus = this.getNextStatus.bind(this);
 		this.getNextAction = this.getNextAction.bind(this);
 		this.handleOpenPackage = this.handleOpenPackage.bind(this);
-		this.handlePackageStatus = this.handlePackageStatus.bind(this);
 
 		this.state = {
 			idSelectedPackage: this.props.selectedPackage ? this.props.selectedPackage.id : -1,
@@ -64,18 +63,9 @@ class PackageCards extends React.Component {
 		this.setState({ idSelectedPackage: pkg.id });
 		this.props.getPackageDetails(pkg.id);
 	};
-	// Handle package state change
-	handlePackageStatus (pkg) {
-		console.log('>>>>PackageCards.handlePackageStatus', pkg);
-		this.props.updatePackageState({
-			id: pkg.id,
-			status: this.getNextStatus(pkg.state),
-			isRefreshAll: true,
-		});
-	};
 
 	render () {
-		const { classes, theme, packages, getPackageDetails, updatePackageState } = this.props;
+		const { classes, theme, packages, getPackageDetails } = this.props;
 
 		let cards = _.map(packages, (pkg) => {
 			// Init button/action of package card
@@ -83,9 +73,6 @@ class PackageCards extends React.Component {
 			const btnActionMap = {};
 			if (getPackageDetails) {
 				btnActionMap['View Package'] = this.handleOpenPackage;
-			}
-			if (updatePackageState) {
-				btnActionMap[`${nextAction} Package`] = this.handlePackageStatus;
 			}
 
 			return (
