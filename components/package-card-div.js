@@ -43,7 +43,13 @@ class PackageCard extends React.Component {
 				? `${item.description.substring(0, 200)}...`
 				: item.description;
 		const status = `${item.type} - ${item.state}`;
-		// console.log('>>>>PackageCard.item', item);
+		const actionDefault = it => {
+			console.log('>>>>Default Action', it);
+			const actions = _.values(btnActionMap);
+			if (actions && actions.length === 1) {
+				actions[0](it);
+			}
+		};
 
 		_.each(btnActionMap, (btnAction, btnName) => {
 			buttons.push(
@@ -61,9 +67,7 @@ class PackageCard extends React.Component {
 
 		return (
 			<Card className={classes.card}>
-				<CardActionArea
-					onClick={() => btnAction(item)}
-				>
+				<CardActionArea onClick={() => actionDefault(item)}>
 					<CardMedia
 						className={classes.media}
 						image={item.imageUrl}

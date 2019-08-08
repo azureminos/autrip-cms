@@ -80,11 +80,9 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 					});
 			},
 			snapshots: callback => {
-				TravelPackage.model
-					.find({template: id})
-					.exec(function (err, items) {
-						return callback(null, items);
-					});
+				TravelPackage.model.find({ template: id }).exec(function (err, items) {
+					return callback(null, items);
+				});
 			},
 		},
 		function (err, results) {
@@ -178,11 +176,7 @@ exports.getFilteredPackages = ({ request, sendStatus, socket }) => {
 	});
 };
 
-exports.publishPackage = ({
-	request: { id, status },
-	sendStatus,
-	socket,
-}) => {
+exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 	// console.log('>>>>server socket received event[push:package:status]', id);
 	const TravelPackage = keystone.list('TravelPackage');
 
@@ -190,7 +184,7 @@ exports.publishPackage = ({
 		.update({ _id: id }, { state: status })
 		.exec(function (err, res) {
 			// console.log(`>>>>TravelPackage.update[${id}: ${status}]`, res);
-			if (isRefreshAll) {
+			if (true) {
 				TravelPackage.model.find(function (err, items) {
 					socket.emit('package:refreshAll', {
 						packages: helper.parseTravelPackage(items),
@@ -246,19 +240,18 @@ exports.publishPackage = ({
 						// console.log('>>>>server final callback for event[push:package:get]', results);
 						socket.emit('package:get', results);
 					}
-				);;
+				);
 			}
 		});
 };
 
-exports.archivePackage = ({
-	request: { id, status },
-	sendStatus,
-	socket,
-}) => {
+exports.archivePackage = ({ request: { id }, sendStatus, socket }) => {
 	// console.log('>>>>server socket received event[push:package:archive]', id);
 	const TravelPackage = keystone.list('TravelPackage');
-	const {status} = CONSTANTS.get().TravelPackage;
-	
-	return TravelPackage.updateMany({template: id, state: status.PUBLISHED}, {state: status.ARCHIVED});
+	const { status } = CONSTANTS.get().TravelPackage;
+
+	return TravelPackage.updateMany(
+		{ template: id, state: status.PUBLISHED },
+		{ state: status.ARCHIVED }
+	);
 };

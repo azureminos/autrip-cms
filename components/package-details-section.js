@@ -12,7 +12,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import PublishIcon from '@material-ui/icons/Publish';
 import MobileViewIcon from '@material-ui/icons/MobileScreenShare';
 import ComputerIcon from '@material-ui/icons/Computer';
-import GoBackIcon from '@material-ui/icons/KeyboardBackspace';
 import HomeIcon from '@material-ui/icons/Home';
 import SnapshotIcon from '@material-ui/icons/TableChartOutlined';
 import SpellCheckIcon from '@material-ui/icons/Spellcheck';
@@ -78,12 +77,12 @@ class PackageDetails extends React.Component {
 	// Publish template snapshot
 	handlePublishTemplate (id) {
 		// console.log('>>>>PackageDetails.handlePackageStatusUpdate', pkg);
-		this.props.publishProduct(id);
+		this.props.publishProduct({ id });
 	}
 	// Archive snapshot
-	handleArchiveSnapshot (pkg) {
+	handleArchiveSnapshot (id) {
 		// console.log('>>>>PackageDetails.handlePackageStatusUpdate', pkg);
-		this.props.archiveSnapshot(pkg.id);
+		this.props.archiveSnapshot({ id });
 	}
 	handleValidation () {
 		const validation = Validator.validate(this.state.selectedPackage);
