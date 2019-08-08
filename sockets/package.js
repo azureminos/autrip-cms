@@ -78,6 +78,13 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 							});
 					});
 			},
+			snapshots: callback => {
+				TravelPackage.model
+					.find({template: id})
+					.exec(function (err, items) {
+						return callback(null, items);
+					});
+			},
 		},
 		function (err, results) {
 			// console.log('>>>>server final callback for event[push:package:get]', results);
