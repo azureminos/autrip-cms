@@ -38,7 +38,8 @@ class App extends Component {
 		this.getPackageDetails = this.getPackageDetails.bind(this);
 		this.getFilteredPackages = this.getFilteredPackages.bind(this);
 		this.handleGetPackageDetails = this.handleGetPackageDetails.bind(this);
-		this.updatePackageState = this.updatePackageState.bind(this);
+		this.publishProduct = this.publishProduct.bind(this);
+		this.archiveSnapshot = this.archiveSnapshot.bind(this);
 		this.handleRefreshAllPackages = this.handleRefreshAllPackages.bind(this);
 		this.handleDrawerItemClick = this.handleDrawerItemClick.bind(this);
 
@@ -85,16 +86,22 @@ class App extends Component {
 		this.pushToRemote('package:filter', req);
 		this.setState({ updating: true });
 	}
+	// Publish product, Event[push:package:publish]
+	publishProduct (req) {
+		console.log('>>>>App Client >> publishProduct', req);
+		this.pushToRemote('package:publish', req);
+		this.setState({ updating: true });
+	}
+	// Archive snapshot, Event[push:package:archive]
+	archiveProduct (req) {
+		console.log('>>>>App Client >> archiveProduct', req);
+		this.pushToRemote('package:archive', req);
+		this.setState({ updating: true });
+	}
 	// Handle response of Get package details, Event[package:get]
 	handleGetPackageDetails (res) {
 		console.log('>>>>Event[package:get] response', res);
 		this.setState({ updating: false, packages: [], selectedPackage: res });
-	}
-	// Update package state, Event[push:package:status]
-	updatePackageState (req) {
-		console.log('>>>>App Client >> updatePackageState', req);
-		this.pushToRemote('package:status', req);
-		this.setState({ updating: true });
 	}
 	// Handle response of refresh all packages, Event[package:refreshAll]
 	handleRefreshAllPackages (res) {
@@ -143,7 +150,6 @@ class App extends Component {
 					<PackageCards
 						packages={packages}
 						getPackageDetails={this.getPackageDetails}
-						updatePackageState={this.updatePackageState}
 					/>
 				);
 			} else if (
@@ -155,8 +161,9 @@ class App extends Component {
 				viewPackage = (
 					<PackageDetails
 						selectedPackage={selectedPackage}
-						updatePackageState={this.updatePackageState}
 						getFilteredPackages={this.getFilteredPackages}
+						publishProduct={this.publishProduct}
+						archiveSnapshot={this.archiveSnapshot}
 					/>
 				);
 			} else {
