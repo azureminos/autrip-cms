@@ -44,7 +44,7 @@ class PackageCard extends React.Component {
 				: item.description;
 		const status = `${item.type} - ${item.state}`;
 		const actionDefault = it => {
-			console.log('>>>>Default Action', it);
+			// console.log('>>>>Default Action', it);
 			const actions = _.values(btnActionMap);
 			if (actions && actions.length === 1) {
 				actions[0](it);
