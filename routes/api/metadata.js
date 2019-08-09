@@ -30,11 +30,7 @@ exports.getMetadata = function (req, res) {
 	const query = req.body;
 
 	const result = {
-		status: [
-			{ type: 'Template', state: 'Draft' },
-			{ type: 'Snapshot', state: 'Published' },
-			{ type: 'Snapshot', state: 'Archived' },
-		],
+		status: ['Draft', 'Published', 'Archived'],
 	};
 
 	const getCountryList = function (callback) {

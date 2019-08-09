@@ -26,13 +26,8 @@ TravelPackage.add({
 	maxParticipant: { type: Types.Number, default: 0 },
 	departureDate: { type: Types.Textarea },
 	retailPrice: { type: Types.Number, default: 0 },
-	type: {
-		type: Types.Select,
-		options: 'Template, Snapshot',
-		default: 'Template',
-		noedit: false,
-	},
-	state: {
+	isSnapshot: { type: Types.Boolean, default: false },
+	status: {
 		type: Types.Select,
 		options: 'Draft, Published, Archived',
 		default: 'Draft',
@@ -56,7 +51,7 @@ TravelPackage.add({
 });
 
 TravelPackage.defaultColumns
-	= 'name, type, state, totalDays, maxParticipant, isPromoted';
+	= 'name, type, status, totalDays, maxParticipant, isPromoted';
 
 TravelPackage.schema.methods.cleanupCountry = function (callback) {
 	var pkg = this;

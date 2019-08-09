@@ -1,88 +1,77 @@
 const _ = require('lodash');
 const async = require('async');
 const keystone = require('keystone');
-const helper = require('../lib/object-parser');
+const Parser = require('../lib/object-parser');
 const TravelPackage = require('../lib/models/travel-package');
+const PackageItem = require('../lib/models/package-item');
+const PackageHotel = require('../lib/models/package-hotel');
+const PackageRate = require('../lib/models/package-rate');
+const FlightRate = require('../lib/models/flight-rate');
+const City = require('../lib/models/city');
 
 exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 	// console.log('>>>>server socket received event[push:package:get]', id);
-	const TravelPackage = keystone.list('TravelPackage');
-	const PackageItem = keystone.list('PackageItem');
-	const PackageHotel = keystone.list('PackageHotel');
-	const City = keystone.list('City');
 	// async calls
 	async.parallel(
 		{
 			packageSummary: callback => {
-				TravelPackage.model.findById(id).exec(function (err, item) {
-					// console.log('>>>>server async calls for event[push:package:get]', item);
-					return callback(null, helper.parseTravelPackage(item));
-				});
+				const handler = (err, resp) => {
+					return callback(err, Parser.parseTravelPackage(resp));
+				};
+				TravelPackage.getTravelPackageById(id, handler);
 			},
 			packageItems: callback => {
-				PackageItem.model
-					.find({ package: id })
-					.populate('attraction')
-					.exec(function (err, items) {
-						return callback(null, helper.parsePackageItem(items));
-					});
+				const handler = (err, resp) => {
+					return callback(err, Parser.parsePackageItem(resp));
+				};
+				PackageItem.getPackageItemByParams({ package: id }, handler);
 			},
 			packageHotels: callback => {
-				PackageHotel.model
-					.find({ package: id })
-					.populate('hotel')
-					.exec(function (err, items) {
-						return callback(null, helper.parsePackageHotel(items));
-					});
+				const handler = (err, resp) => {
+					return callback(err, Parser.parsePackageHotel(resp));
+				};
+				PackageHotel.getPackageHotelByParams({ package: id }, handler);
 			},
 			packageRates: callback => {
-				TravelPackage.model
-					.findById(id)
-					.populate('packageRates')
-					.exec(function (err, item) {
-						const sortedRates = (item.packageRates || []).sort(function (a, b) {
-							return b.priority - a.priority;
-						});
-						return callback(null, sortedRates);
+				const handler = (err, resp) => {
+					const sortedRates = (resp || []).sort(function (a, b) {
+						return b.priority - a.priority;
 					});
+					return callback(null, sortedRates);
+				};
+				PackageRate.getPackageRateByParams({ package: id }, handler);
+			},
+			flightRates: callback => {
+				const handler = (err, resp) => {
+					const sortedRates = (resp || []).sort(function (a, b) {
+						return b.priority - a.priority;
+					});
+					return callback(null, sortedRates);
+				};
+				FlightRate.getFlightRateByParams({ package: id }, handler);
+			},
+			cities: callback => {
+				const handler = (err, items) => {
+					const cities = _.map(items, item => {
+						return item.attraction ? item.attraction.city : null;
+					});
+					const handler2 = (err, resp) => {
+						return callback(null, Parser.parseCity(resp, 'all'));
+					};
+					// console.log('>>>>getPackageDetails.cityAttractions : cities', cities);
+					return City.getFullCityByParams({ _id: { $in: cities } }, handler2);
+				};
+				PackageItem.getPackageItemByParams({ package: id }, handler);
 			},
 			carRates: callback => {
 				// TBD
 				callback(null, []);
 			},
-			flightRates: callback => {
-				TravelPackage.model
-					.findById(id)
-					.populate('flightRates')
-					.exec(function (err, item) {
-						const sortedRates = (item.flightRates || []).sort(function (a, b) {
-							return b.priority - a.priority;
-						});
-						return callback(null, sortedRates);
-					});
-			},
-			cities: callback => {
-				PackageItem.model
-					.find({ package: id })
-					.populate('attraction')
-					.exec(function (err, items) {
-						const cities = _.map(items, item => {
-							return item.attraction ? item.attraction.city : null;
-						});
-						// console.log('>>>>getPackageDetails.cityAttractions : cities', cities);
-						return City.model
-							.find({ _id: { $in: cities } })
-							.populate('attractions hotels')
-							.exec(function (err, items) {
-								// console.log('>>>>getPackageDetails.cityAttractions : result', items);
-								return callback(null, helper.parseCity(items, 'all'));
-							});
-					});
-			},
 			snapshots: callback => {
-				TravelPackage.model.find({ template: id }).exec(function (err, items) {
-					return callback(null, items);
-				});
+				const handler = (err, resp) => {
+					callback(err, Parser.parseSnapshot(resp));
+				};
+				TravelPackage.getTravelPackageByParams({ template: id }, handler);
 			},
 		},
 		function (err, results) {
@@ -92,86 +81,13 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 	);
 };
 
-exports.updatePackageState = ({
-	request: { id, status, isRefreshAll },
-	sendStatus,
-	socket,
-}) => {
-	// console.log('>>>>server socket received event[push:package:status]', id);
-	const TravelPackage = keystone.list('TravelPackage');
-
-	TravelPackage.model
-		.update({ _id: id }, { state: status })
-		.exec(function (err, res) {
-			// console.log(`>>>>TravelPackage.update[${id}: ${status}]`, res);
-			if (isRefreshAll) {
-				TravelPackage.model.find(function (err, items) {
-					socket.emit('package:refreshAll', {
-						packages: helper.parseTravelPackage(items),
-					});
-				});
-			} else {
-				async.parallel(
-					{
-						packageSummary: callback => {
-							TravelPackage.model.findById(id).exec(function (err, item) {
-								// console.log('>>>>server async calls for event[push:package:get]', item);
-								return callback(null, helper.parseTravelPackage(item));
-							});
-						},
-						packageItems: callback => {
-							TravelPackage.model
-								.findById(id)
-								.populate('packageItems')
-								.exec(function (err, item) {
-									return callback(null, item.packageItems);
-								});
-						},
-						packageHotels: callback => {
-							TravelPackage.model
-								.findById(id)
-								.populate('packageHotels')
-								.exec(function (err, item) {
-									return callback(null, item.packageHotels);
-								});
-						},
-						packageRates: callback => {
-							TravelPackage.model
-								.findById(id)
-								.populate('packageRates')
-								.exec(function (err, item) {
-									return callback(null, item.packageRates);
-								});
-						},
-						carRates: callback => {
-							// TBD
-							callback(null, []);
-						},
-						flightRates: callback => {
-							TravelPackage.model
-								.findById(id)
-								.populate('flightRates')
-								.exec(function (err, item) {
-									return callback(null, item.flightRates);
-								});
-						},
-					},
-					function (err, results) {
-						// console.log('>>>>server final callback for event[push:package:get]', results);
-						socket.emit('package:get', results);
-					}
-				);
-			}
-		});
-};
-
 exports.getFilteredPackages = ({ request, sendStatus, socket }) => {
 	// console.log('>>>>server socket received event[push:package:filter]', request);
 	const TravelPackage = keystone.list('TravelPackage');
 
 	TravelPackage.model.find(request).exec(function (err, items) {
 		socket.emit('package:refreshAll', {
-			packages: helper.parseTravelPackage(items),
+			packages: Parser.parseTravelPackage(items),
 		});
 	});
 };

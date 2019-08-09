@@ -9,6 +9,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
+import CONSTANTS from '../lib/constants';
 
 const styles = {
 	card: {
@@ -23,7 +24,7 @@ const styles = {
 	media: {
 		height: 240,
 	},
-	state: {
+	status: {
 		color: 'red',
 		fontWeight: 800,
 		fontSize: '35px',
@@ -37,12 +38,15 @@ const styles = {
 class PackageCard extends React.Component {
 	render () {
 		const { classes, item, btnActionMap } = this.props;
+		const { type } = CONSTANTS.get().TravelPackage;
 		const buttons = [];
 		const description
 			= item.description.length > 200
 				? `${item.description.substring(0, 200)}...`
 				: item.description;
-		const status = `${item.type} - ${item.state}`;
+		const status = item.isSnapshot
+			? `${type.SNAPSHOT} - ${item.status}`
+			: type.TEMPLATE;
 		const actionDefault = it => {
 			// console.log('>>>>Default Action', it);
 			const actions = _.values(btnActionMap);
@@ -75,7 +79,7 @@ class PackageCard extends React.Component {
 					/>
 					<CardContent>
 						<Typography gutterBottom variant="h5">
-							<div className={classes.state}>{status}</div>
+							<div className={classes.status}>{status}</div>
 							<div className={classes.title}>{item.name}</div>
 						</Typography>
 						<Typography component="p">{description}</Typography>

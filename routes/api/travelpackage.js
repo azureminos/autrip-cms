@@ -16,7 +16,7 @@ exports.getAllTravelPackage = function (req, res) {
 exports.getTravelPackageTemplate = function (req, res) {
 	console.log('>>>>Calling getTravelPackageTemplate');
 	TravelPackage.model
-		.find({ type: 'Template', state: 'Draft' })
+		.find({ isSnapshot: false, status: 'Draft' })
 		.exec(function (err, items) {
 			if (err) return res.apiError('database error', err);
 			return res.apiResponse(Parser.parseTravelPackage(items));
@@ -27,7 +27,7 @@ exports.getTravelPackageTemplate = function (req, res) {
 exports.getTravelPackageSnapshot = function (req, res) {
 	console.log('>>>>Calling getTravelPackageSnapshot');
 	TravelPackage.model
-		.find({ type: 'Snapshot', state: 'Published' })
+		.find({ isSnapshot: true, status: 'Published' })
 		.exec(function (err, items) {
 			if (err) return res.apiError('database error', err);
 			return res.apiResponse(Parser.parseTravelPackage(items));

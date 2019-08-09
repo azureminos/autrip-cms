@@ -13,8 +13,6 @@ class PackageCards extends React.Component {
 	constructor (props) {
 		super(props);
 
-		this.getNextStatus = this.getNextStatus.bind(this);
-		this.getNextAction = this.getNextAction.bind(this);
 		this.handleOpenPackage = this.handleOpenPackage.bind(this);
 
 		this.state = {
@@ -25,39 +23,6 @@ class PackageCards extends React.Component {
 	}
 
 	/* ----------  Helpers  ------- */
-	// Get next status
-	getNextStatus (status) {
-		let nextStatus;
-		switch (status) {
-			case 'Draft':
-				nextStatus = 'Published';
-				break;
-			case 'Published':
-				nextStatus = 'Archived';
-				break;
-			case 'Archived':
-				nextStatus = 'Draft';
-				break;
-		}
-		return nextStatus;
-	}
-	// Get next Action
-	getNextAction (status) {
-		let nextStatus;
-		switch (status) {
-			case 'Draft':
-				nextStatus = 'Publish';
-				break;
-			case 'Published':
-				nextStatus = 'Archive';
-				break;
-			case 'Archived':
-				nextStatus = 'Edit';
-				break;
-		}
-		return nextStatus;
-	}
-
 	/* ----------  Event Handlers  ------- */
 	// Handle open package
 	handleOpenPackage (pkg) {
@@ -71,7 +36,6 @@ class PackageCards extends React.Component {
 
 		let cards = _.map(packages, pkg => {
 			// Init button/action of package card
-			const nextAction = this.getNextAction(pkg.state);
 			const btnActionMap = {};
 			if (getPackageDetails) {
 				btnActionMap['View Package'] = this.handleOpenPackage;

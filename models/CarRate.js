@@ -40,7 +40,89 @@ CarRate.add({
 
 CarRate.defaultColumns = 'name|50%, type, minParticipant, maxParticipant, rate';
 
+CarRate.schema.methods.cleanupCity = function (callback) {
+	var hotel = this;
+	// Remove hotel from city.hotels
+	keystone
+		.list('City')
+		.model.findOne({ hotels: hotel._id })
+		.exec(function (err, item) {
+			if (err || !item) return callback();
+			if (
+				!hotel.city
+				|| (hotel.city && item._id.toString() != hotel.city.toString())
+			) {
+				item.hotels = _.remove(item.hotels, function (o) {
+					return o.toString() != hotel._id.toString();
+				});
+				// console.log('>>>>Updated item.hotels', item);
+				keystone
+					.list('City')
+					.model.findByIdAndUpdate(item._id, { hotels: item.hotels }, callback);
+			} else {
+				return callback();
+			}
+		});
+};
+
+CarRate.schema.methods.updateCity = function (callback) {
+	var carRate = this;
+	// Update hotel from city.hotels
+	if (carRate.city) {
+		// Find the new selected city, then add this hotel to city.hotels
+		keystone
+			.list('City')
+			.model.findById(carRate.city.toString())
+			.exec(function (err, item) {
+				if (err || !item) return callback();
+				var isFound = _.find(item.carRates, function (o) {
+					return o.toString() == carRate._id.toString();
+				});
+				if (!isFound) {
+					item.carRates.push(carRate._id);
+					keystone
+						.list('City')
+						.model.findByIdAndUpdate(
+							item._id,
+							{ carRates: item.carRates },
+							callback
+						);
+				} else {
+					return callback();
+				}
+			});
+	} else {
+		return callback();
+	}
+};
+
 CarRate.schema.set('usePushEach', true);
+
+CarRate.schema.pre('save', function (next) {
+	console.log('>>>>Before Save Hotel', this.name);
+	var carRate = this;
+	async.series(
+		[
+			function (callback) {
+				if (carRate.isModified('city')) {
+					carRate.cleanupCity(callback);
+				} else {
+					return callback();
+				}
+			},
+			function (callback) {
+				if (carRate.isModified('city')) {
+					carRate.updateCity(callback);
+				} else {
+					return callback();
+				}
+			},
+		],
+		function (err) {
+			next();
+		}
+	);
+});
 
 /**
  * Registration
