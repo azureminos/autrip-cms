@@ -17,7 +17,11 @@ var TravelPackage = new keystone.List('TravelPackage', {
 
 TravelPackage.add({
 	name: { type: Types.Text, required: true, index: true },
-	template: { type: Types.Relationship, ref: 'TravelPackage' },
+	template: {
+		type: Types.Relationship,
+		ref: 'TravelPackage',
+		hidden: true,
+	},
 	description: { type: Types.Textarea },
 	finePrint: { type: Types.Textarea },
 	highlight: { type: Types.Textarea },
@@ -33,7 +37,6 @@ TravelPackage.add({
 		default: 'Draft',
 		noedit: false,
 	},
-	// publishedAt: { type: Types.Date, noedit: true },
 	isPromoted: { type: Types.Boolean, default: false },
 	isCustomisable: { type: Types.Boolean, default: false },
 	isExtention: { type: Types.Boolean, default: false },

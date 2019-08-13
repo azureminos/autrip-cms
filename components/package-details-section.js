@@ -91,7 +91,7 @@ class PackageDetails extends React.Component {
 	// Handle go back to package-list view
 	handleShowPackageList () {
 		// console.log('>>>>PackageDetails.handleShowPackageList');
-		this.props.getFilteredPackages({ type: 'Template' });
+		this.props.getFilteredPackages({ isSnapshot: false });
 	}
 	// Handle modal open
 	handleModalOpen (type) {
@@ -119,7 +119,7 @@ class PackageDetails extends React.Component {
 			carRates,
 			hotelRates,
 		} = selectedPackage;
-		const isTemplate = packageSummary.type === 'Template';
+		const isTemplate = !packageSummary.isSnapshot;
 
 		const btnSnapshotList = isTemplate ? (
 			<Button

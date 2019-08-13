@@ -92,18 +92,54 @@ exports.getFilteredPackages = ({ request, sendStatus, socket }) => {
 	});
 };
 
-exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
-	// console.log('>>>>server socket received event[push:package:status]', id);
-	const handler = (err, resp) => {
-		console.log('>>>>Socket.publishPackage resp', resp);
-	};
-	TravelPackage.publishTravelPackageByTemplateId(id, handler);
-};
-
 exports.archivePackage = ({ request: { id }, sendStatus, socket }) => {
 	// console.log('>>>>server socket received event[push:package:archive]', id);
+	const TravelPackage = keystone.list('TravelPackage');
 	const handler = (err, resp) => {
 		console.log('>>>>Socket.archivePackage resp', resp);
 	};
 	TravelPackage.archiveTravelPackageByTemplateId(id, handler);
+};
+
+exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
+	// console.log('>>>>server socket received event[push:package:status]', id);
+	const handler = (err, resp) => {
+		console.log('>>>>Socket.publishPackage, archived existing snapshots', resp);
+		async.parallel(
+			{
+				packageSummary: callback => {
+					TravelPackage.getTravelPackageById(id, callback);
+				},
+				packageItems: callback => {
+					PackageItem.getPackageItemByParams({ package: id }, callback);
+				},
+				packageHotels: callback => {
+					PackageHotel.getPackageHotelByParams({ package: id }, callback);
+				},
+				packageRates: callback => {
+					PackageRate.getPackageRateByParams({ package: id }, callback);
+				},
+				flightRates: callback => {
+					FlightRate.getFlightRateByParams({ package: id }, callback);
+				},
+			},
+			function (err, results) {
+				console.log(
+					'>>>>Socket.publishPackage, before building snapshot',
+					results
+				);
+				const handler = (err, resp) => {
+					console.log(
+						'>>>>Socket.publishPackage, published travel package only',
+						resp
+					);
+				};
+				TravelPackage.publishTravelPackage(
+					Parser.snapshot(results.packageSummary),
+					handler
+				);
+			}
+		);
+	};
+	TravelPackage.publishTravelPackageByTemplateId(id, handler);
 };
