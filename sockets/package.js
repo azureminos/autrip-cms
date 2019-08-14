@@ -126,18 +126,25 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 			function (err, results) {
 				console.log(
 					'>>>>Socket.publishPackage, before building snapshot',
-					results
+					results.packageSummary
 				);
 				const handler = (err, resp) => {
 					console.log(
 						'>>>>Socket.publishPackage, published travel package only',
 						resp
 					);
+					const snapshotId = resp._id;
+					console.log(
+						`>>>>Socket.publishPackage, Before link items to [${snapshotId}]`,
+						results
+					);
 				};
-				TravelPackage.publishTravelPackage(
-					Parser.snapshot(results.packageSummary),
-					handler
-				);
+				if (results.packageSummary && results.packageSummary._doc) {
+					const templateId = results.packageSummary._doc._id;
+					const snapshot = Parser.snapshot(results.packageSummary._doc);
+					snapshot.template = templateId;
+					TravelPackage.publishTravelPackage(snapshot, handler);
+				}
 			}
 		);
 	};
