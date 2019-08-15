@@ -8,6 +8,8 @@ const PackageHotel = require('../lib/models/package-hotel');
 const PackageRate = require('../lib/models/package-rate');
 const FlightRate = require('../lib/models/flight-rate');
 const City = require('../lib/models/city');
+const CONSTANTS = require('../lib/constants');
+const { status } = CONSTANTS.get().TravelPackage;
 
 exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 	// console.log('>>>>server socket received event[push:package:get]', id);
@@ -93,12 +95,11 @@ exports.getFilteredPackages = ({ request, sendStatus, socket }) => {
 };
 
 exports.archivePackage = ({ request: { id }, sendStatus, socket }) => {
-	// console.log('>>>>server socket received event[push:package:archive]', id);
-	const TravelPackage = keystone.list('TravelPackage');
+	console.log('>>>>server socket received event[push:package:archive]', id);
 	const handler = (err, resp) => {
 		console.log('>>>>Socket.archivePackage resp', resp);
 	};
-	TravelPackage.archiveTravelPackageByTemplateId(id, handler);
+	TravelPackage.archiveTravelPackageById(id, handler);
 };
 
 exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
@@ -111,38 +112,116 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 					TravelPackage.getTravelPackageById(id, callback);
 				},
 				packageItems: callback => {
-					PackageItem.getPackageItemByParams({ package: id }, callback);
+					const handler = (err, resp) => {
+						if (err) {
+							console.log('>>>>Model.packageItems >> Error', err);
+							callback(err, null);
+						} else {
+							// console.log('>>>>Model.packageItems', resp);
+							const snapshots = _.map(resp, it => {
+								const ss = Parser.snapshot(it._doc);
+								ss.package = undefined;
+								ss.attraction = ss.attraction
+									? ss.attraction._id
+									: ss.attraction;
+								return ss;
+							});
+							// console.log('>>>>Model.packageItems before publish', snapshots);
+							PackageItem.publishPackageItem(snapshots, callback);
+						}
+					};
+					PackageItem.getPackageItemByParams({ package: id }, handler);
 				},
 				packageHotels: callback => {
-					PackageHotel.getPackageHotelByParams({ package: id }, callback);
+					const handler = (err, resp) => {
+						if (err) {
+							console.log('>>>>Model.packageHotels >> Error', err);
+							callback(err, null);
+						} else {
+							// console.log('>>>>Model.packageHotels', resp);
+							const snapshots = _.map(resp, it => {
+								const ss = Parser.snapshot(it._doc);
+								ss.package = undefined;
+								ss.hotel = ss.hotel ? ss.hotel._id : ss.hotel;
+								return ss;
+							});
+							// console.log('>>>>Model.packageHotels before publish', snapshots);
+							PackageHotel.publishPackageHotel(snapshots, callback);
+						}
+					};
+					PackageHotel.getPackageHotelByParams({ package: id }, handler);
 				},
 				packageRates: callback => {
-					PackageRate.getPackageRateByParams({ package: id }, callback);
+					const handler = (err, resp) => {
+						if (err) {
+							console.log('>>>>Model.packageRates >> Error', err);
+							callback(err, null);
+						} else {
+							// console.log('>>>>Model.packageRates', resp);
+							const snapshots = _.map(resp, it => {
+								const ss = Parser.snapshot(it._doc);
+								ss.package = undefined;
+								return ss;
+							});
+							// console.log('>>>>Model.packageRates before publish', snapshots);
+							PackageRate.publishPackageRate(snapshots, callback);
+						}
+					};
+					PackageRate.getPackageRateByParams({ package: id }, handler);
 				},
 				flightRates: callback => {
-					FlightRate.getFlightRateByParams({ package: id }, callback);
+					const handler = (err, resp) => {
+						if (err) {
+							console.log('>>>>Model.flightRates >> Error', err);
+							callback(err, null);
+						} else {
+							// console.log('>>>>Model.flightRates', resp);
+							const snapshots = _.map(resp, it => {
+								const ss = Parser.snapshot(it._doc);
+								ss.package = undefined;
+								return ss;
+							});
+							// console.log('>>>>Model.flightRates before publish', snapshots);
+							FlightRate.publishFlightRate(snapshots, callback);
+						}
+					};
+					FlightRate.getFlightRateByParams({ package: id }, handler);
 				},
 			},
 			function (err, results) {
-				console.log(
-					'>>>>Socket.publishPackage, before building snapshot',
-					results.packageSummary
-				);
-				const handler = (err, resp) => {
-					console.log(
-						'>>>>Socket.publishPackage, published travel package only',
-						resp
-					);
-					const snapshotId = resp._id;
-					console.log(
-						`>>>>Socket.publishPackage, Before link items to [${snapshotId}]`,
-						results
-					);
-				};
-				if (results.packageSummary && results.packageSummary._doc) {
-					const templateId = results.packageSummary._doc._id;
-					const snapshot = Parser.snapshot(results.packageSummary._doc);
+				if (err) {
+					console.log('>>>>Socket.publishPackage >> Finished in error', err);
+				} else if (!results.packageSummary) {
+					console.log('>>>>Socket.publishPackage >> PackageSummary is created');
+				} else {
+					// console.log('>>>>Socket.publishPackage, new snapshot', results);
+					const flightRates = _.map(results.flightRates, item => {
+						return item._id;
+					});
+					const packageRates = _.map(results.packageRates, item => {
+						return item._id;
+					});
+					const packageHotels = _.map(results.packageHotels, item => {
+						return item._id;
+					});
+					const packageItems = _.map(results.packageItems, item => {
+						return item._id;
+					});
+
+					const templateId = results.packageSummary._id;
+					const snapshot = Parser.snapshot(resp._doc);
 					snapshot.template = templateId;
+					snapshot.isSnapshot = true;
+					snapshot.status = status.PUBLISHED;
+					snapshot.packageItems = packageItems;
+					snapshot.packageRates = packageRates;
+					snapshot.flightRates = flightRates;
+					snapshot.packageHotels = packageHotels;
+
+					const handler = (err, response) => {
+						console.log('>>>>Completed publish travel package', response);
+					};
+
 					TravelPackage.publishTravelPackage(snapshot, handler);
 				}
 			}
