@@ -5,6 +5,9 @@ import io from 'socket.io-client';
 import getConfig from 'next/config';
 
 import { Paper, Typography } from '@material-ui/core';
+import Loader from 'react-loader-advanced';
+
+import LoadingSpinner from '../components/loading-spinner';
 import PersistentDrawer from '../components/persistent-drawer';
 import PackageFilters from '../components/package-filters';
 import PackageCards from '../components/package-list-section';
@@ -41,6 +44,8 @@ class App extends Component {
 		this.archiveSnapshot = this.archiveSnapshot.bind(this);
 		this.handleGetPackageDetails = this.handleGetPackageDetails.bind(this);
 		this.handleRefreshAllPackages = this.handleRefreshAllPackages.bind(this);
+		this.handlePublishProduct = this.handlePublishProduct.bind(this);
+		this.handleArchiveSnapshot = this.handleArchiveSnapshot.bind(this);
 		this.handleDrawerItemClick = this.handleDrawerItemClick.bind(this);
 
 		this.state = {
@@ -112,6 +117,14 @@ class App extends Component {
 			selectedPackage: {},
 		});
 	}
+	// Handle response of publish product
+	handlePublishProduct (resp) {
+		this.setState({ updating: false });
+	}
+	// Handle response of archive snapshot
+	handleArchiveSnapshot (resp) {
+		this.setState({ updating: false });
+	}
 	// Handle drawer click
 	handleDrawerItemClick (idx) {
 		this.setState({ idxSelectedSection: idx });
@@ -134,40 +147,51 @@ class App extends Component {
 		socket.on('package:refreshAll', res => {
 			this.handleRefreshAllPackages(res);
 		});
+		socket.on('package:publish', res => {
+			this.handlePublishProduct(res);
+		});
+		socket.on('package:archive', res => {
+			this.handleArchiveSnapshot(res);
+		});
 	}
 
 	render () {
 		const { reference, drawerItems } = this.props;
 		const { idxSelectedSection, packages, selectedPackage } = this.state;
 		console.log('>>>>App.render', { reference, packages, drawerItems });
-		let page, viewPackage;
+		const spinner = <LoadingSpinner loading={this.state.updating} />;
+		let viewPackage;
 
 		// Init package related view
-		if (idxSelectedSection === 0) {
-			if (packages && packages.length > 0) {
-				// Init tab content to display all packages
-				viewPackage = (
-					<PackageCards
-						packages={packages}
-						getPackageDetails={this.getPackageDetails}
-					/>
-				);
-			} else if (
-				packages.length === 0
-				&& selectedPackage
-				&& selectedPackage.packageSummary
-			) {
-				// Init tab content to display selected package
-				viewPackage = (
-					<PackageDetails
-						selectedPackage={selectedPackage}
-						getFilteredPackages={this.getFilteredPackages}
-						publishProduct={this.publishProduct}
-						archiveSnapshot={this.archiveSnapshot}
-					/>
-				);
-			} else {
-				viewPackage = <div />;
+		if (this.state.updating) {
+			viewPackage = <div style={{ height: 600 }} />;
+		} else {
+			if (idxSelectedSection === 0) {
+				if (packages && packages.length > 0) {
+					// Init tab content to display all packages
+					viewPackage = (
+						<PackageCards
+							packages={packages}
+							getPackageDetails={this.getPackageDetails}
+						/>
+					);
+				} else if (
+					packages.length === 0
+					&& selectedPackage
+					&& selectedPackage.packageSummary
+				) {
+					// Init tab content to display selected package
+					viewPackage = (
+						<PackageDetails
+							selectedPackage={selectedPackage}
+							getFilteredPackages={this.getFilteredPackages}
+							publishProduct={this.publishProduct}
+							archiveSnapshot={this.archiveSnapshot}
+						/>
+					);
+				} else {
+					viewPackage = <div style={{ height: 600 }} />;
+				}
 			}
 		}
 
@@ -181,25 +205,29 @@ class App extends Component {
 			))
 			|| (idxSelectedSection !== 0 && <div />);
 
-		// Init page
-		page = (
-			<Paper>
-				<PersistentDrawer
-					drawerItems={drawerItems}
-					selectedDrawerItem={idxSelectedSection}
-					handleDrawerItemClick={this.handleDrawerItemClick}
-					toolbarItem={toolbarItem}
-				>
-					{idxSelectedSection === 0 && viewPackage}
-					{idxSelectedSection === 1 && <div>This is Country</div>}
-					{idxSelectedSection === 2 && <div>This is City</div>}
-					{idxSelectedSection === 3 && <div>This is Attraction</div>}
-					{idxSelectedSection === 4 && <div>This is Hotel</div>}
-				</PersistentDrawer>
-			</Paper>
+		return (
+			<Loader
+				show={this.state.updating}
+				message={spinner}
+				foregroundStyle={{ color: 'white' }}
+				backgroundStyle={{ backgroundColor: 'white' }}
+			>
+				<Paper>
+					<PersistentDrawer
+						drawerItems={drawerItems}
+						selectedDrawerItem={idxSelectedSection}
+						handleDrawerItemClick={this.handleDrawerItemClick}
+						toolbarItem={toolbarItem}
+					>
+						{idxSelectedSection === 0 && viewPackage}
+						{idxSelectedSection === 1 && <div>This is Country</div>}
+						{idxSelectedSection === 2 && <div>This is City</div>}
+						{idxSelectedSection === 3 && <div>This is Attraction</div>}
+						{idxSelectedSection === 4 && <div>This is Hotel</div>}
+					</PersistentDrawer>
+				</Paper>
+			</Loader>
 		);
-
-		return page;
 	}
 }
 

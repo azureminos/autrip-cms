@@ -2,6 +2,8 @@
 var _ = require('lodash');
 var async = require('async');
 var keystone = require('keystone');
+var CONSTANTS = require('../../lib/constants');
+var { status } = CONSTANTS.get().TravelPackage;
 
 var Country = keystone.list('Country');
 
@@ -30,7 +32,7 @@ exports.getMetadata = function (req, res) {
 	const query = req.body;
 
 	const result = {
-		status: ['Draft', 'Published', 'Archived'],
+		status: [status.PUBLISHED, status.ARCHIVED],
 	};
 
 	const getCountryList = function (callback) {

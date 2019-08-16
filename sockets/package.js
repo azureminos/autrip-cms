@@ -97,7 +97,18 @@ exports.getFilteredPackages = ({ request, sendStatus, socket }) => {
 exports.archivePackage = ({ request: { id }, sendStatus, socket }) => {
 	console.log('>>>>server socket received event[push:package:archive]', id);
 	const handler = (err, resp) => {
-		console.log('>>>>Socket.archivePackage resp', resp);
+		if (err) {
+			console.log('>>>>Socket.publishPackage >> Finished in error', err);
+			socket.emit('package:archive', {
+				message: 'Failed to archive travel package',
+				err: true,
+			});
+		} else {
+			console.log('>>>>Socket.archivePackage resp', resp);
+			socket.emit('package:archive', {
+				message: 'Travel package has been archived',
+			});
+		}
 	};
 	TravelPackage.archiveTravelPackageById(id, handler);
 };
@@ -191,8 +202,16 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 			function (err, results) {
 				if (err) {
 					console.log('>>>>Socket.publishPackage >> Finished in error', err);
+					socket.emit('package:publish', {
+						message: 'Failed to publish travel package',
+						err: true,
+					});
 				} else if (!results.packageSummary) {
 					console.log('>>>>Socket.publishPackage >> PackageSummary is created');
+					socket.emit('package:publish', {
+						message: 'Travel package not found',
+						err: true,
+					});
 				} else {
 					// console.log('>>>>Socket.publishPackage, new snapshot', results);
 					const flightRates = _.map(results.flightRates, item => {
@@ -220,6 +239,9 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 
 					const handler = (err, response) => {
 						console.log('>>>>Completed publish travel package', response);
+						socket.emit('package:publish', {
+							message: 'Travel package has been published',
+						});
 					};
 
 					TravelPackage.publishTravelPackage(snapshot, handler);
