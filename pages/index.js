@@ -8,6 +8,7 @@ import { Paper, Typography } from '@material-ui/core';
 import Loader from 'react-loader-advanced';
 
 import LoadingSpinner from '../components/loading-spinner';
+import SnackBar from '../components/snack-bar';
 import PersistentDrawer from '../components/persistent-drawer';
 import PackageFilters from '../components/package-filters';
 import PackageCards from '../components/package-list-section';
@@ -47,12 +48,14 @@ class App extends Component {
 		this.handlePublishProduct = this.handlePublishProduct.bind(this);
 		this.handleArchiveSnapshot = this.handleArchiveSnapshot.bind(this);
 		this.handleDrawerItemClick = this.handleDrawerItemClick.bind(this);
+		this.handleSnackBarClose = this.handleSnackBarClose.bind(this);
 
 		this.state = {
+			updating: false,
 			idxSelectedSection: 0,
 			packages: props.packages ? props.packages : [],
-			updating: false,
 			selectedPackage: {},
+			message: null,
 		};
 	}
 
@@ -104,30 +107,36 @@ class App extends Component {
 		this.setState({ updating: true });
 	}
 	// Handle response of Get package details, Event[package:get]
-	handleGetPackageDetails (res) {
-		console.log('>>>>Event[package:get] response', res);
-		this.setState({ updating: false, packages: [], selectedPackage: res });
+	handleGetPackageDetails (resp) {
+		console.log('>>>>Event[package:get] response', resp);
+		this.setState({ updating: false, packages: [], selectedPackage: resp });
 	}
 	// Handle response of refresh all packages, Event[package:refreshAll]
-	handleRefreshAllPackages (res) {
-		console.log('>>>>Event[package:refreshAll] response', res);
+	handleRefreshAllPackages (resp) {
+		console.log('>>>>Event[package:refreshAll] response', resp);
 		this.setState({
 			updating: false,
-			packages: res.packages,
+			packages: resp.packages,
 			selectedPackage: {},
 		});
 	}
 	// Handle response of publish product
 	handlePublishProduct (resp) {
-		this.setState({ updating: false });
+		console.log('>>>>Event[package:publish] response', resp);
+		this.setState({ updating: false, message: resp });
 	}
 	// Handle response of archive snapshot
 	handleArchiveSnapshot (resp) {
-		this.setState({ updating: false });
+		console.log('>>>>Event[package:archive] response', resp);
+		this.setState({ updating: false, message: resp });
 	}
 	// Handle drawer click
 	handleDrawerItemClick (idx) {
 		this.setState({ idxSelectedSection: idx });
+	}
+	// Handle snack bar close
+	handleSnackBarClose () {
+		this.setState({ message: null });
 	}
 
 	/* ==============================
@@ -160,8 +169,19 @@ class App extends Component {
 		const { idxSelectedSection, packages, selectedPackage } = this.state;
 		console.log('>>>>App.render', { reference, packages, drawerItems });
 		const spinner = <LoadingSpinner loading={this.state.updating} />;
-		let viewPackage;
+		let viewPackage, snackBar;
 
+		// Init Snack Bar Popup
+		if (this.state.message) {
+			snackBar = (
+				<SnackBar
+					message={this.state.message}
+					handleClose={this.handleSnackBarClose}
+				/>
+			);
+		} else {
+			snackBar = '';
+		}
 		// Init package related view
 		if (this.state.updating) {
 			viewPackage = <div style={{ height: 600 }} />;
@@ -219,6 +239,7 @@ class App extends Component {
 						handleDrawerItemClick={this.handleDrawerItemClick}
 						toolbarItem={toolbarItem}
 					>
+						{snackBar}
 						{idxSelectedSection === 0 && viewPackage}
 						{idxSelectedSection === 1 && <div>This is Country</div>}
 						{idxSelectedSection === 2 && <div>This is City</div>}

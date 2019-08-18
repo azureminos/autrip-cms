@@ -10,6 +10,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import CONSTANTS from '../lib/constants';
+import Parser from '../lib/object-parser';
 
 const styles = {
 	card: {
@@ -28,10 +29,12 @@ const styles = {
 		color: 'red',
 		fontWeight: 800,
 		fontSize: '35px',
-		textShadow: '0px 0px 5px rgba(0,0,0,0.42)',
 	},
 	title: {
 		height: 70,
+	},
+	localDateTime: {
+		fontSize: '12px',
 	},
 };
 
@@ -80,6 +83,14 @@ class PackageCard extends React.Component {
 					<CardContent>
 						<Typography gutterBottom variant="h5">
 							<div className={classes.status}>{status}</div>
+							<div className={classes.localDateTime}>
+								<span>Created At: </span>
+								{Parser.parseDate(new Date(item.updatedAt || ''))}
+							</div>
+							<div className={classes.localDateTime}>
+								<span>Updated At: </span>
+								{Parser.parseDate(new Date(item.createdAt || ''))}
+							</div>
 							<div className={classes.title}>{item.name}</div>
 						</Typography>
 						<Typography component="p">{description}</Typography>
