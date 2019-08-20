@@ -2,7 +2,8 @@ var _ = require('lodash');
 var async = require('async');
 var keystone = require('keystone');
 var Types = keystone.Field.Types;
-
+var CONSTANT = require('../lib/constants');
+var { status } = CONSTANT.get().TravelPackage;
 /**
  * TravelPackage Model
  * ==========
@@ -33,8 +34,8 @@ TravelPackage.add({
 	isSnapshot: { type: Types.Boolean, default: false },
 	status: {
 		type: Types.Select,
-		options: 'Draft, Published, Archived',
-		default: 'Draft',
+		options: `${status.DRAFT}, ${status.PUBLISHED}, ${status.ARCHIVED}`,
+		default: status.DRAFT,
 		noedit: false,
 	},
 	isPromoted: { type: Types.Boolean, default: false },
