@@ -23,10 +23,7 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 				TravelPackage.getTravelPackageById(id, handler);
 			},
 			packageItems: callback => {
-				const handler = (err, resp) => {
-					return callback(err, Parser.parsePackageItem(resp));
-				};
-				PackageItem.getPackageItemByParams({ package: id }, handler);
+				PackageItem.getPackageItemByPackage(id, callback);
 			},
 			packageHotels: callback => {
 				const handler = (err, resp) => {
@@ -53,7 +50,8 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 				FlightRate.getFlightRateByParams({ package: id }, handler);
 			},
 			cities: callback => {
-				const handler = (err, items) => {
+				callback(null, []);
+				/* const handler = (err, items) => {
 					const cities = _.map(items, item => {
 						return item.attraction ? item.attraction.city : null;
 					});
@@ -63,7 +61,7 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 					// console.log('>>>>getPackageDetails.cityAttractions : cities', cities);
 					return City.getFullCityByParams({ _id: { $in: cities } }, handler2);
 				};
-				PackageItem.getPackageItemByParams({ package: id }, handler);
+				PackageItem.getPackageItemByPackage(id, handler);*/
 			},
 			carRates: callback => {
 				// TBD
@@ -141,7 +139,7 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 							PackageItem.publishPackageItem(snapshots, callback);
 						}
 					};
-					PackageItem.getPackageItemByParams({ package: id }, handler);
+					PackageItem.getPackageItemByPackage(id, handler);
 				},
 				packageHotels: callback => {
 					const handler = (err, resp) => {
