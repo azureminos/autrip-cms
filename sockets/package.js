@@ -99,7 +99,7 @@ exports.archivePackage = ({ request: { id }, sendStatus, socket }) => {
 				err: true,
 			});
 		} else {
-			console.log('>>>>Socket.archivePackage resp', resp);
+			// console.log('>>>>Socket.archivePackage resp', resp);
 			socket.emit('package:archive', {
 				message: 'Travel package has been archived',
 			});
@@ -109,9 +109,9 @@ exports.archivePackage = ({ request: { id }, sendStatus, socket }) => {
 };
 
 exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
-	// console.log('>>>>server socket received event[push:package:status]', id);
-	const handler = (err, resp) => {
-		console.log('>>>>Socket.publishPackage, archived existing snapshots', resp);
+	// console.log('>>>>server socket received event[push:package:publish]', id);
+	const pubHandler = (err, resp) => {
+		// console.log('>>>>Socket.publishPackage', resp);
 		async.parallel(
 			{
 				packageSummary: callback => {
@@ -125,10 +125,10 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 						} else {
 							// console.log('>>>>Model.packageItems', resp);
 							const snapshots = _.map(resp, it => {
-								const ss = Parser.snapshot(it._doc);
+								const ss = Parser.snapshot(it);
 								ss.package = undefined;
 								ss.attraction = ss.attraction
-									? ss.attraction._id
+									? ss.attraction.id
 									: ss.attraction;
 								return ss;
 							});
@@ -146,16 +146,16 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 						} else {
 							// console.log('>>>>Model.packageHotels', resp);
 							const snapshots = _.map(resp, it => {
-								const ss = Parser.snapshot(it._doc);
+								const ss = Parser.snapshot(it);
 								ss.package = undefined;
-								ss.hotel = ss.hotel ? ss.hotel._id : ss.hotel;
+								ss.hotel = ss.hotel ? ss.hotel.id : ss.hotel;
 								return ss;
 							});
 							// console.log('>>>>Model.packageHotels before publish', snapshots);
 							PackageHotel.publishPackageHotel(snapshots, callback);
 						}
 					};
-					PackageHotel.getPackageHotelByParams({ package: id }, handler);
+					PackageHotel.getPackageHotelByPackage(id, handler);
 				},
 				packageRates: callback => {
 					const handler = (err, resp) => {
@@ -181,13 +181,13 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 							console.log('>>>>Model.flightRates >> Error', err);
 							callback(err, null);
 						} else {
-							// console.log('>>>>Model.flightRates', resp);
+							console.log('>>>>Model.flightRates', resp);
 							const snapshots = _.map(resp, it => {
 								const ss = Parser.snapshot(it._doc);
 								ss.package = undefined;
 								return ss;
 							});
-							// console.log('>>>>Model.flightRates before publish', snapshots);
+							console.log('>>>>Model.flightRates before publish', snapshots);
 							FlightRate.publishFlightRate(snapshots, callback);
 						}
 					};
@@ -208,7 +208,7 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 						err: true,
 					});
 				} else {
-					// console.log('>>>>Socket.publishPackage, new snapshot', results);
+					console.log('>>>>Socket.publishPackage, new snapshot', results);
 					const flightRates = _.map(results.flightRates, item => {
 						return item._id;
 					});
@@ -232,17 +232,17 @@ exports.publishPackage = ({ request: { id }, sendStatus, socket }) => {
 					snapshot.flightRates = flightRates;
 					snapshot.packageHotels = packageHotels;
 
-					const handler = (err, response) => {
-						console.log('>>>>Completed publish travel package', response);
+					const finalHandler = (err, response) => {
+						// console.log('>>>>Completed publish travel package', response);
 						socket.emit('package:publish', {
 							message: 'Travel package has been published',
 						});
 					};
 
-					TravelPackage.publishTravelPackage(snapshot, handler);
+					TravelPackage.publishTravelPackage(snapshot, finalHandler);
 				}
 			}
 		);
 	};
-	TravelPackage.publishTravelPackageByTemplateId(id, handler);
+	TravelPackage.publishTravelPackageByTemplateId(id, pubHandler);
 };
