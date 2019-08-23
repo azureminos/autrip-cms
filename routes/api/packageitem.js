@@ -20,14 +20,15 @@ exports.getPackageItemById = function (req, res) {
 	});
 };
 
-/** * Get FlightRate by Params */
+/** * Get PackageItem by Params */
 exports.getPackageItemByPackage = function (req, res) {
 	console.log('>>>>Calling getPackageItemByPackage', req.body);
 	var query = req.body;
 	if (query.package) {
 		if (query.package.id) {
 			TravelPackage.model
-				.findById(query.package.id).populate('packageItems')
+				.findById(query.package.id)
+				.populate('packageItems')
 				.exec(function (err, item) {
 					if (err) return res.apiError('database error', err);
 					if (!item) return res.apiError('not found');
@@ -35,7 +36,8 @@ exports.getPackageItemByPackage = function (req, res) {
 				});
 		} else if (query.package.name) {
 			TravelPackage.model
-				.findOne({ name: query.package.name }).populate('packageItems')
+				.findOne({ name: query.package.name })
+				.populate('packageItems')
 				.exec(function (err, item) {
 					if (err) return res.apiError('database error', err);
 					if (!item) return res.apiError('not found');

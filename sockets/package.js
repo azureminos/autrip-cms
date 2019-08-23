@@ -26,10 +26,7 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 				PackageItem.getPackageItemByPackage(id, callback);
 			},
 			packageHotels: callback => {
-				const handler = (err, resp) => {
-					return callback(err, Parser.parsePackageHotel(resp));
-				};
-				PackageHotel.getPackageHotelByParams({ package: id }, handler);
+				PackageHotel.getPackageHotelByPackage(id, callback);
 			},
 			packageRates: callback => {
 				const handler = (err, resp) => {
