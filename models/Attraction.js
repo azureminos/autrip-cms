@@ -36,7 +36,7 @@ Attraction.add({
 		ref: 'Attraction',
 		many: true,
 	},
-	parentAttractions: { type: Types.Relationship, ref: 'Attraction' },
+	parentAttraction: { type: Types.Relationship, ref: 'Attraction' },
 	notes: { type: Types.Textarea },
 	additionalField: { type: Types.Textarea },
 });
