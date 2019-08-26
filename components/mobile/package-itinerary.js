@@ -62,7 +62,7 @@ export default class PackageItinerary extends React.Component {
 		// Add itinerary for each days
 		_.forEach(itAttractions, it => {
 			it.isPlannable = it.attractions[0].timePlannable > 0 || false;
-			it.isOvernight = it.hotels[0].isOvernight || !!it.hotels[0].hotel;
+			it.isOverNight = it.hotels[0].isOverNight || !!it.hotels[0].hotel;
 			console.log('>>>>PackageItinerary, formatted itinerary', it);
 			const city = Helper.findCityByName(it.cityBase, cities);
 			const title = triggerText(it.dayNo, it.cityBase);
