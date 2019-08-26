@@ -30,8 +30,15 @@ class MobileApp extends React.Component {
 		this.handleSelectFlight = this.handleSelectFlight.bind(this);
 		this.handleSelectCar = this.handleSelectCar.bind(this);
 
-		var instItems = _.map(props.instPackage.items, (item) => {
-			return item.attraction ? Helper.enhanceItem(item, props.reference.cities) : item;
+		var instItems = _.map(props.instPackage.items, item => {
+			return item.attraction
+				? Helper.enhanceItem(item, props.reference.cities)
+				: item;
+		});
+		var instHotels = _.map(props.instPackage.hotels, hotel => {
+			return hotel.hotel
+				? Helper.enhanceHotel(hotel, props.reference.cities)
+				: hotel;
 		});
 
 		this.state = {
@@ -40,14 +47,17 @@ class MobileApp extends React.Component {
 			flagModal: {
 				modalDiy: false,
 			},
-			instPackage: { ...props.instPackage, items: instItems },
+			instPackage: {
+				...props.instPackage,
+				items: instItems,
+				hotels: instHotels,
+			},
 		};
 	}
 
 	/* ==============================
 	   = Helper Methods             =
 	   ============================== */
-
 
 	/* ==============================
 	   = State & Event Handlers     =
@@ -58,19 +68,26 @@ class MobileApp extends React.Component {
 	handleModalDiyClose () {
 		console.log('>>>>MobileApp.handleModalDiyClose');
 		const { flagModal } = this.state;
-		this.setState({ updating: false, flagModal: { ...flagModal, modalDiy: false } });
+		this.setState({
+			updating: false,
+			flagModal: { ...flagModal, modalDiy: false },
+		});
 	}
 	enablePackageDiy () {
 		console.log('>>>>MobileApp.enablePackageDiy');
 		const { flagModal, instPackage } = this.state;
-		this.setState({ updating: false, instPackage: { ...instPackage, isCustomised: true }, flagModal: { ...flagModal, modalDiy: false } });
+		this.setState({
+			updating: false,
+			instPackage: { ...instPackage, isCustomised: true },
+			flagModal: { ...flagModal, modalDiy: false },
+		});
 	}
 	handleLikeAttraction (attraction) {
 		// Functions
-		var isPlannable = (dayItem) => {
+		var isPlannable = dayItem => {
 			return dayItem && dayItem.length > 0 && dayItem[0].timePlannable > 0;
 		};
-		var isOverloaded = (dayItem) => {
+		var isOverloaded = dayItem => {
 			var timePlannable = dayItem[0].timePlannable;
 			if (timePlannable === 0) {
 				return true;
@@ -78,8 +95,14 @@ class MobileApp extends React.Component {
 			var timePlanned = 0;
 			for (var i = 0; i < dayItem.length; i++) {
 				var attraction = dayItem[i].attraction;
-				timePlanned = timePlanned + attraction.timeTraffic + attraction.timeVisit;
-				if (i > 0 && _.findIndex(dayItem[i].attraction.nearByAttractions, (item) => { return item === dayItem[i - 1].attraction.id; }) > -1) {
+				timePlanned
+					= timePlanned + attraction.timeTraffic + attraction.timeVisit;
+				if (
+					i > 0
+					&& _.findIndex(dayItem[i].attraction.nearByAttractions, item => {
+						return item === dayItem[i - 1].attraction.id;
+					}) > -1
+				) {
 					timePlanned = timePlanned - 1;
 				}
 			}
@@ -97,9 +120,14 @@ class MobileApp extends React.Component {
 				var iDayItem = dayItems[days[i]];
 				if (!isOverloaded(iDayItem)) {
 					for (var n = 0; n < iDayItem.length; n++) {
-						if (_.findIndex((iDayItem[n].attraction.nearByAttractions || []), (nba) => {
-							return nba === item.id;
-						}) > -1) {
+						if (
+							_.findIndex(
+								iDayItem[n].attraction.nearByAttractions || [],
+								nba => {
+									return nba === item.id;
+								}
+							) > -1
+						) {
 							pos = { dayNo: iDayItem[n].dayNo, daySeq: iDayItem[n].daySeq };
 						}
 					}
@@ -107,11 +135,11 @@ class MobileApp extends React.Component {
 			}
 			return pos;
 		};
-		var mergeDayItems = (dayItems) => {
+		var mergeDayItems = dayItems => {
 			var items = [];
 			var days = Object.keys(dayItems);
-			_.each(days, (day) => {
-				_.each(dayItems[day], (item) => {
+			_.each(days, day => {
+				_.each(dayItems[day], item => {
 					items.push(item);
 				});
 			});
@@ -122,17 +150,25 @@ class MobileApp extends React.Component {
 		var { reference } = this.props;
 		var { cities } = reference;
 		var instItems = instPackage.items;
-		console.log(`>>>>MobileApp.setLikedAttractions, isCustomised[${instPackage.isCustomised}]`, attraction);
+		console.log(
+			`>>>>MobileApp.setLikedAttractions, isCustomised[${
+				instPackage.isCustomised
+			}]`,
+			attraction
+		);
 
 		if (!instPackage.isCustomised) {
 			// Package is not customised (DIY) yet, ask customer to confirm enabling DIY
-			this.setState({ updating: true, flagModal: { ...flagModal, modalDiy: true } });
+			this.setState({
+				updating: true,
+				flagModal: { ...flagModal, modalDiy: true },
+			});
 		} else {
 			// Package is customised (DIY) already, move on with rest of logic
 			this.setState({ updating: true });
 			var action = attraction.isLiked ? 'DELETE' : 'ADD';
 
-			var dayItems = _.groupBy(instItems, (item) => {
+			var dayItems = _.groupBy(instItems, item => {
 				return item.dayNo;
 			});
 			var posLastNearby = getLastNearby(attraction, dayItems);
@@ -159,8 +195,11 @@ class MobileApp extends React.Component {
 					var days = Object.keys(dayItems);
 					for (var i = 0; i < days.length; i++) {
 						var dayItem = dayItems[days[i]];
-						if (isPlannable(dayItem) && isSameCity(attraction, dayItem, cities)
-							&& !isOverloaded(dayItem)) {
+						if (
+							isPlannable(dayItem)
+							&& isSameCity(attraction, dayItem, cities)
+							&& !isOverloaded(dayItem)
+						) {
 							isAddible = true;
 							// Do something
 							var idx = dayItem.length;
@@ -178,19 +217,28 @@ class MobileApp extends React.Component {
 				}
 				if (!isAddible) {
 					// Do nothing but show warning message
-					this.setState({ updating: false, message: 'You have a full itinerary.' });
+					this.setState({
+						updating: false,
+						message: 'You have a full itinerary.',
+					});
 				}
 			} else if (action === 'DELETE') {
 				var days = Object.keys(dayItems);
 				for (var i = 0; i < days.length; i++) {
 					var dayItem = dayItems[days[i]];
-					var idx = _.findIndex(dayItem, (item) => {
-						return attraction.id === (item.attraction ? item.attraction.id : null);
+					var idx = _.findIndex(dayItem, item => {
+						return (
+							attraction.id === (item.attraction ? item.attraction.id : null)
+						);
 					});
-	
+
 					if (idx > -1 && dayItem.length === 1) {
 						// if it's the only item of the day, show warning and ignore the change
-						this.setState({ updating: false, message: 'Can not remove. It is the only attraction to visit for that day.' });
+						this.setState({
+							updating: false,
+							message:
+								'Can not remove. It is the only attraction to visit for that day.',
+						});
 						break;
 					} else if (idx > -1 && dayItem.length > 1) {
 						// if not the only item of the day, allow change
@@ -260,16 +308,24 @@ class MobileApp extends React.Component {
 		];
 		const pModalDiy = {
 			title: `Let's DIY your package`,
-			description: 'Would you like to start DIY your trip? An extra fee will be applied.',
+			description:
+				'Would you like to start DIY your trip? An extra fee will be applied.',
 			buttons: pBtnModalDiy,
 		};
+		const departDates = _.map(packageSummary.departureDate.split(','), d => {
+			return d.trim();
+		});
+		const itAttractions = Helper.getItineraryAttractionList({
+			cities,
+			packageItems: instPackage.items,
+			packageHotels: instPackage.hotels,
+		});
 
 		const tabs = {
 			Attraction: (
 				<div id="package-attraction">
 					<PackageAttraction
-						instPackage={instPackage}
-						cities={cities}
+						itAttractions={itAttractions}
 						handleLikeAttraction={this.handleLikeAttraction}
 					/>
 					<BotModal
@@ -287,7 +343,8 @@ class MobileApp extends React.Component {
 						showTransport
 						instPackage={instPackage}
 						rates={rates}
-						packageSummary={packageSummary}
+						itAttractions={itAttractions}
+						departDates={departDates}
 						cities={cities}
 						handleSelectHotel={this.handleSelectHotel}
 						handleSelectFlight={this.handleSelectFlight}
@@ -302,7 +359,7 @@ class MobileApp extends React.Component {
 		return (
 			<div id="app">
 				<Paper>
-					<FixedTab tabs={tabs} >
+					<FixedTab tabs={tabs}>
 						<BotHeader
 							instPackage={instPackage}
 							rates={rates}

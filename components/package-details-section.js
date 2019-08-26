@@ -205,9 +205,9 @@ class PackageDetails extends React.Component {
 		// Validation errors
 		let divMsgValidation = '';
 		if (!validation) {
-			console.log('>>>>No validation, hide message');
+			// console.log('>>>>No validation, hide message');
 		} else if (isValid) {
-			console.log('>>>>Passed validation, show success message');
+			// console.log('>>>>Passed validation, show success message');
 			divMsgValidation = (
 				<Typography
 					className={classes.dividerFullWidth}
@@ -217,7 +217,7 @@ class PackageDetails extends React.Component {
 				</Typography>
 			);
 		} else {
-			console.log('>>>>Failed validation, show error message');
+			// console.log('>>>>Failed validation, show error message');
 			const divErrors = _.map(validation.messages || [], (err, idx) => {
 				return <div key={idx}>{err}</div>;
 			});

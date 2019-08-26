@@ -21,29 +21,34 @@ const styles = {
 
 class PackageAttraction extends React.Component {
 	render () {
+		/*
+		 * Itinerary Card object
+		 *  - dayNo: dayNo
+		 *  - cityBase: where stay over night (or attraction city, or previous cityBase)
+		 *  - cityVisit: where attraction city (or same as cityBase)
+		 *  - cityDesc: description of cityBase
+		 *  - attractions: list of attractions in cityVisit (isLiked -> true/false)
+		 *  - hotel:
+		 */
 		console.log('>>>>PackageAttraction props', this.props);
-		const { classes, instPackage, cities, handleLikeAttraction, isReadonly } = this.props;
-		const packageItems = instPackage.items;
-		const cityDays = _.groupBy(_.filter(packageItems, (i) => { return i.attraction; }), (item) => {
-			return Helper.findCityByAttraction(item.attraction.id, cities);
-		});
-		const citySections = cities.map((city) => {
-			const tmpCity = city.name;
-			const cityDesc = tmpCity ? city.description : '';
-			const cityDescShort = cityDesc.length > 80 ? (cityDesc.substring(0, 80) + '...') : cityDesc;
-			const attractions = _.map(city.attractions, (a) => {
-				a.isLiked = _.findIndex(packageItems, (pi) => { return pi.attraction && pi.attraction.id === a.id; }) !== -1;
-				return a;
-			});
+		const {
+			classes,
+			itAttractions,
+			handleLikeAttraction,
+			isReadonly,
+		} = this.props;
+
+		const daySections = _.map(itAttractions, it => {
 			// Prepare settings of ChipList
-			const likedItems = _.filter(attractions, { isLiked: true });
-			// console.log('>>>>Show tags for city[' + city.name + ']', likedItems);
+			const likedItems = _.filter(it.attractions, { isLiked: true });
 			const tagSetting = {
-				tags: likedItems.map((item) => { return { id: item.id, name: item.name, imageUrl: item.imageUrl }; }),
+				tags: likedItems.map(item => {
+					return { id: item.id, name: item.name, imageUrl: item.imageUrl };
+				}),
 			};
 
 			// Prepare attraction card list
-			const attractionCards = attractions.map((a) => {
+			const attractionCards = _.map(it.attractions, a => {
 				return (
 					<AttractionCard
 						key={a.id}
@@ -53,24 +58,19 @@ class PackageAttraction extends React.Component {
 				);
 			});
 
-			const days = Object.keys(_.groupBy(cityDays[tmpCity], (c) => { return c.dayNo; })).length;
 			return (
-				<div key={city.id} className={classes.city}>
+				<div key={it.id} className={classes.city}>
 					<Typography variant="h5" gutterBottom>
-						{city.name + ' - ' + days + ' Day' + (days === 1 ? '' : 's')}
+						{`Day ${it.dayNo}: ${it.cityVisit}`}
 					</Typography>
-					<DescPanel descShort={cityDescShort} descFull={cityDesc} />
+					<DescPanel descShort={it.cityDescShort} descFull={it.cityDesc} />
 					<ChipList {...tagSetting} />
 					<CardSlider cards={attractionCards} />
 				</div>
 			);
 		});
 
-		return (
-			<section>
-				{citySections}
-			</section>
-		);
+		return <section>{daySections}</section>;
 	}
 }
 

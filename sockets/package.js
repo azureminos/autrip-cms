@@ -47,18 +47,23 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 				FlightRate.getFlightRateByParams({ package: id }, handler);
 			},
 			cities: callback => {
-				callback(null, []);
-				/* const handler = (err, items) => {
-					const cities = _.map(items, item => {
-						return item.attraction ? item.attraction.city : null;
+				const handler = (err, items) => {
+					// console.log('>>>>Socket.getPackageItemByPackage', items);
+					const tmpCities = _.map(items, item => {
+						return item.cityId;
+					});
+					const allCities = _.filter(tmpCities, item => {
+						return !!item;
 					});
 					const handler2 = (err, resp) => {
 						return callback(null, Parser.parseCity(resp, 'all'));
 					};
-					// console.log('>>>>getPackageDetails.cityAttractions : cities', cities);
-					return City.getFullCityByParams({ _id: { $in: cities } }, handler2);
+					return City.getFullCityByParams(
+						{ _id: { $in: allCities } },
+						handler2
+					);
 				};
-				PackageItem.getPackageItemByPackage(id, handler);*/
+				PackageItem.getPackageItemByPackage(id, handler);
 			},
 			carRates: callback => {
 				// TBD
