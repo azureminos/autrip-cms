@@ -29,21 +29,31 @@ const styles = theme => ({
 
 class HotelCard extends React.Component {
 	constructor (props) {
-		console.log('>>>>HotelCard, constructor()', props);
+		// console.log('>>>>HotelCard, constructor()', props);
 		super(props);
 	}
 
 	render () {
 		const { classes, item, doSelectHotel } = this.props;
-		console.log('>>>>HotelCard render()', item);
+		// console.log('>>>>HotelCard render()', item);
 		return (
 			<Card className={classes.card}>
 				<CardHeader
 					classes={{ root: classes.headerRoot, title: classes.headerTitle }}
 					action={
 						<IconButton onClick={() => doSelectHotel(item)}>
-							<CheckIcon style={{ display: this.props.item.isSelected ? 'none' : 'block', color: grey[500] }} />
-							<SolidCheckIcon style={{ display: this.props.item.isSelected ? 'block' : 'none', color: blue[500] }} />
+							<CheckIcon
+								style={{
+									display: this.props.item.isSelected ? 'none' : 'block',
+									color: grey[500],
+								}}
+							/>
+							<SolidCheckIcon
+								style={{
+									display: this.props.item.isSelected ? 'block' : 'none',
+									color: blue[500],
+								}}
+							/>
 						</IconButton>
 					}
 					title={item.name}

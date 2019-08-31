@@ -1,36 +1,67 @@
 import _ from 'lodash';
 import React from 'react';
+import Moment from 'moment';
 // import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import { withStyles } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
 import ControlledAccordion from './components/accordion';
 import HotelSlider from './components/hotel-slider';
 import FlightCar from './components/flight-car';
 import ItineraryItem from './components/itinerary-item';
 import HotelItem from './components/hotel-item';
-
 import Helper from '../../lib/helper';
+import CONSTANTS from '../../lib/constants';
 
+const dtFormat = CONSTANTS.get().Global.dateFormat;
 const triggerText = (dayNo, city) => `Day ${dayNo}: ${city}`;
 
 export default class PackageItinerary extends React.Component {
+	constructor (props) {
+		super(props);
+		const { startDate } = props.transport;
+		const likedHotel = _.find(props.hotels, h => {
+			return h.isLiked;
+		});
+		this.state = {
+			idxSelected: likedHotel ? likedHotel.id : -1,
+			startDate: startDate,
+		};
+	}
+
 	render () {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
 		const {
-			instPackage,
 			rates,
 			cities,
-			departDates,
+			transport: { departDates, carOption, totalDays },
 			isReadonly,
 			showTransport,
+			itAttractions,
 			handleSelectHotel,
 			handleSelectFlight,
 			handleSelectCar,
-			itAttractions,
 		} = this.props;
+		const { startDate } = this.state;
 		const { packageRates, carRates, flightRates, hotelRates } = rates;
+		const doHandleSelectFlight = stStartDate => {
+			const sDate = stStartDate ? Moment(stStartDate, dtFormat).toDate() : null;
+			const eDate = stStartDate
+				? Moment(stStartDate, dtFormat)
+						.add(totalDays, 'days')
+						.toDate()
+				: null;
+			handleSelectFlight(sDate, eDate);
+			this.setState({ startDate: sDate });
+		};
 		// Generate itinerary accordion
 		const elItineraries = {};
 		if (showTransport) {
+			const stStartDate = startDate ? Moment(startDate).format(dtFormat) : '';
+			const stEndDate = startDate
+				? Moment(startDate)
+						.add(totalDays, 'days')
+						.format(dtFormat)
+				: '';
 			const carOptions = _.map(carRates, carRate => {
 				return carRate.type;
 			});
@@ -38,22 +69,22 @@ export default class PackageItinerary extends React.Component {
 			elItineraries['Flight and Car'] = isReadonly ? (
 				<FlightCar
 					departDates={departDates}
-					selectedDepartDate={instPackage.startDate}
-					selectedReturnDate={instPackage.endDate}
+					selectedDepartDate={stStartDate}
+					selectedReturnDate={stEndDate}
 					carOptions={carOptions}
-					selectedCarOption={instPackage.carOption}
-					handleSelectFlight={handleSelectFlight}
+					selectedCarOption={carOption}
+					handleSelectFlight={doHandleSelectFlight}
 					handleSelectCar={handleSelectCar}
 					isReadonly
 				/>
 			) : (
 				<FlightCar
 					departDates={departDates}
-					selectedDepartDate={instPackage.startDate}
-					selectedReturnDate={instPackage.endDate}
+					selectedDepartDate={stStartDate}
+					selectedReturnDate={stEndDate}
 					carOptions={carOptions}
-					selectedCarOption={instPackage.carOption}
-					handleSelectFlight={handleSelectFlight}
+					selectedCarOption={carOption}
+					handleSelectFlight={doHandleSelectFlight}
 					handleSelectCar={handleSelectCar}
 				/>
 			);
@@ -61,31 +92,32 @@ export default class PackageItinerary extends React.Component {
 
 		// Add itinerary for each days
 		_.forEach(itAttractions, it => {
-			it.isPlannable = it.attractions[0].timePlannable > 0 || false;
-			it.isOverNight = it.hotels[0].isOverNight || !!it.hotels[0].hotel;
-			console.log('>>>>PackageItinerary, formatted itinerary', it);
-			const city = Helper.findCityByName(it.cityBase, cities);
 			const title = triggerText(it.dayNo, it.cityBase);
-			const hotels = it.isOvernight ? city.hotels : [];
-			const attractions = it.isPlannable ? city.attractions : [];
-			console.log(`>>>>PackageItinerary ${title} with hotels`, hotels);
-
 			// Prepare attraction card list
 			const hotelSelector = isReadonly ? (
-				<HotelItem hotels={hotels} />
+				<HotelItem hotels={it.hotels} />
 			) : (
 				<HotelSlider
 					dayNo={it.dayNo}
-					dayHotel={it.hotels[0]}
+					hotels={it.hotels}
 					hotelRates={hotelRates}
-					hotels={hotels}
 					handleSelectHotel={handleSelectHotel}
 				/>
 			);
-
+			// Display the desciption of package-item
+			const desc
+				= !it.hotels
+				|| it.hotels.length === 0
+				|| !it.attractions
+				|| it.attractions.length === 0 ? (
+					<Typography>{it.cityDesc}</Typography>
+				) : (
+					''
+				);
 			elItineraries[title] = (
-				<div>
-					<ItineraryItem itinerary={it} attractions={attractions} />
+				<div style={{ width: '-webkit-fill-available' }}>
+					{desc}
+					<ItineraryItem attractions={it.attractions} />
 					{hotelSelector}
 				</div>
 			);

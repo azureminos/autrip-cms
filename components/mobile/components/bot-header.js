@@ -49,9 +49,18 @@ class BotHeader extends React.Component {
 
 	buildMenuItems (maxSelect, itemText) {
 		const rs = [];
-		rs[rs.length] = (<MenuItem key={0} value={0}>0 {itemText}</MenuItem>);
+		rs[rs.length] = (
+			<MenuItem key={0} value={0}>
+				0 {itemText}
+			</MenuItem>
+		);
 		for (let ct = 0; ct < maxSelect; ct++) {
-			rs[rs.length] = (<MenuItem key={ct + 1} value={ct + 1}>{ct + 1} {itemText}{(ct === 0) ? '' : 's'}</MenuItem>);
+			rs[rs.length] = (
+				<MenuItem key={ct + 1} value={ct + 1}>
+					{ct + 1} {itemText}
+					{ct === 0 ? '' : 's'}
+				</MenuItem>
+			);
 		}
 		return rs;
 	}
@@ -61,17 +70,40 @@ class BotHeader extends React.Component {
 		const total = (adults || 0) + (kids || 0);
 		if (startDate) {
 			for (var i = 0; i < packageRates.length; i++) {
-				const { minParticipant, maxParticipant, rate, premiumFee, rangeFrom, rangeTo } = packageRates[i];
-				if (total >= minParticipant && total <= maxParticipant
-					&& startDate.getTime() >= rangeFrom.getTime() && startDate.getTime() <= rangeTo.getTime()) {
-					return { price: rate, premiumFee: premiumFee, maxParticipant: maxParticipant };
+				const {
+					minParticipant,
+					maxParticipant,
+					rate,
+					premiumFee,
+					rangeFrom,
+					rangeTo,
+				} = packageRates[i];
+				if (
+					total >= minParticipant
+					&& total <= maxParticipant
+					&& startDate.getTime() >= new Date(rangeFrom).getTime()
+					&& startDate.getTime() <= new Date(rangeTo).getTime()
+				) {
+					return {
+						price: rate,
+						premiumFee: premiumFee,
+						maxParticipant: maxParticipant,
+					};
 				}
 			}
 		} else {
-			const matchedRates = _.filter(packageRates, (o) => { return (total >= o.minParticipant && total <= o.maxParticipant); });
+			const matchedRates = _.filter(packageRates, o => {
+				return total >= o.minParticipant && total <= o.maxParticipant;
+			});
 			if (matchedRates && matchedRates.length > 0) {
-				const minRate = _.minBy(matchedRates, (r) => { return r.rate; });
-				return { price: minRate.rate, premiumFee: minRate.premiumFee, maxParticipant: minRate.maxParticipant };
+				const minRate = _.minBy(matchedRates, r => {
+					return r.rate;
+				});
+				return {
+					price: minRate.rate,
+					premiumFee: minRate.premiumFee,
+					maxParticipant: minRate.maxParticipant,
+				};
 			}
 		}
 		return null;
@@ -82,19 +114,39 @@ class BotHeader extends React.Component {
 		const total = (adults || 0) + (kids || 0);
 		if (startDate && carOption) {
 			for (var i = 0; i < carRates.length; i++) {
-				const { minParticipant, maxParticipant, rate, rangeFrom, rangeTo, type } = carRates[i];
-				if (total >= minParticipant && total <= maxParticipant && carOption === type
-					&& startDate.getTime() >= rangeFrom.getTime() && startDate.getTime() <= rangeTo.getTime()) {
+				const {
+					minParticipant,
+					maxParticipant,
+					rate,
+					rangeFrom,
+					rangeTo,
+					type,
+				} = carRates[i];
+				if (
+					total >= minParticipant
+					&& total <= maxParticipant
+					&& carOption === type
+					&& startDate.getTime() >= new Date(rangeFrom).getTime()
+					&& startDate.getTime() <= new Date(rangeTo).getTime()
+				) {
 					return rate * totalDays;
 				}
 			}
 		} else {
-			const matchedRates = _.filter(carRates, (o) => {
-				return (total >= o.minParticipant && total <= o.maxParticipant && (!carOption || carOption === o.type)
-					&& (!startDate || (startDate.getTime() >= o.rangeFrom.getTime() && startDate.getTime() <= o.rangeTo.getTime())));
+			const matchedRates = _.filter(carRates, o => {
+				return (
+					total >= o.minParticipant
+					&& total <= o.maxParticipant
+					&& (!carOption || carOption === o.type)
+					&& (!startDate
+						|| (startDate.getTime() >= new Date(o.rangeFrom).getTime()
+							&& startDate.getTime() <= new Date(o.rangeTo).getTime()))
+				);
 			});
 			if (matchedRates && matchedRates.length > 0) {
-				const minRate = _.minBy(matchedRates, (r) => { return r.rate; });
+				const minRate = _.minBy(matchedRates, r => {
+					return r.rate;
+				});
 				return minRate.rate * totalDays;
 			}
 		}
@@ -105,12 +157,17 @@ class BotHeader extends React.Component {
 		if (startDate) {
 			for (var i = 0; i < flightRates.length; i++) {
 				const { rate, rangeFrom, rangeTo } = flightRates[i];
-				if (startDate.getTime() >= rangeFrom.getTime() && startDate.getTime() <= rangeTo.getTime()) {
+				if (
+					startDate.getTime() >= new Date(rangeFrom).getTime()
+					&& startDate.getTime() <= new Date(rangeTo).getTime()
+				) {
 					return rate;
 				}
 			}
 		} else {
-			const minRate = _.minBy(flightRates, (r) => { return r.rate; });
+			const minRate = _.minBy(flightRates, r => {
+				return r.rate;
+			});
 			return minRate.rate;
 		}
 
@@ -119,11 +176,15 @@ class BotHeader extends React.Component {
 
 	calItemRate (items, cities) {
 		let totalPrice = 0;
-		const tmpItems = _.filter(items, (it) => { return it.attraction; });
+		const tmpItems = _.filter(items, it => {
+			return it.attraction;
+		});
 		for (var i = 0; tmpItems && i < tmpItems.length; i++) {
 			var item = null;
-			_.each(cities, (c) => {
-				const matcher = _.find(c.attractions, function (a) { return a.id === tmpItems[i].attraction.id; });
+			_.each(cities, c => {
+				const matcher = _.find(c.attractions, function (a) {
+					return a.id === tmpItems[i].attraction.id;
+				});
 				if (matcher) item = matcher;
 			});
 			totalPrice = totalPrice + (item ? item.rate : 0);
@@ -139,8 +200,16 @@ class BotHeader extends React.Component {
 		console.log('>>>>BotHeader, render()', this.state);
 		const { classes, instPackage, rates, cities } = this.props;
 		const { packageRates, carRates, flightRates } = rates;
-		const { isCustomised, hotels, items, totalAdults, totalKids,
-			startDate, carOption, totalDays } = instPackage;
+		const {
+			isCustomised,
+			hotels,
+			items,
+			totalAdults,
+			totalKids,
+			startDate,
+			carOption,
+			totalDays,
+		} = instPackage;
 		const { adults, kids } = this.state;
 		const finalCost = { price: 0, promo: '' };
 		const maxSelect = 30;
@@ -153,21 +222,27 @@ class BotHeader extends React.Component {
 
 		if (!isCustomised) {
 			/* ==== Regular tour group ====
-			* - packageRates: totalAdults, totalKids
-			* - flightRates: startDate, endDate
-			* ============================ */
+			 * - packageRates: totalAdults, totalKids
+			 * - flightRates: startDate, endDate
+			 * ============================ */
 			const curRatePackageReg = this.calPackageRate(params, packageRates);
 			if (curRatePackageReg) {
 				const curRateFlight = this.calFlightRate(startDate, flightRates);
 				var nxtRatePackageReq;
-				if (curRatePackageReg.maxParticipant && instPackage.maxParticipant > curRatePackageReg.maxParticipant) {
+				if (
+					curRatePackageReg.maxParticipant
+					&& instPackage.maxParticipant > curRatePackageReg.maxParticipant
+				) {
 					params.adults = curRatePackageReg.maxParticipant + 1;
 					params.kids = 0;
 					nxtRatePackageReq = this.calPackageRate(params, packageRates);
 				} else {
 					nxtRatePackageReq = null;
 				}
-				const gap = curRatePackageReg.maxParticipant + 1 - (adults + totalAdults + kids + totalKids);
+				const gap
+					= curRatePackageReg.maxParticipant
+					+ 1
+					- (adults + totalAdults + kids + totalKids);
 				finalCost.price = curRatePackageReg.price + curRateFlight;
 				finalCost.promo = nxtRatePackageReq
 					? `${gap} more people $${nxtRatePackageReq.price + curRateFlight} pp`
@@ -178,32 +253,58 @@ class BotHeader extends React.Component {
 			}
 		} else {
 			/* ==== DIY tour group ====
-			* - packageRates: totalAdults, totalKids, [startDate]
-			* - flightRates: [startDate], [type]
-			* - carRates: totalAdults, totalKids, [startDate], [type]
-			* - packageItems: all package items
-			* - packageHotels: To Be Added
-			* ============================ */
+			 * - packageRates: totalAdults, totalKids, [startDate]
+			 * - flightRates: [startDate], [type]
+			 * - carRates: totalAdults, totalKids, [startDate], [type]
+			 * - packageItems: all package items
+			 * - packageHotels: To Be Added
+			 * ============================ */
 			const curRatePackageDiy = this.calPackageRate(params, packageRates);
 			if (curRatePackageDiy) {
 				const curRateFlightDiy = this.calFlightRate(startDate, flightRates);
-				const curRateCarDiy = this.calCarRate({ ...params, totalDays, carOption }, carRates);
+				const curRateCarDiy = this.calCarRate(
+					{ ...params, totalDays, carOption },
+					carRates
+				);
 				const curRateItemDiy = this.calItemRate(items, cities);
-				const curRateHotelDiy = this.calHotelRate({ startDate }, hotels, cities);
+				const curRateHotelDiy = this.calHotelRate(
+					{ startDate },
+					hotels,
+					cities
+				);
 
 				var nxtRatePackageDiy, nxtRateCarDiy;
-				if (curRatePackageDiy.maxParticipant && instPackage.maxParticipant > curRatePackageDiy.maxParticipant) {
+				if (
+					curRatePackageDiy.maxParticipant
+					&& instPackage.maxParticipant > curRatePackageDiy.maxParticipant
+				) {
 					params.adults = curRatePackageDiy.maxParticipant + 1;
 					params.kids = 0;
 					nxtRatePackageDiy = this.calPackageRate(params, packageRates);
-					nxtRateCarDiy = this.calCarRate({ ...params, totalDays, carOption }, carRates);
+					nxtRateCarDiy = this.calCarRate(
+						{ ...params, totalDays, carOption },
+						carRates
+					);
 				} else {
 					nxtRatePackageDiy = null;
 					nxtRateCarDiy = null;
 				}
-				const gap = curRatePackageDiy.maxParticipant + 1 - (adults + totalAdults + kids + totalKids);
-				const nextPrice = nxtRatePackageDiy.price + curRateFlightDiy + nxtRateCarDiy + curRateItemDiy + curRateHotelDiy;
-				finalCost.price = curRatePackageDiy.price + curRateFlightDiy + curRateCarDiy + curRateItemDiy + curRateHotelDiy;
+				const gap
+					= curRatePackageDiy.maxParticipant
+					+ 1
+					- (adults + totalAdults + kids + totalKids);
+				const nextPrice
+					= nxtRatePackageDiy.price
+					+ curRateFlightDiy
+					+ nxtRateCarDiy
+					+ curRateItemDiy
+					+ curRateHotelDiy;
+				finalCost.price
+					= curRatePackageDiy.price
+					+ curRateFlightDiy
+					+ curRateCarDiy
+					+ curRateItemDiy
+					+ curRateHotelDiy;
 				finalCost.promo = nxtRatePackageDiy
 					? `${gap} more people $${nextPrice} pp`
 					: `Max group size is ${curRatePackageDiy.maxParticipant}`;
@@ -220,9 +321,17 @@ class BotHeader extends React.Component {
 			<Table className={classes.table}>
 				<TableBody>
 					<TableRow>
-						<TableCell style={{ padding: '4px', width: '22%' }}>{totalAdults + adults} Adults<br />{totalKids + kids} Kids</TableCell>
-						<TableCell style={{ padding: '4px', width: '20%' }}>${finalCost.price} pp</TableCell>
-						<TableCell style={{ padding: '4px', width: '33%' }}>{finalCost.promo}</TableCell>
+						<TableCell style={{ padding: '4px', width: '22%' }}>
+							{totalAdults + adults} Adults
+							<br />
+							{totalKids + kids} Kids
+						</TableCell>
+						<TableCell style={{ padding: '4px', width: '20%' }}>
+							${finalCost.price} pp
+						</TableCell>
+						<TableCell style={{ padding: '4px', width: '33%' }}>
+							{finalCost.promo}
+						</TableCell>
 						<TableCell style={{ padding: '4px', width: '25%' }}>
 							<FormControl className={classes.formControl}>
 								<Select

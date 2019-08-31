@@ -151,9 +151,7 @@ class MobileApp extends React.Component {
 		var { cities } = reference;
 		var instItems = instPackage.items;
 		console.log(
-			`>>>>MobileApp.setLikedAttractions, isCustomised[${
-				instPackage.isCustomised
-			}]`,
+			`>>>>MobileApp.setLikedAttractions, isCustomised[${instPackage.isCustomised}]`,
 			attraction
 		);
 
@@ -256,35 +254,29 @@ class MobileApp extends React.Component {
 	}
 	// ----------  Package Instance Hotel  ----------
 	handleSelectHotel (dayNo, item) {
-		console.log(`>>>>MobileApp.handleSelectHotel of Day[${dayNo}]`, item);
-		this.setState({ updating: true });
 		const { instPackage } = this.state;
+		console.log('>>>>MobileApp.handleSelectHotel', instPackage);
 		for (var i = 0; i < instPackage.hotels.length; i++) {
 			const hotel = instPackage.hotels[i];
 			if (Number(hotel.dayNo) === Number(dayNo)) {
-				hotel.hotel = item.id;
+				const city = hotel.hotel.city;
+				hotel.hotel = { ...item, city };
 			}
 		}
-		this.setState({ instPackage: instPackage, updating: false });
+		// this.setState({ instPackage: instPackage });
 	}
 	// ----------  Package Instance Flight  ----------
-	handleSelectFlight (selectedVal) {
-		console.log(`>>>>MobileApp.handleSelectFlight`, selectedVal);
-		this.setState({ updating: true });
+	handleSelectFlight (startDate, endDate) {
+		console.log(`>>>>MobileApp.handleSelectFlight`, { startDate, endDate });
 		const { instPackage } = this.state;
-		const dtDepart = Moment(selectedVal, 'DD/MM/YYYY');
-		const dtReturn = Moment(dtDepart).add(instPackage.totalDays, 'days');
-		instPackage.startDate = selectedVal;
-		instPackage.endDate = dtReturn.format('DD/MM/YYYY');
-		this.setState({ instPackage: instPackage, updating: false });
+		instPackage.startDate = startDate;
+		instPackage.endDate = endDate;
 	}
 	// ----------  Package Instance Car  ----------
 	handleSelectCar (selectedVal) {
 		console.log(`>>>>MobileApp.handleSelectCar`, selectedVal);
-		this.setState({ updating: true });
 		const { instPackage } = this.state;
 		instPackage.carOption = selectedVal;
-		this.setState({ instPackage: instPackage, updating: false });
 	}
 	/* ==============================
 	   = React Lifecycle            =
@@ -315,6 +307,12 @@ class MobileApp extends React.Component {
 		const departDates = _.map(packageSummary.departureDate.split(','), d => {
 			return d.trim();
 		});
+		const transport = {
+			departDates: departDates,
+			startDate: instPackage.startDate,
+			totalDays: instPackage.totalDays,
+			carOption: instPackage.carOption,
+		};
 		const itAttractions = Helper.getItineraryAttractionList({
 			cities,
 			packageItems: instPackage.items,
@@ -341,10 +339,9 @@ class MobileApp extends React.Component {
 				<div id="package-itinerary">
 					<PackageItinerary
 						showTransport
-						instPackage={instPackage}
 						rates={rates}
+						transport={transport}
 						itAttractions={itAttractions}
-						departDates={departDates}
 						cities={cities}
 						handleSelectHotel={this.handleSelectHotel}
 						handleSelectFlight={this.handleSelectFlight}

@@ -7,7 +7,6 @@ import AttractionCard from './components/attraction-card';
 import CardSlider from './components/card-slider';
 import ChipList from './components/chip-list';
 import DescPanel from './components/description-panel';
-
 import Helper from '../../lib/helper';
 
 const styles = {
@@ -42,7 +41,7 @@ class PackageAttraction extends React.Component {
 			// Prepare settings of ChipList
 			const likedItems = _.filter(it.attractions, { isLiked: true });
 			const tagSetting = {
-				tags: likedItems.map(item => {
+				tags: _.map(likedItems, item => {
 					return { id: item.id, name: item.name, imageUrl: item.imageUrl };
 				}),
 			};
@@ -59,7 +58,7 @@ class PackageAttraction extends React.Component {
 			});
 
 			return (
-				<div key={it.id} className={classes.city}>
+				<div key={it.dayNo} className={classes.city}>
 					<Typography variant="h5" gutterBottom>
 						{`Day ${it.dayNo}: ${it.cityVisit}`}
 					</Typography>
