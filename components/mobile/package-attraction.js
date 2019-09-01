@@ -2,6 +2,9 @@ import React from 'react';
 import _ from 'lodash';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import AttractionCard from './components/attraction-card';
 import CardSlider from './components/card-slider';
@@ -10,11 +13,23 @@ import DescPanel from './components/description-panel';
 import Helper from '../../lib/helper';
 
 const styles = {
-	city: {
+	itinerary: {
 		border: '1px solid',
 		borderColor: 'lightgrey',
 		padding: '4px',
 		margin: '4px',
+	},
+	dayCity: {
+		display: 'table',
+		clear: 'both',
+		width: '100%',
+	},
+	titleDayCity: {
+		float: 'left',
+	},
+	iconDayCity: {
+		float: 'right',
+		margin: '8px',
 	},
 };
 
@@ -34,10 +49,21 @@ class PackageAttraction extends React.Component {
 			classes,
 			itAttractions,
 			handleLikeAttraction,
-			isReadonly,
+			isCustomised,
+			handleAddItinerary,
+			handleDeleteItinerary,
 		} = this.props;
 
-		const daySections = _.map(itAttractions, it => {
+		const daySections = _.map(itAttractions, (it, idx) => {
+			// Event Handlers
+			const doHandleAddItinerary = () => {
+				// console.log('>>>>PackageAttraction.doHandleAddItinerary', it);
+				handleAddItinerary(it);
+			};
+			const doHandleDeleteItinerary = () => {
+				// console.log('>>>>PackageAttraction.doHandleDeleteItinerary', it);
+				handleDeleteItinerary(it);
+			};
 			// Prepare settings of ChipList
 			const likedItems = _.filter(it.attractions, { isLiked: true });
 			const tagSetting = {
@@ -56,11 +82,41 @@ class PackageAttraction extends React.Component {
 					/>
 				);
 			});
+			const isDayChangable
+				= isCustomised && idx != 0 && idx != itAttractions.length - 1;
 
 			return (
-				<div key={it.dayNo} className={classes.city}>
-					<Typography variant="h5" gutterBottom>
-						{`Day ${it.dayNo}: ${it.cityVisit}`}
+				<div key={it.dayNo} className={classes.itinerary}>
+					<Typography variant="h5" gutterBottom className={classes.dayCity}>
+						<div
+							className={classes.titleDayCity}
+						>{`Day ${it.dayNo}: ${it.cityVisit}`}</div>
+						{isDayChangable ? (
+							<Fab
+								size="small"
+								color="secondary"
+								aria-label="delete"
+								onClick={doHandleDeleteItinerary}
+								className={classes.iconDayCity}
+							>
+								<DeleteIcon />
+							</Fab>
+						) : (
+							''
+						)}
+						{isDayChangable ? (
+							<Fab
+								size="small"
+								color="primary"
+								aria-label="add"
+								onClick={doHandleAddItinerary}
+								className={classes.iconDayCity}
+							>
+								<AddIcon />
+							</Fab>
+						) : (
+							''
+						)}
 					</Typography>
 					<DescPanel descShort={it.cityDescShort} descFull={it.cityDesc} />
 					<ChipList {...tagSetting} />

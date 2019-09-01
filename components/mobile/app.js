@@ -6,26 +6,33 @@ import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS =======================================
 import Helper from '../../lib/helper';
+import ModalHelper from '../../lib/bot-modal-helper';
+import PackageHelper from '../../lib/package-helper';
 import BotModal from './components/bot-modal';
 import BotHeader from './components/bot-header';
 import FixedTab from './components/fixed-tab';
 import PackageAttraction from './package-attraction';
 import PackageItinerary from './package-itinerary';
+import CONSTANTS from '../../lib/constants';
 
 // ==== CSS ==============================================
 import 'react-id-swiper/src/styles/css/swiper.css';
 
+const modal = CONSTANTS.get().Modal;
 /* ==============================
    = React Application          =
    ============================== */
-
 class MobileApp extends React.Component {
 	constructor (props) {
 		super(props);
 
-		this.handleModalDiyClose = this.handleModalDiyClose.bind(this);
+		this.handleModalClose = this.handleModalClose.bind(this);
 		this.enablePackageDiy = this.enablePackageDiy.bind(this);
 		this.handleLikeAttraction = this.handleLikeAttraction.bind(this);
+		this.confirmAddItinerary = this.confirmAddItinerary.bind(this);
+		this.handleAddItinerary = this.handleAddItinerary.bind(this);
+		this.confirmDeleteItinerary = this.confirmDeleteItinerary.bind(this);
+		this.handleDeleteItinerary = this.handleDeleteItinerary.bind(this);
 		this.handleSelectHotel = this.handleSelectHotel.bind(this);
 		this.handleSelectFlight = this.handleSelectFlight.bind(this);
 		this.handleSelectCar = this.handleSelectCar.bind(this);
@@ -44,9 +51,8 @@ class MobileApp extends React.Component {
 		this.state = {
 			updating: false,
 			message: '',
-			flagModal: {
-				modalDiy: false,
-			},
+			botModal: '',
+			refModal: null,
 			instPackage: {
 				...props.instPackage,
 				items: instItems,
@@ -62,24 +68,55 @@ class MobileApp extends React.Component {
 	/* ==============================
 	   = State & Event Handlers     =
 	   ============================== */
+	// ----------  App  ----------
+	handleModalClose () {
+		console.log('>>>>MobileApp.handleModalClose');
+		this.setState({
+			botModal: '',
+		});
+	}
 	// ----------  Package  ----------
 	// ----------  Package Instance -------
 	// ----------  Package Instance Items-------
-	handleModalDiyClose () {
-		console.log('>>>>MobileApp.handleModalDiyClose');
-		const { flagModal } = this.state;
+	confirmAddItinerary (it) {
+		console.log('>>>>MobileApp.confirmAddItinerary', it);
+	}
+	handleAddItinerary () {
+		const it = this.state.refModal;
+		console.log('>>>>MobileApp.handleAddItinerary', it);
+	}
+	confirmDeleteItinerary (it) {
+		console.log('>>>>MobileApp.confirmDeleteItinerary', it);
 		this.setState({
-			updating: false,
-			flagModal: { ...flagModal, modalDiy: false },
+			botModal: modal.DELETE_ITINERARY.key,
+			refModal: it,
 		});
 	}
+	handleDeleteItinerary () {
+		const it = this.state.refModal;
+		console.log('>>>>MobileApp.handleDeleteItinerary', it);
+		if (it.isRequired) {
+			this.setState({
+				botModal: modal.FAILED_DELETE_ITINERARY.key,
+			});
+		} else {
+			const instPackage = PackageHelper.deleteItinerary(
+				this.state.instPackage,
+				it.dayNo
+			);
+			this.setState({
+				instPackage: instPackage,
+				botModal: '',
+			});
+		}
+	}
+
 	enablePackageDiy () {
 		console.log('>>>>MobileApp.enablePackageDiy');
-		const { flagModal, instPackage } = this.state;
+		const { instPackage } = this.state;
+		instPackage.isCustomised = true;
 		this.setState({
-			updating: false,
-			instPackage: { ...instPackage, isCustomised: true },
-			flagModal: { ...flagModal, modalDiy: false },
+			botModal: '',
 		});
 	}
 	handleLikeAttraction (attraction) {
@@ -146,7 +183,7 @@ class MobileApp extends React.Component {
 			return items;
 		};
 		// Logic starts here
-		var { flagModal, instPackage, message } = this.state;
+		var { instPackage, message } = this.state;
 		var { reference } = this.props;
 		var { cities } = reference;
 		var instItems = instPackage.items;
@@ -158,8 +195,7 @@ class MobileApp extends React.Component {
 		if (!instPackage.isCustomised) {
 			// Package is not customised (DIY) yet, ask customer to confirm enabling DIY
 			this.setState({
-				updating: true,
-				flagModal: { ...flagModal, modalDiy: true },
+				botModal: modal.ENABLE_DIY.key,
 			});
 		} else {
 			// Package is customised (DIY) already, move on with rest of logic
@@ -286,7 +322,7 @@ class MobileApp extends React.Component {
 	}
 
 	render () {
-		const { updating, flagModal, instPackage } = this.state;
+		const { botModal, refModal, instPackage } = this.state;
 		const { rates, reference } = this.props;
 		const { packageRates, flightRates, hotelRates } = rates;
 		const { cities, packageSummary } = reference;
@@ -300,17 +336,7 @@ class MobileApp extends React.Component {
 		console.log('>>>>MobileApp.render >> instPackage', instPackage);
 		console.log('>>>>MobileApp.render >> reference', reference);
 		console.log('>>>>MobileApp.render >> rates', rates);
-		// Setup modal element
-		const pBtnModalDiy = [
-			{ title: 'Yes', handleClick: this.enablePackageDiy },
-			{ title: 'No', handleClick: this.handleModalDiyClose },
-		];
-		const pModalDiy = {
-			title: `Let's DIY your package`,
-			description:
-				'Would you like to start DIY your trip? An extra fee will be applied.',
-			buttons: pBtnModalDiy,
-		};
+		// Variables
 		const departDates = _.map(packageSummary.departureDate.split(','), d => {
 			return d.trim();
 		});
@@ -321,44 +347,64 @@ class MobileApp extends React.Component {
 			carOption: instPackage.carOption,
 		};
 		const itAttractions = Helper.getItineraryAttractionList({
+			isCustomised: instPackage.isCustomised,
 			cities,
 			packageItems: instPackage.items,
 			packageHotels: instPackage.hotels,
 		});
 
-		const tabs = {
-			Attraction: (
-				<div id="package-attraction">
-					<PackageAttraction
-						itAttractions={itAttractions}
-						handleLikeAttraction={this.handleLikeAttraction}
-					/>
-					<BotModal
-						isModalOpen={flagModal.modalDiy}
-						title={pModalDiy.title}
-						description={pModalDiy.description}
-						buttons={pModalDiy.buttons}
-						handleModalClose={this.handleModalDiyClose}
-					/>
-				</div>
-			),
-			Itinerary: (
-				<div id="package-itinerary">
-					<PackageItinerary
-						isCustomised={instPackage.isCustomised}
-						rates={rates}
-						transport={transport}
-						itAttractions={itAttractions}
-						handleSelectHotel={this.handleSelectHotel}
-						handleSelectFlight={this.handleSelectFlight}
-						handleSelectCar={this.handleSelectCar}
-					/>
-				</div>
-			),
-		};
+		// ======Web Elements======
+		// Setup modal element
+		const paramModal = ModalHelper.getModal(botModal, this, refModal);
+		// Tab item - Attraction
+		const elAttractions = (
+			<div id="package-attraction">
+				<PackageAttraction
+					isCustomised={instPackage.isCustomised}
+					itAttractions={itAttractions}
+					handleLikeAttraction={this.handleLikeAttraction}
+					handleAddItinerary={this.confirmAddItinerary}
+					handleDeleteItinerary={this.confirmDeleteItinerary}
+				/>
+			</div>
+		);
+		// Tab item - Hotel
+		const elHotels = (
+			<div id="package-itinerary">
+				<PackageItinerary
+					isCustomised={instPackage.isCustomised}
+					rates={rates}
+					transport={transport}
+					itAttractions={itAttractions}
+					handleSelectHotel={this.handleSelectHotel}
+					handleSelectFlight={this.handleSelectFlight}
+					handleSelectCar={this.handleSelectCar}
+				/>
+			</div>
+		);
+		// Tabs
+		const tabs = {};
+		if (instPackage.isCustomised) {
+			tabs.Attraction = elAttractions;
+			tabs.Hotel = elHotels;
+		} else {
+			tabs.Itinerary = elAttractions;
+		}
+		// Bot Modal
+		const elModal
+			= paramModal && botModal ? (
+				<BotModal
+					isModalOpen={!!botModal}
+					title={paramModal.title}
+					description={paramModal.description}
+					buttons={paramModal.buttons}
+					handleModalClose={this.handleModalClose}
+				/>
+			) : (
+				''
+			);
 
-		/* ----------  Animated Wrapper  ---------- */
-
+		// Display Web Widget
 		return (
 			<div id="app">
 				<Paper>
@@ -369,6 +415,7 @@ class MobileApp extends React.Component {
 							cities={cities}
 						/>
 					</FixedTab>
+					{elModal}
 				</Paper>
 			</div>
 		);
