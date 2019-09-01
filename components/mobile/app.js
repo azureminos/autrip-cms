@@ -288,8 +288,15 @@ class MobileApp extends React.Component {
 	render () {
 		const { updating, flagModal, instPackage } = this.state;
 		const { rates, reference } = this.props;
-		const { packageRates, carRates, flightRates, hotelRates } = rates;
+		const { packageRates, flightRates, hotelRates } = rates;
 		const { cities, packageSummary } = reference;
+		rates.carRates = _.map(cities, c => {
+			return {
+				id: c.id || '',
+				name: c.name || '',
+				carRates: c.carRates || [],
+			};
+		});
 		console.log('>>>>MobileApp.render >> instPackage', instPackage);
 		console.log('>>>>MobileApp.render >> reference', reference);
 		console.log('>>>>MobileApp.render >> rates', rates);
@@ -338,11 +345,10 @@ class MobileApp extends React.Component {
 			Itinerary: (
 				<div id="package-itinerary">
 					<PackageItinerary
-						showTransport
+						isCustomised={instPackage.isCustomised}
 						rates={rates}
 						transport={transport}
 						itAttractions={itAttractions}
-						cities={cities}
 						handleSelectHotel={this.handleSelectHotel}
 						handleSelectFlight={this.handleSelectFlight}
 						handleSelectCar={this.handleSelectCar}

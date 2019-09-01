@@ -3,7 +3,7 @@ var async = require('async');
 var keystone = require('keystone');
 var Types = keystone.Field.Types;
 var CONSTANT = require('../lib/constants');
-var { status } = CONSTANT.get().TravelPackage;
+var { status, carOption } = CONSTANT.get().TravelPackage;
 /**
  * TravelPackage Model
  * ==========
@@ -37,6 +37,11 @@ TravelPackage.add({
 		options: `${status.DRAFT}, ${status.PUBLISHED}, ${status.ARCHIVED}`,
 		default: status.DRAFT,
 		noedit: false,
+	},
+	carOption: {
+		type: Types.Select,
+		options: `${carOption.REGULAR}, ${carOption.PREMIUM}, ${carOption.LUXURY}`,
+		default: carOption.REGULAR,
 	},
 	isPromoted: { type: Types.Boolean, default: false },
 	isCustomisable: { type: Types.Boolean, default: false },

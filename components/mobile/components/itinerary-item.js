@@ -10,14 +10,9 @@ import ChipList from './chip-list';
 };*/
 
 const getTagSetting = attractions => {
-	const tags = _.map(
-		_.filter(attractions, aa => {
-			return aa.isLiked;
-		}),
-		a => {
-			return { id: a.id, name: a.name, imageUrl: a.imageUrl };
-		}
-	);
+	const tags = _.map(attractions, a => {
+		return { id: a.id, name: a.name, imageUrl: a.imageUrl };
+	});
 
 	return {
 		tags: tags,
@@ -29,13 +24,15 @@ export default class ItineraryItem extends React.Component {
 		// console.log('>>>>ItineraryItem, Start render with props', this.props);
 		// Get data from props
 		const { attractions } = this.props;
-
+		const likedAttractions = _.filter(attractions, aa => {
+			return aa.isLiked;
+		});
 		if (attractions && attractions.length > 0) {
 			return (
 				<div className="itinerary-day-item">
 					<div>Attractions</div>
 					<div className="dnd-container">
-						<ChipList {...getTagSetting(attractions)} />
+						<ChipList {...getTagSetting(likedAttractions)} />
 					</div>
 				</div>
 			);

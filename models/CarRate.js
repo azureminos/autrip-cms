@@ -2,6 +2,8 @@ var _ = require('lodash');
 var async = require('async');
 var keystone = require('keystone');
 var Types = keystone.Field.Types;
+var CONSTANT = require('../lib/constants');
+var { carOption } = CONSTANT.get().TravelPackage;
 /**
  * CarRate Model
  * ==========
@@ -20,7 +22,8 @@ CarRate.add({
 	description: { type: Types.Textarea },
 	type: {
 		type: Types.Select,
-		options: 'Regular, Premium, Luxury',
+		options: `${carOption.REGULAR}, ${carOption.PREMIUM}, ${carOption.LUXURY}`,
+		default: carOption.REGULAR,
 		index: true,
 	},
 	minParticipant: { type: Types.Number, default: 0 },

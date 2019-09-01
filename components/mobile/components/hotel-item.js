@@ -3,9 +3,9 @@ import React, { createElement } from 'react';
 import _ from 'lodash';
 import ChipList from './chip-list';
 
-const getTagSetting = (attractions) => {
-	const tags = attractions.map((a) => {
-		return { id: a.attractionId, name: a.name, imageUrl: a.imageUrl };
+const getTagSetting = items => {
+	const tags = items.map(a => {
+		return { id: a.id, name: a.name, imageUrl: a.imageUrl };
 	});
 
 	return {
@@ -15,15 +15,17 @@ const getTagSetting = (attractions) => {
 
 export default class HotelItem extends React.Component {
 	render () {
-		console.log('>>>>HotelItem, Start render with props', this.props);
+		// console.log('>>>>HotelItem, Start render with props', this.props);
 		// Get data from props
 		const { hotels } = this.props;
-
+		const likedHotel = _.filter(hotels, hh => {
+			return hh.isLiked;
+		});
 		return (
 			<div className="hotel-day-item">
 				<div>Hotels</div>
 				<div className="dnd-container">
-					<ChipList {...getTagSetting(hotels)} />
+					<ChipList {...getTagSetting(likedHotel)} />
 				</div>
 			</div>
 		);

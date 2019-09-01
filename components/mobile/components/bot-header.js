@@ -9,6 +9,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
+import Rate from '../../../lib/rate-calculator';
 
 const styles = theme => ({
 	table: {
@@ -33,12 +34,12 @@ class BotHeader extends React.Component {
 			kids: 0,
 		};
 
-		this.handleAdultdsChange = this.handleAdultdsChange.bind(this);
+		this.handleAdultsChange = this.handleAdultsChange.bind(this);
 		this.handleKidsChange = this.handleKidsChange.bind(this);
 	}
 
-	handleAdultdsChange (e) {
-		console.log('>>>>BotHeader, handleAdultdsChange()', e);
+	handleAdultsChange (e) {
+		console.log('>>>>BotHeader, handleAdultsChange()', e);
 		this.setState({ adults: e.target.value });
 	}
 
@@ -63,137 +64,6 @@ class BotHeader extends React.Component {
 			);
 		}
 		return rs;
-	}
-
-	calPackageRate (params, packageRates) {
-		const { startDate, adults, kids } = params;
-		const total = (adults || 0) + (kids || 0);
-		if (startDate) {
-			for (var i = 0; i < packageRates.length; i++) {
-				const {
-					minParticipant,
-					maxParticipant,
-					rate,
-					premiumFee,
-					rangeFrom,
-					rangeTo,
-				} = packageRates[i];
-				if (
-					total >= minParticipant
-					&& total <= maxParticipant
-					&& startDate.getTime() >= new Date(rangeFrom).getTime()
-					&& startDate.getTime() <= new Date(rangeTo).getTime()
-				) {
-					return {
-						price: rate,
-						premiumFee: premiumFee,
-						maxParticipant: maxParticipant,
-					};
-				}
-			}
-		} else {
-			const matchedRates = _.filter(packageRates, o => {
-				return total >= o.minParticipant && total <= o.maxParticipant;
-			});
-			if (matchedRates && matchedRates.length > 0) {
-				const minRate = _.minBy(matchedRates, r => {
-					return r.rate;
-				});
-				return {
-					price: minRate.rate,
-					premiumFee: minRate.premiumFee,
-					maxParticipant: minRate.maxParticipant,
-				};
-			}
-		}
-		return null;
-	}
-
-	calCarRate (params, carRates) {
-		const { startDate, adults, kids, totalDays, carOption } = params;
-		const total = (adults || 0) + (kids || 0);
-		if (startDate && carOption) {
-			for (var i = 0; i < carRates.length; i++) {
-				const {
-					minParticipant,
-					maxParticipant,
-					rate,
-					rangeFrom,
-					rangeTo,
-					type,
-				} = carRates[i];
-				if (
-					total >= minParticipant
-					&& total <= maxParticipant
-					&& carOption === type
-					&& startDate.getTime() >= new Date(rangeFrom).getTime()
-					&& startDate.getTime() <= new Date(rangeTo).getTime()
-				) {
-					return rate * totalDays;
-				}
-			}
-		} else {
-			const matchedRates = _.filter(carRates, o => {
-				return (
-					total >= o.minParticipant
-					&& total <= o.maxParticipant
-					&& (!carOption || carOption === o.type)
-					&& (!startDate
-						|| (startDate.getTime() >= new Date(o.rangeFrom).getTime()
-							&& startDate.getTime() <= new Date(o.rangeTo).getTime()))
-				);
-			});
-			if (matchedRates && matchedRates.length > 0) {
-				const minRate = _.minBy(matchedRates, r => {
-					return r.rate;
-				});
-				return minRate.rate * totalDays;
-			}
-		}
-		return 9999;
-	}
-
-	calFlightRate (startDate, flightRates) {
-		if (startDate) {
-			for (var i = 0; i < flightRates.length; i++) {
-				const { rate, rangeFrom, rangeTo } = flightRates[i];
-				if (
-					startDate.getTime() >= new Date(rangeFrom).getTime()
-					&& startDate.getTime() <= new Date(rangeTo).getTime()
-				) {
-					return rate;
-				}
-			}
-		} else {
-			const minRate = _.minBy(flightRates, r => {
-				return r.rate;
-			});
-			return minRate.rate;
-		}
-
-		return 9999;
-	}
-
-	calItemRate (items, cities) {
-		let totalPrice = 0;
-		const tmpItems = _.filter(items, it => {
-			return it.attraction;
-		});
-		for (var i = 0; tmpItems && i < tmpItems.length; i++) {
-			var item = null;
-			_.each(cities, c => {
-				const matcher = _.find(c.attractions, function (a) {
-					return a.id === tmpItems[i].attraction.id;
-				});
-				if (matcher) item = matcher;
-			});
-			totalPrice = totalPrice + (item ? item.rate : 0);
-		}
-		return totalPrice;
-	}
-
-	calHotelRate (params, hotels, cities) {
-		return 0;
 	}
 
 	render () {
@@ -225,9 +95,9 @@ class BotHeader extends React.Component {
 			 * - packageRates: totalAdults, totalKids
 			 * - flightRates: startDate, endDate
 			 * ============================ */
-			const curRatePackageReg = this.calPackageRate(params, packageRates);
+			const curRatePackageReg = Rate.calPackageRate(params, packageRates);
 			if (curRatePackageReg) {
-				const curRateFlight = this.calFlightRate(startDate, flightRates);
+				const curRateFlight = Rate.calFlightRate(startDate, flightRates);
 				var nxtRatePackageReq;
 				if (
 					curRatePackageReg.maxParticipant
@@ -235,7 +105,7 @@ class BotHeader extends React.Component {
 				) {
 					params.adults = curRatePackageReg.maxParticipant + 1;
 					params.kids = 0;
-					nxtRatePackageReq = this.calPackageRate(params, packageRates);
+					nxtRatePackageReq = Rate.calPackageRate(params, packageRates);
 				} else {
 					nxtRatePackageReq = null;
 				}
@@ -259,15 +129,15 @@ class BotHeader extends React.Component {
 			 * - packageItems: all package items
 			 * - packageHotels: To Be Added
 			 * ============================ */
-			const curRatePackageDiy = this.calPackageRate(params, packageRates);
+			const curRatePackageDiy = Rate.calPackageRate(params, packageRates);
 			if (curRatePackageDiy) {
-				const curRateFlightDiy = this.calFlightRate(startDate, flightRates);
-				const curRateCarDiy = this.calCarRate(
+				const curRateFlightDiy = Rate.calFlightRate(startDate, flightRates);
+				const curRateCarDiy = Rate.calCarRate(
 					{ ...params, totalDays, carOption },
 					carRates
 				);
-				const curRateItemDiy = this.calItemRate(items, cities);
-				const curRateHotelDiy = this.calHotelRate(
+				const curRateItemDiy = Rate.calItemRate(items, cities);
+				const curRateHotelDiy = Rate.calHotelRate(
 					{ startDate },
 					hotels,
 					cities
@@ -280,8 +150,8 @@ class BotHeader extends React.Component {
 				) {
 					params.adults = curRatePackageDiy.maxParticipant + 1;
 					params.kids = 0;
-					nxtRatePackageDiy = this.calPackageRate(params, packageRates);
-					nxtRateCarDiy = this.calCarRate(
+					nxtRatePackageDiy = Rate.calPackageRate(params, packageRates);
+					nxtRateCarDiy = Rate.calCarRate(
 						{ ...params, totalDays, carOption },
 						carRates
 					);
@@ -336,7 +206,7 @@ class BotHeader extends React.Component {
 							<FormControl className={classes.formControl}>
 								<Select
 									value={adults}
-									onChange={this.handleAdultdsChange}
+									onChange={this.handleAdultsChange}
 									input={<Input name="adults" id="adults-label-placeholder" />}
 									displayEmpty
 									name="adults"

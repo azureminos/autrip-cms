@@ -32,10 +32,8 @@ export default class PackageItinerary extends React.Component {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
 		const {
 			rates,
-			cities,
 			transport: { departDates, carOption, totalDays },
-			isReadonly,
-			showTransport,
+			isCustomised,
 			itAttractions,
 			handleSelectHotel,
 			handleSelectFlight,
@@ -55,54 +53,42 @@ export default class PackageItinerary extends React.Component {
 		};
 		// Generate itinerary accordion
 		const elItineraries = {};
-		if (showTransport) {
-			const stStartDate = startDate ? Moment(startDate).format(dtFormat) : '';
-			const stEndDate = startDate
-				? Moment(startDate)
-						.add(totalDays, 'days')
-						.format(dtFormat)
-				: '';
-			const carOptions = _.map(carRates, carRate => {
-				return carRate.type;
-			});
-			// Add Flight and Cars
-			elItineraries['Flight and Car'] = isReadonly ? (
-				<FlightCar
-					departDates={departDates}
-					selectedDepartDate={stStartDate}
-					selectedReturnDate={stEndDate}
-					carOptions={carOptions}
-					selectedCarOption={carOption}
-					handleSelectFlight={doHandleSelectFlight}
-					handleSelectCar={handleSelectCar}
-					isReadonly
-				/>
-			) : (
-				<FlightCar
-					departDates={departDates}
-					selectedDepartDate={stStartDate}
-					selectedReturnDate={stEndDate}
-					carOptions={carOptions}
-					selectedCarOption={carOption}
-					handleSelectFlight={doHandleSelectFlight}
-					handleSelectCar={handleSelectCar}
-				/>
-			);
-		}
+		const stStartDate = startDate ? Moment(startDate).format(dtFormat) : '';
+		const stEndDate = startDate
+			? Moment(startDate)
+					.add(totalDays, 'days')
+					.format(dtFormat)
+			: '';
+		const carOptions = isCustomised
+			? Helper.getValidCarOptions(carRates)
+			: [carOption];
+		// Add Flight and Cars
+		elItineraries['Flight and Car'] = (
+			<FlightCar
+				isCustomised={isCustomised}
+				departDates={departDates}
+				selectedDepartDate={stStartDate}
+				selectedReturnDate={stEndDate}
+				carOptions={carOptions}
+				selectedCarOption={carOption}
+				handleSelectFlight={doHandleSelectFlight}
+				handleSelectCar={handleSelectCar}
+			/>
+		);
 
 		// Add itinerary for each days
 		_.forEach(itAttractions, it => {
 			const title = triggerText(it.dayNo, it.cityBase);
 			// Prepare attraction card list
-			const hotelSelector = isReadonly ? (
-				<HotelItem hotels={it.hotels} />
-			) : (
+			const hotelSelector = isCustomised ? (
 				<HotelSlider
 					dayNo={it.dayNo}
 					hotels={it.hotels}
 					hotelRates={hotelRates}
 					handleSelectHotel={handleSelectHotel}
 				/>
+			) : (
+				<HotelItem hotels={it.hotels} />
 			);
 			// Display the desciption of package-item
 			const desc

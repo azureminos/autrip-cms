@@ -42,74 +42,87 @@ class FlightCar extends React.Component {
 
 	handleCarChange (event) {
 		this.props.handleSelectCar(event.target.value);
-	};
+	}
 
 	handleFlightChange (event) {
 		this.props.handleSelectFlight(event.target.value);
-	};
+	}
 	render () {
 		console.log('>>>>FlightCar, render()', this.props);
-		const { classes, isReadonly, departDates, carOptions,
-			selectedDepartDate, selectedReturnDate, selectedCarOption } = this.props;
-		const miDepartDates = _.map(departDates, (i) => {
-			return (<MenuItem key={i} value={i}>{i}</MenuItem>);
+		const {
+			classes,
+			departDates,
+			carOptions,
+			selectedDepartDate,
+			selectedReturnDate,
+			selectedCarOption,
+		} = this.props;
+		// Reference
+		const isReadonly = carOptions && carOptions.length === 1;
+		const miDepartDates = _.map(departDates, i => {
+			return (
+				<MenuItem key={i} value={i}>
+					{i}
+				</MenuItem>
+			);
 		});
-		const miReturnDates = (<MenuItem value={selectedReturnDate}>{selectedReturnDate}</MenuItem>);
-		const miCarOptions = _.map(carOptions, (i) => {
-			return (<MenuItem key={i} value={i}>{i}</MenuItem>);
-		});
+		const miReturnDates = (
+			<MenuItem value={selectedReturnDate}>{selectedReturnDate}</MenuItem>
+		);
+		const miCarOptions = carOptions
+			? _.map(carOptions, i => {
+				return (
+						<MenuItem key={i || 0} value={i}>
+							{i}
+						</MenuItem>
+				);
+			  })
+			: [];
 
-		return (
-			<List className={classes.list}>
-				<ListItem>
-					<ListItemIcon>
-						<FlightTakeoff color="primary" />
-					</ListItemIcon>
-					<ListItemSecondaryAction>
-						<div>
-							<FormControl
-								className={classes.formControl}
-								disabled={isReadonly ? true : false}
+		// Web Elements
+		const divFlightOptions = (
+			<ListItem>
+				<ListItemIcon>
+					<FlightTakeoff color="primary" />
+				</ListItemIcon>
+				<ListItemSecondaryAction>
+					<div>
+						<FormControl className={classes.formControl}>
+							<Select
+								value={selectedDepartDate || ''}
+								onChange={this.handleFlightChange}
+								displayEmpty
+								inputProps={{
+									name: 'departDate',
+									id: 'depart-date',
+								}}
 							>
-								<Select
-									value={selectedDepartDate || ''}
-									onChange={this.handleFlightChange}
-									displayEmpty
-									inputProps={{
-										name: 'departDate',
-										id: 'depart-date',
-									}}
-								>
-									<MenuItem value="" disabled>
-										<em>Depart</em>
-									</MenuItem>
-									{miDepartDates}
-								</Select>
-							</FormControl>
-							<FormControl
-								className={classes.formControl}
-								disabled
-							>
-								<Select value={selectedReturnDate || ''} displayEmpty>
-									<MenuItem value="">
-										<em>Arrive</em>
-									</MenuItem>
-									{miReturnDates}
-								</Select>
-							</FormControl>
-						</div>
-					</ListItemSecondaryAction>
-				</ListItem>
-				<Divider />
+								<MenuItem value="" disabled>
+									<em>Depart</em>
+								</MenuItem>
+								{miDepartDates}
+							</Select>
+						</FormControl>
+						<FormControl className={classes.formControl} disabled>
+							<Select value={selectedReturnDate || ''} displayEmpty>
+								<MenuItem value="">
+									<em>Arrive</em>
+								</MenuItem>
+								{miReturnDates}
+							</Select>
+						</FormControl>
+					</div>
+				</ListItemSecondaryAction>
+			</ListItem>
+		);
+		const divCarOptions
+			= miCarOptions && miCarOptions.length > 0 ? (
 				<ListItem>
 					<ListItemIcon>
 						<DirectionsCar color="primary" />
 					</ListItemIcon>
 					<ListItemSecondaryAction>
-						<FormControl
-							className={classes.formControl}
-							disabled={isReadonly ? true : false}
-						>
+						<FormControl className={classes.formControl} disabled={isReadonly}>
 							<Select
 								value={selectedCarOption || ''}
 								onChange={this.handleCarChange}
@@ -127,6 +140,15 @@ class FlightCar extends React.Component {
 						</FormControl>
 					</ListItemSecondaryAction>
 				</ListItem>
+			) : (
+				''
+			);
+
+		return (
+			<List className={classes.list}>
+				{divFlightOptions}
+				{divCarOptions ? <Divider /> : ''}
+				{divCarOptions}
 			</List>
 		);
 	}

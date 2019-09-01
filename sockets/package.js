@@ -65,10 +65,6 @@ exports.getPackageDetails = ({ request: { id }, sendStatus, socket }) => {
 				};
 				PackageItem.getPackageItemByPackage(id, handler);
 			},
-			carRates: callback => {
-				// TBD
-				callback(null, []);
-			},
 			snapshots: callback => {
 				const handler = (err, resp) => {
 					callback(err, Parser.parseSnapshot(resp));
