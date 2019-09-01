@@ -80,10 +80,22 @@ class MobileApp extends React.Component {
 	// ----------  Package Instance Items-------
 	confirmAddItinerary (it) {
 		console.log('>>>>MobileApp.confirmAddItinerary', it);
+		this.setState({
+			botModal: modal.ADD_ITINERARY.key,
+			refModal: it,
+		});
 	}
 	handleAddItinerary () {
 		const it = this.state.refModal;
 		console.log('>>>>MobileApp.handleAddItinerary', it);
+		const instPackage = PackageHelper.addItinerary(
+			this.state.instPackage,
+			it.dayNo
+		);
+		this.setState({
+			instPackage: instPackage,
+			botModal: '',
+		});
 	}
 	confirmDeleteItinerary (it) {
 		console.log('>>>>MobileApp.confirmDeleteItinerary', it);
