@@ -64,6 +64,13 @@ class PackageAttraction extends React.Component {
 				// console.log('>>>>PackageAttraction.doHandleDeleteItinerary', it);
 				handleDeleteItinerary(it);
 			};
+			const doHandleLikeAttraction = attraction => {
+				console.log('>>>>PackageAttraction.doHandleLikeAttraction', {
+					itinerary: it,
+					attraction,
+				});
+				handleLikeAttraction(it, attraction);
+			};
 			// Prepare settings of ChipList
 			const likedItems = _.filter(it.attractions, { isLiked: true });
 			const tagSetting = {
@@ -78,7 +85,7 @@ class PackageAttraction extends React.Component {
 					<AttractionCard
 						key={a.id}
 						item={a}
-						handleClick={handleLikeAttraction}
+						handleClick={doHandleLikeAttraction}
 					/>
 				);
 			});
