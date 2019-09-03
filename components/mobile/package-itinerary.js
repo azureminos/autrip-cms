@@ -40,7 +40,7 @@ export default class PackageItinerary extends React.Component {
 			handleSelectCar,
 		} = this.props;
 		const { startDate } = this.state;
-		const { packageRates, carRates, flightRates, hotelRates } = rates;
+		const { packageRates, carRates, flightRates } = rates;
 		const doHandleSelectFlight = stStartDate => {
 			const sDate = stStartDate ? Moment(stStartDate, dtFormat).toDate() : null;
 			const eDate = stStartDate
@@ -80,26 +80,21 @@ export default class PackageItinerary extends React.Component {
 		_.forEach(itAttractions, it => {
 			const title = triggerText(it.dayNo, it.cityBase);
 			// Prepare attraction card list
-			const hotelSelector = isCustomised ? (
-				<HotelSlider
-					dayNo={it.dayNo}
-					hotels={it.hotels}
-					hotelRates={hotelRates}
-					handleSelectHotel={handleSelectHotel}
-				/>
+			const hotelSelector = it.hotels ? (
+				isCustomised ? (
+					<HotelSlider
+						dayNo={it.dayNo}
+						hotels={it.hotels}
+						handleSelectHotel={handleSelectHotel}
+					/>
+				) : (
+					<HotelItem hotels={it.hotels} />
+				)
 			) : (
-				<HotelItem hotels={it.hotels} />
+				''
 			);
 			// Display the desciption of package-item
-			const desc
-				= !it.hotels
-				|| it.hotels.length === 0
-				|| !it.attractions
-				|| it.attractions.length === 0 ? (
-					<Typography>{it.cityDesc}</Typography>
-				) : (
-					''
-				);
+			const desc = !isCustomised ? <Typography>{it.cityDesc}</Typography> : '';
 			elItineraries[title] = (
 				<div style={{ width: '-webkit-fill-available' }}>
 					{desc}

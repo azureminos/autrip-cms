@@ -5,13 +5,15 @@ import { withStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import FlightTakeoff from '@material-ui/icons/FlightTakeoff';
-import DirectionsCar from '@material-ui/icons/DirectionsCar';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+// ====== Icons ======
+import FlightTakeoff from '@material-ui/icons/FlightTakeoff';
+import DirectionsCar from '@material-ui/icons/DirectionsCar';
+import HelpIcon from '@material-ui/icons/HelpOutlineRounded';
 
 const styles = theme => ({
 	root: {
@@ -21,6 +23,9 @@ const styles = theme => ({
 	formControl: {
 		margin: theme.spacing.unit,
 		minWidth: 120,
+	},
+	helpIcon: {
+		margin: theme.spacing.unit,
 	},
 	list: {
 		width: '100%',
@@ -111,6 +116,9 @@ class FlightCar extends React.Component {
 								{miReturnDates}
 							</Select>
 						</FormControl>
+						<FormControl className={classes.helpIcon}>
+							<HelpIcon />
+						</FormControl>
 					</div>
 				</ListItemSecondaryAction>
 			</ListItem>
@@ -137,6 +145,9 @@ class FlightCar extends React.Component {
 								</MenuItem>
 								{miCarOptions}
 							</Select>
+						</FormControl>
+						<FormControl className={classes.helpIcon}>
+							<HelpIcon />
 						</FormControl>
 					</ListItemSecondaryAction>
 				</ListItem>

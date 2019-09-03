@@ -273,7 +273,7 @@ class MobileApp extends React.Component {
 	render () {
 		const { botModal, refModal, instPackage } = this.state;
 		const { rates, reference } = this.props;
-		const { packageRates, flightRates, hotelRates } = rates;
+		const { packageRates, flightRates } = rates;
 		const { cities, packageSummary } = reference;
 		rates.carRates = _.map(cities, c => {
 			return {
@@ -332,13 +332,10 @@ class MobileApp extends React.Component {
 			</div>
 		);
 		// Tabs
-		const tabs = {};
-		if (instPackage.isCustomised) {
-			tabs.Attraction = elAttractions;
-			tabs.Hotel = elHotels;
-		} else {
-			tabs.Itinerary = elAttractions;
-		}
+		const tabs = {
+			Attraction: elAttractions,
+			Itinerary: elHotels,
+		};
 		// Bot Modal
 		const elModal
 			= paramModal && botModal ? (

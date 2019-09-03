@@ -116,8 +116,6 @@ class PackageDetails extends React.Component {
 			packageRates,
 			flightRates,
 			cities,
-			carRates,
-			hotelRates,
 		} = selectedPackage;
 		const isTemplate = !packageSummary.isSnapshot;
 
@@ -294,9 +292,7 @@ class PackageDetails extends React.Component {
 					<ListItem>
 						<PackageRates
 							flightRates={flightRates}
-							carRates={carRates}
 							packageRates={packageRates}
-							hotelRates={hotelRates}
 						/>
 					</ListItem>
 				</List>
@@ -311,7 +307,7 @@ class PackageDetails extends React.Component {
 								packageItems,
 								packageHotels,
 							})}
-							rates={{ packageRates, carRates, flightRates, hotelRates }}
+							rates={{ packageRates, flightRates }}
 							reference={{ packageSummary, cities }}
 						/>
 					) : (

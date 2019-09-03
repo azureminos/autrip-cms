@@ -22,7 +22,7 @@ class HotelSlider extends React.Component {
 
 		// console.log('>>>>HotelSlider, render()', this.props);
 		const { idxSelected } = this.state;
-		const { dayNo, hotels, hotelRates, handleSelectHotel } = this.props;
+		const { dayNo, hotels, handleSelectHotel } = this.props;
 		const doSelectHotel = item => {
 			handleSelectHotel(dayNo, item);
 			this.setState({ idxSelected: item.id });

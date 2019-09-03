@@ -54,33 +54,49 @@ class PackageRates extends React.Component {
 	// Render Flight Rates
 	renderFlightRates (flightRates, classes) {
 		// console.log('>>>>PackageRates.renderFlightRates', flightRates);
-		const rates = _.map(flightRates, (rate) =>
-			(_.pick(rate, '_id', 'name', 'priority', 'rangeFrom', 'rangeTo', 'airline', 'type', 'cost', 'rate')));
+		const rates = _.map(flightRates, rate =>
+			_.pick(
+				rate,
+				'_id',
+				'name',
+				'priority',
+				'rangeFrom',
+				'rangeTo',
+				'airline',
+				'type',
+				'cost',
+				'rate'
+			)
+		);
 
 		return (
 			<Table className={classes.table}>
 				<TableHead>
-				<TableRow>
-					<TableCell>Rate Name</TableCell>
-					<TableCell align="right">Priority (High to Low)</TableCell>
-					<TableCell align="right">Airline</TableCell>
-					<TableCell align="right">Rate Range From</TableCell>
-					<TableCell align="right">Rate Range To</TableCell>
-					<TableCell align="right">Ticket Type</TableCell>
-					<TableCell align="right">Ticket Cost</TableCell>
-					<TableCell align="right">Ticket Price</TableCell>
-				</TableRow>
+					<TableRow>
+						<TableCell>Rate Name</TableCell>
+						<TableCell align="right">Priority (High to Low)</TableCell>
+						<TableCell align="right">Airline</TableCell>
+						<TableCell align="right">Rate Range From</TableCell>
+						<TableCell align="right">Rate Range To</TableCell>
+						<TableCell align="right">Ticket Type</TableCell>
+						<TableCell align="right">Ticket Cost</TableCell>
+						<TableCell align="right">Ticket Price</TableCell>
+					</TableRow>
 				</TableHead>
 				<TableBody>
-					{_.map(rates, (row) => (
+					{_.map(rates, row => (
 						<TableRow key={row._id}>
 							<TableCell component="th" scope="row">
 								{row.name}
 							</TableCell>
 							<TableCell align="right">{row.priority}</TableCell>
 							<TableCell align="right">{row.airline}</TableCell>
-							<TableCell align="right">{row.rangeFrom.substring(0, row.rangeFrom.indexOf('T'))}</TableCell>
-							<TableCell align="right">{row.rangeTo.substring(0, row.rangeTo.indexOf('T'))}</TableCell>
+							<TableCell align="right">
+								{row.rangeFrom.substring(0, row.rangeFrom.indexOf('T'))}
+							</TableCell>
+							<TableCell align="right">
+								{row.rangeTo.substring(0, row.rangeTo.indexOf('T'))}
+							</TableCell>
 							<TableCell align="right">{row.type}</TableCell>
 							<TableCell align="right">{row.cost}</TableCell>
 							<TableCell align="right">{row.rate}</TableCell>
@@ -92,35 +108,52 @@ class PackageRates extends React.Component {
 	}
 	// Render Car Rates
 	renderCarRates (carRates, classes) {
-		//console.log('>>>>PackageRates.renderCarRates', carRates);
-		const rates = _.map(carRates, (rate) =>
-			(_.pick(rate, '_id', 'name', 'priority', 'type', 'rangeFrom', 'rangeTo', 'minParticipant', 'maxParticipant', 'cost', 'rate')));
+		// console.log('>>>>PackageRates.renderCarRates', carRates);
+		const rates = _.map(carRates, rate =>
+			_.pick(
+				rate,
+				'_id',
+				'name',
+				'priority',
+				'type',
+				'rangeFrom',
+				'rangeTo',
+				'minParticipant',
+				'maxParticipant',
+				'cost',
+				'rate'
+			)
+		);
 
 		return (
 			<Table className={classes.table}>
 				<TableHead>
-				<TableRow>
-					<TableCell>Rate Name</TableCell>
-					<TableCell align="right">Priority (High to Low)</TableCell>
-					<TableCell align="right">Type</TableCell>
-					<TableCell align="right">Rate Range From</TableCell>
-					<TableCell align="right">Rate Range To</TableCell>
-					<TableCell align="right">Min Onboard</TableCell>
-					<TableCell align="right">Max Onboard</TableCell>
-					<TableCell align="right">Cost</TableCell>
-					<TableCell align="right">Price</TableCell>
-				</TableRow>
+					<TableRow>
+						<TableCell>Rate Name</TableCell>
+						<TableCell align="right">Priority (High to Low)</TableCell>
+						<TableCell align="right">Type</TableCell>
+						<TableCell align="right">Rate Range From</TableCell>
+						<TableCell align="right">Rate Range To</TableCell>
+						<TableCell align="right">Min Onboard</TableCell>
+						<TableCell align="right">Max Onboard</TableCell>
+						<TableCell align="right">Cost</TableCell>
+						<TableCell align="right">Price</TableCell>
+					</TableRow>
 				</TableHead>
 				<TableBody>
-					{_.map(rates, (row) => (
+					{_.map(rates, row => (
 						<TableRow key={row._id}>
 							<TableCell component="th" scope="row">
 								{row.name}
 							</TableCell>
 							<TableCell align="right">{row.priority}</TableCell>
 							<TableCell align="right">{row.type}</TableCell>
-							<TableCell align="right">{row.rangeFrom.substring(0, row.rangeFrom.indexOf('T'))}</TableCell>
-							<TableCell align="right">{row.rangeTo.substring(0, row.rangeTo.indexOf('T'))}</TableCell>
+							<TableCell align="right">
+								{row.rangeFrom.substring(0, row.rangeFrom.indexOf('T'))}
+							</TableCell>
+							<TableCell align="right">
+								{row.rangeTo.substring(0, row.rangeTo.indexOf('T'))}
+							</TableCell>
 							<TableCell align="right">{row.minParticipant}</TableCell>
 							<TableCell align="right">{row.maxParticipant}</TableCell>
 							<TableCell align="right">{row.cost}</TableCell>
@@ -134,33 +167,50 @@ class PackageRates extends React.Component {
 	// Render Package Rates
 	renderPackageRates (packageRates, classes) {
 		// console.log('>>>>PackageRates.renderPackageRates', packageRates);
-		const rates = _.map(packageRates, (rate) =>
-			(_.pick(rate, '_id', 'name', 'priority', 'rangeFrom', 'rangeTo', 'minParticipant', 'maxParticipant', 'premiumFee', 'cost', 'rate')));
+		const rates = _.map(packageRates, rate =>
+			_.pick(
+				rate,
+				'_id',
+				'name',
+				'priority',
+				'rangeFrom',
+				'rangeTo',
+				'minParticipant',
+				'maxParticipant',
+				'premiumFee',
+				'cost',
+				'rate'
+			)
+		);
 
 		return (
 			<Table className={classes.table}>
 				<TableHead>
-				<TableRow>
-					<TableCell>Rate Name</TableCell>
-					<TableCell align="right">Priority (High to Low)</TableCell>
-					<TableCell align="right">Rate Range From</TableCell>
-					<TableCell align="right">Rate Range To</TableCell>
-					<TableCell align="right">Min Onboard</TableCell>
-					<TableCell align="right">Max Onboard</TableCell>
-					<TableCell align="right">Premium Fee</TableCell>
-					<TableCell align="right">Cost</TableCell>
-					<TableCell align="right">Price</TableCell>
-				</TableRow>
+					<TableRow>
+						<TableCell>Rate Name</TableCell>
+						<TableCell align="right">Priority (High to Low)</TableCell>
+						<TableCell align="right">Rate Range From</TableCell>
+						<TableCell align="right">Rate Range To</TableCell>
+						<TableCell align="right">Min Onboard</TableCell>
+						<TableCell align="right">Max Onboard</TableCell>
+						<TableCell align="right">Premium Fee</TableCell>
+						<TableCell align="right">Cost</TableCell>
+						<TableCell align="right">Price</TableCell>
+					</TableRow>
 				</TableHead>
 				<TableBody>
-					{_.map(rates, (row) => (
+					{_.map(rates, row => (
 						<TableRow key={row._id}>
 							<TableCell component="th" scope="row">
 								{row.name}
 							</TableCell>
 							<TableCell align="right">{row.priority}</TableCell>
-							<TableCell align="right">{row.rangeFrom.substring(0, row.rangeFrom.indexOf('T'))}</TableCell>
-							<TableCell align="right">{row.rangeTo.substring(0, row.rangeTo.indexOf('T'))}</TableCell>
+							<TableCell align="right">
+								{row.rangeFrom.substring(0, row.rangeFrom.indexOf('T'))}
+							</TableCell>
+							<TableCell align="right">
+								{row.rangeTo.substring(0, row.rangeTo.indexOf('T'))}
+							</TableCell>
 							<TableCell align="right">{row.minParticipant}</TableCell>
 							<TableCell align="right">{row.maxParticipant}</TableCell>
 							<TableCell align="right">{row.premiumFee}</TableCell>
@@ -172,26 +222,21 @@ class PackageRates extends React.Component {
 			</Table>
 		);
 	}
-	// Render Hotel Rates
-	renderHotelRates (hotelRates, classes) {
-		//console.log('>>>>PackageRates.renderHotelRates', hotelRates);
-		return (<div>Hotel Rates</div>);
-	}
 	// Render Rates Table
-	renderRatesTable (tbFlightRates, tbCarRates, tbPackageRates, tbHotelRates, classes, selectedTab) {
+	renderRatesTable (tbFlightRates, tbPackageRates, classes, selectedTab) {
 		return (
 			<div className={classes.root}>
-				<Tabs value={selectedTab} onChange={this.handleTabChange} variant="fullWidth">
+				<Tabs
+					value={selectedTab}
+					onChange={this.handleTabChange}
+					variant="fullWidth"
+				>
 					<Tab label="Package Rate" />
 					<Tab label="Flight Rate" />
-					<Tab label="Car Rate" />
-					<Tab label="Hotel Rate" />
 				</Tabs>
 				<TabContainer>
-					{selectedTab === 0 ? tbPackageRates : (<div/>)}
-					{selectedTab === 1 ? tbFlightRates : (<div/>)}
-					{selectedTab === 2 ? tbCarRates : (<div/>)}
-					{selectedTab === 3 ? tbHotelRates : (<div/>)}
+					{selectedTab === 0 ? tbPackageRates : <div />}
+					{selectedTab === 1 ? tbFlightRates : <div />}
 				</TabContainer>
 			</div>
 		);
@@ -199,17 +244,20 @@ class PackageRates extends React.Component {
 	/* ----------  Event Handlers  ------- */
 	handleTabChange (event, value) {
 		this.setState({ selectedTab: value });
-	};
+	}
 
 	render () {
-		const { classes, theme, flightRates, carRates, packageRates, hotelRates } = this.props;
+		const { classes, theme, flightRates, packageRates } = this.props;
 		const { selectedTab } = this.state;
 		const tbFlightRates = this.renderFlightRates(flightRates, classes);
-		const tbCarRates = this.renderCarRates(carRates, classes);
 		const tbPackageRates = this.renderPackageRates(packageRates, classes);
-		const tbHotelRates = this.renderHotelRates(hotelRates, classes);
 
-		return (this.renderRatesTable(tbFlightRates, tbCarRates, tbPackageRates, tbHotelRates, classes, selectedTab));
+		return this.renderRatesTable(
+			tbFlightRates,
+			tbPackageRates,
+			classes,
+			selectedTab
+		);
 	}
 }
 
