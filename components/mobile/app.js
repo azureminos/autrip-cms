@@ -30,6 +30,7 @@ class MobileApp extends React.Component {
 		this.handleModalClose = this.handleModalClose.bind(this);
 		this.enablePackageDiy = this.enablePackageDiy.bind(this);
 		this.handleLikeAttraction = this.handleLikeAttraction.bind(this);
+		this.handleInvalidParticipant = this.handleInvalidParticipant.bind(this);
 		this.confirmAddItinerary = this.confirmAddItinerary.bind(this);
 		this.handleAddItinerary = this.handleAddItinerary.bind(this);
 		this.confirmDeleteItinerary = this.confirmDeleteItinerary.bind(this);
@@ -79,43 +80,58 @@ class MobileApp extends React.Component {
 	// ----------  Package  ----------
 	// ----------  Package Instance -------
 	// ----------  Package Instance Items-------
-	confirmAddItinerary (it) {
-		console.log('>>>>MobileApp.confirmAddItinerary', it);
+	confirmAddItinerary (ref) {
+		console.log('>>>>MobileApp.confirmAddItinerary', ref);
 		this.setState({
 			botModal: modal.ADD_ITINERARY.key,
-			refModal: it,
+			refModal: ref,
 		});
 	}
 	handleAddItinerary () {
-		const it = this.state.refModal;
-		console.log('>>>>MobileApp.handleAddItinerary', it);
+		const ref = this.state.refModal;
+		console.log('>>>>MobileApp.handleAddItinerary', ref);
 		const instPackage = PackageHelper.addItinerary(
 			this.state.instPackage,
-			it.dayNo
+			ref.dayNo
 		);
 		this.setState({
 			instPackage: instPackage,
 			botModal: '',
 		});
 	}
-	confirmDeleteItinerary (it) {
-		console.log('>>>>MobileApp.confirmDeleteItinerary', it);
+	handleInvalidParticipant (ref) {
+		console.log('>>>>MobileApp.handleErrorParticipant', ref);
+		const { total, max, min } = ref;
+		if (total > max) {
+			this.setState({
+				botModal: modal.INVALID_MAX_PARTICIPANT.key,
+				refModal: ref,
+			});
+		} else if (total < min) {
+			this.setState({
+				botModal: modal.INVALID_MIN_PARTICIPANT.key,
+				refModal: ref,
+			});
+		}
+	}
+	confirmDeleteItinerary (ref) {
+		console.log('>>>>MobileApp.confirmDeleteItinerary', ref);
 		this.setState({
 			botModal: modal.DELETE_ITINERARY.key,
-			refModal: it,
+			refModal: ref,
 		});
 	}
 	handleDeleteItinerary () {
-		const it = this.state.refModal;
-		console.log('>>>>MobileApp.handleDeleteItinerary', it);
-		if (it.isRequired) {
+		const ref = this.state.refModal;
+		console.log('>>>>MobileApp.handleDeleteItinerary', ref);
+		if (ref.isRequired) {
 			this.setState({
 				botModal: modal.FAILED_DELETE_ITINERARY.key,
 			});
 		} else {
 			const instPackage = PackageHelper.deleteItinerary(
 				this.state.instPackage,
-				it.dayNo
+				ref.dayNo
 			);
 			this.setState({
 				instPackage: instPackage,
@@ -156,7 +172,7 @@ class MobileApp extends React.Component {
 					if (
 						i > 0
 						&& _.findIndex(itinerary.attractions[i].nearByAttractions, item => {
-							return item === itinerary[i - 1].attraction.id;
+							return item === itinerary.attractions[i - 1].id;
 						}) > -1
 					) {
 						timePlanned = timePlanned - 1;
@@ -184,13 +200,11 @@ class MobileApp extends React.Component {
 			});
 		} else {
 			// Package is customised (DIY) already, move on with rest of logic
-			this.setState({ updating: true });
 			const action = attraction.isLiked ? 'DELETE' : 'ADD';
 			if (action === 'ADD') {
 				if (isOverloaded(itinerary)) {
 					// Activities over booked
 					this.setState({
-						updating: false,
 						botModal: modal.FULL_ITINERARY.key,
 						refModal: itinerary,
 					});
@@ -210,7 +224,7 @@ class MobileApp extends React.Component {
 					};
 					dayItems[itinerary.dayNo].push(newItem);
 					instPackage.items = mergeDayItems(dayItems);
-					this.setState({ updating: false, instPackage: instPackage });
+					this.setState({ instPackage: instPackage });
 				}
 			} else if (action === 'DELETE') {
 				const dayItems = _.groupBy(instPackage.items, item => {
@@ -219,7 +233,6 @@ class MobileApp extends React.Component {
 				if (dayItems[itinerary.dayNo].length === 1) {
 					// Only one activity, can not be deleted
 					this.setState({
-						updating: false,
 						botModal: modal.ONLY_ITINERARY.key,
 						refModal: itinerary,
 					});
@@ -232,7 +245,7 @@ class MobileApp extends React.Component {
 					});
 					dayItems[itinerary.dayNo] = newItems;
 					instPackage.items = mergeDayItems(dayItems);
-					this.setState({ updating: false, instPackage: instPackage });
+					this.setState({ instPackage: instPackage });
 				}
 			}
 		}
@@ -248,14 +261,15 @@ class MobileApp extends React.Component {
 				hotel.hotel = { ...item, city };
 			}
 		}
-		// this.setState({ instPackage: instPackage });
+		this.setState({ instPackage: instPackage });
 	}
 	// ----------  Package Instance Flight  ----------
 	handleSelectFlight (startDate, endDate) {
-		console.log(`>>>>MobileApp.handleSelectFlight`, { startDate, endDate });
+		// console.log(`>>>>MobileApp.handleSelectFlight`, { startDate, endDate });
 		const { instPackage } = this.state;
 		instPackage.startDate = startDate;
 		instPackage.endDate = endDate;
+		this.setState({ instPackage: instPackage });
 	}
 	// ----------  Package Instance Car  ----------
 	handleSelectCar (selectedVal) {
@@ -286,6 +300,12 @@ class MobileApp extends React.Component {
 		console.log('>>>>MobileApp.render >> reference', reference);
 		console.log('>>>>MobileApp.render >> rates', rates);
 		// Variables
+		const kids
+			= instPackage.members.length === 1 ? instPackage.members[0].memberKids : 0;
+		const adults
+			= instPackage.members.length === 1
+				? instPackage.members[0].memberAdults
+				: 0;
 		const departDates = _.map(packageSummary.departureDate.split(','), d => {
 			return d.trim();
 		});
@@ -359,6 +379,9 @@ class MobileApp extends React.Component {
 							instPackage={instPackage}
 							rates={rates}
 							cities={cities}
+							adults={adults}
+							kids={kids}
+							handleInvalidParticipant={this.handleInvalidParticipant}
 						/>
 					</FixedTab>
 					{elModal}

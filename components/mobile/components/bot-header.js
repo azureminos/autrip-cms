@@ -28,24 +28,23 @@ class BotHeader extends React.Component {
 	constructor (props) {
 		console.log('>>>>BotHeader, constructor()', props);
 		super(props);
-
+		// Set min & max
+		let max = 0;
+		let min = 999;
+		_.each(props.rates.packageRates, pr => {
+			if (pr.maxParticipant >= max) {
+				max = pr.maxParticipant;
+			}
+			if (pr.minParticipant <= max) {
+				min = pr.minParticipant;
+			}
+		});
 		this.state = {
-			adults: 1,
-			kids: 0,
+			adults: props.adults || 1,
+			kids: props.kids || 0,
+			max: max,
+			min: min,
 		};
-
-		this.handleAdultsChange = this.handleAdultsChange.bind(this);
-		this.handleKidsChange = this.handleKidsChange.bind(this);
-	}
-
-	handleAdultsChange (e) {
-		console.log('>>>>BotHeader, handleAdultsChange()', e);
-		this.setState({ adults: e.target.value });
-	}
-
-	handleKidsChange (e) {
-		console.log('>>>>BotHeader, handleKidsChange()', e);
-		this.setState({ kids: e.target.value });
 	}
 
 	buildMenuItems (maxSelect, itemText) {
@@ -80,7 +79,7 @@ class BotHeader extends React.Component {
 			carOption,
 			totalDays,
 		} = instPackage;
-		const { adults, kids } = this.state;
+		const { adults, kids, max, min } = this.state;
 		const finalCost = { price: 0, promo: '' };
 		const maxSelect = 30;
 
@@ -88,6 +87,29 @@ class BotHeader extends React.Component {
 			startDate: startDate,
 			adults: adults + totalAdults,
 			kids: kids + totalKids,
+		};
+		// ====== Event Handler ======
+		// Handle adult change
+		const handleAdultsChange = e => {
+			console.log('>>>>BotHeader, handleAdultsChange()', { e, packageRates });
+			const { handleInvalidParticipant } = this.props;
+			const total = kids + e.target.value;
+			if (total > max || total < min) {
+				handleInvalidParticipant({ total, max, min });
+			} else {
+				this.setState({ adults: e.target.value });
+			}
+		};
+		// Handle kid change
+		const handleKidsChange = e => {
+			console.log('>>>>BotHeader, handleKidsChange()', { e, packageRates });
+			const { handleInvalidParticipant } = this.props;
+			const total = adults + e.target.value;
+			if (total > max || total < min) {
+				handleInvalidParticipant({ total, max, min });
+			} else {
+				this.setState({ kids: e.target.value });
+			}
 		};
 
 		if (!isCustomised) {
@@ -130,54 +152,64 @@ class BotHeader extends React.Component {
 			 * - packageHotels: To Be Added
 			 * ============================ */
 			const curRatePackageDiy = Rate.calPackageRate(params, packageRates);
+			console.log('>>>>Rate.calPackageRate', curRatePackageDiy);
 			if (curRatePackageDiy) {
 				const curRateFlightDiy = Rate.calFlightRate(startDate, flightRates);
-				const curRateCarDiy = Rate.calCarRate(
-					{ ...params, totalDays, carOption },
-					carRates
-				);
-				const curRateItemDiy = Rate.calItemRate(items, cities);
-				const curRateHotelDiy = Rate.calHotelRate(
-					{ startDate },
-					hotels,
-					cities
-				);
-
-				var nxtRatePackageDiy, nxtRateCarDiy;
-				if (
-					curRatePackageDiy.maxParticipant
-					&& instPackage.maxParticipant > curRatePackageDiy.maxParticipant
-				) {
-					params.adults = curRatePackageDiy.maxParticipant + 1;
-					params.kids = 0;
-					nxtRatePackageDiy = Rate.calPackageRate(params, packageRates);
-					nxtRateCarDiy = Rate.calCarRate(
-						{ ...params, totalDays, carOption },
+				console.log('>>>>Rate.calFlightRate', curRateFlightDiy);
+				if (curRateFlightDiy) {
+					const curRateCarDiy = Rate.calCarRate(
+						{ ...params, carOption, hotels, items },
 						carRates
 					);
+					console.log('>>>>Rate.calCarRate', curRateCarDiy);
+					if (curRateCarDiy) {
+						const curRateItemDiy = Rate.calItemRate({ startDate }, items);
+						const curRateHotelDiy = Rate.calHotelRate({ startDate }, hotels);
+						var nxtRatePackageDiy, nxtRateCarDiy;
+						if (
+							curRatePackageDiy.maxParticipant
+							&& instPackage.maxParticipant > curRatePackageDiy.maxParticipant
+						) {
+							params.adults = curRatePackageDiy.maxParticipant + 1;
+							params.kids = 0;
+							nxtRatePackageDiy = Rate.calPackageRate(params, packageRates);
+							nxtRateCarDiy = Rate.calCarRate(
+								{ ...params, carOption, hotels, items },
+								carRates
+							);
+						} else {
+							nxtRatePackageDiy = null;
+							nxtRateCarDiy = null;
+						}
+						const gap
+							= curRatePackageDiy.maxParticipant
+							+ 1
+							- (adults + totalAdults + kids + totalKids);
+						const nextPrice
+							= nxtRatePackageDiy && nxtRateCarDiy
+								? nxtRatePackageDiy.price
+								  + curRateFlightDiy
+								  + nxtRateCarDiy
+								  + curRateItemDiy
+								  + curRateHotelDiy
+								: 0;
+						finalCost.price
+							= curRatePackageDiy.price
+							+ curRateFlightDiy
+							+ curRateCarDiy
+							+ curRateItemDiy
+							+ curRateHotelDiy;
+						finalCost.promo = nxtRatePackageDiy
+							? `${gap} more people $${nextPrice} pp`
+							: `Max group size is ${curRatePackageDiy.maxParticipant}`;
+					} else {
+						finalCost.price = 'ERROR';
+						finalCost.promo = 'ERROR';
+					}
 				} else {
-					nxtRatePackageDiy = null;
-					nxtRateCarDiy = null;
+					finalCost.price = 'ERROR';
+					finalCost.promo = 'ERROR';
 				}
-				const gap
-					= curRatePackageDiy.maxParticipant
-					+ 1
-					- (adults + totalAdults + kids + totalKids);
-				const nextPrice
-					= nxtRatePackageDiy.price
-					+ curRateFlightDiy
-					+ nxtRateCarDiy
-					+ curRateItemDiy
-					+ curRateHotelDiy;
-				finalCost.price
-					= curRatePackageDiy.price
-					+ curRateFlightDiy
-					+ curRateCarDiy
-					+ curRateItemDiy
-					+ curRateHotelDiy;
-				finalCost.promo = nxtRatePackageDiy
-					? `${gap} more people $${nextPrice} pp`
-					: `Max group size is ${curRatePackageDiy.maxParticipant}`;
 			} else {
 				finalCost.price = 'ERROR';
 				finalCost.promo = 'ERROR';
@@ -206,7 +238,7 @@ class BotHeader extends React.Component {
 							<FormControl className={classes.formControl}>
 								<Select
 									value={adults}
-									onChange={this.handleAdultsChange}
+									onChange={handleAdultsChange}
 									input={<Input name="adults" id="adults-label-placeholder" />}
 									displayEmpty
 									name="adults"
@@ -218,7 +250,7 @@ class BotHeader extends React.Component {
 							<FormControl className={classes.formControl}>
 								<Select
 									value={kids}
-									onChange={this.handleKidsChange}
+									onChange={handleKidsChange}
 									input={<Input name="kids" id="kids-label-placeholder" />}
 									displayEmpty
 									name="kids"
