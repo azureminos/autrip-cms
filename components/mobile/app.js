@@ -55,6 +55,7 @@ class MobileApp extends React.Component {
 			message: '',
 			botModal: '',
 			refModal: null,
+			userId: props.userId,
 			instPackage: {
 				...props.instPackage,
 				items: instItems,
@@ -155,9 +156,6 @@ class MobileApp extends React.Component {
 			instPackage: this.state.instPackage,
 		});
 		// Functions
-		var isPlannable = itinerary => {
-			return itinerary && itinerary.timePlannable > 0;
-		};
 		var isOverloaded = itinerary => {
 			var timePlannable = itinerary.timePlannable;
 			if (timePlannable === 0) {
@@ -285,7 +283,7 @@ class MobileApp extends React.Component {
 	}
 
 	render () {
-		const { botModal, refModal, instPackage } = this.state;
+		const { botModal, refModal, instPackage, userId } = this.state;
 		const { rates, reference } = this.props;
 		const { packageRates, flightRates } = rates;
 		const { cities, packageSummary } = reference;
@@ -300,12 +298,6 @@ class MobileApp extends React.Component {
 		console.log('>>>>MobileApp.render >> reference', reference);
 		console.log('>>>>MobileApp.render >> rates', rates);
 		// Variables
-		const kids
-			= instPackage.members.length === 1 ? instPackage.members[0].memberKids : 0;
-		const adults
-			= instPackage.members.length === 1
-				? instPackage.members[0].memberAdults
-				: 0;
 		const departDates = _.map(packageSummary.departureDate.split(','), d => {
 			return d.trim();
 		});
@@ -376,12 +368,12 @@ class MobileApp extends React.Component {
 				<Paper>
 					<FixedTab tabs={tabs}>
 						<BotHeader
+							userId={userId}
 							instPackage={instPackage}
 							rates={rates}
 							cities={cities}
-							adults={adults}
-							kids={kids}
-							handleInvalidParticipant={this.handleInvalidParticipant}
+							handleInvalidPeople={this.handleInvalidParticipant}
+							handleInvalidRoom={this.handleInvalidParticipant}
 						/>
 					</FixedTab>
 					{elModal}

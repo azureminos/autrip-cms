@@ -22,6 +22,7 @@ Hotel.add({
 	stars: { type: Types.Number, default: 0 },
 	type: { type: Types.Text },
 	defaultRate: { type: Types.Number, default: 0 },
+	rateExtraBed: { type: Types.Number, default: 0 },
 	image: {
 		type: Types.CloudinaryImage,
 		folder: 'Hotels',

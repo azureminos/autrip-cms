@@ -229,6 +229,11 @@ class PackageDetails extends React.Component {
 			);
 		}
 
+		const instPackage = Helper.dummyInstance({
+			packageSummary,
+			packageItems,
+			packageHotels,
+		});
 		return (
 			<div className={classes.root}>
 				<div>
@@ -302,13 +307,10 @@ class PackageDetails extends React.Component {
 				>
 					{this.state.openModal === 'mobile' ? (
 						<MobileApp
-							instPackage={Helper.dummyInstance({
-								packageSummary,
-								packageItems,
-								packageHotels,
-							})}
+							instPackage={instPackage}
 							rates={{ packageRates, flightRates }}
 							reference={{ packageSummary, cities }}
+							userId={instPackage.members[0].loginId}
 						/>
 					) : (
 						<div />

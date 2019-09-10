@@ -29,6 +29,7 @@ TravelPackage.add({
 	country: { type: Types.Relationship, ref: 'Country' },
 	totalDays: { type: Types.Number, default: 0 },
 	maxParticipant: { type: Types.Number, default: 0 },
+	minParticipant: { type: Types.Number, default: 0 },
 	departureDate: { type: Types.Textarea },
 	retailPrice: { type: Types.Number, default: 0 },
 	isSnapshot: { type: Types.Boolean, default: false },

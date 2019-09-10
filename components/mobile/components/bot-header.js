@@ -10,7 +10,9 @@ import Select from '@material-ui/core/Select';
 import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
 import Rate from '../../../lib/rate-calculator';
+import CONSTANTS from '../../../lib/constants';
 
+const { maxRoomCapacity, standardRoomCapacity } = CONSTANTS.get().Global;
 const styles = theme => ({
 	table: {
 		minWidth: 200,
@@ -26,39 +28,67 @@ const styles = theme => ({
 
 class BotHeader extends React.Component {
 	constructor (props) {
-		console.log('>>>>BotHeader, constructor()', props);
+		console.log('>>>>BotHeader.constructor', props);
 		super(props);
-		// Set min & max
-		let max = 0;
-		let min = 999;
-		_.each(props.rates.packageRates, pr => {
-			if (pr.maxParticipant >= max) {
-				max = pr.maxParticipant;
-			}
-			if (pr.minParticipant <= max) {
-				min = pr.minParticipant;
-			}
-		});
+		// Get people & rooms
+		const otherRooms
+			= _.sumBy(
+				_.filter(props.instPackage.members, m => {
+					return m.userId !== props.userId;
+				}),
+				m => {
+					return m.rooms;
+				}
+			) || 0;
+		const rooms
+			= _.sumBy(
+				_.filter(props.instPackage.members, m => {
+					return m.userId === props.userId;
+				}),
+				m => {
+					return m.rooms;
+				}
+			) || 1;
+		const otherPeople
+			= _.sumBy(
+				_.filter(props.instPackage.members, m => {
+					return m.userId !== props.userId;
+				}),
+				m => {
+					return m.people;
+				}
+			) || 0;
+		const people
+			= _.sumBy(
+				_.filter(props.instPackage.members, m => {
+					return m.userId === props.userId;
+				}),
+				m => {
+					return m.people;
+				}
+			) || 1;
+
+		// Set initial state
 		this.state = {
-			adults: props.adults || 1,
-			kids: props.kids || 0,
-			max: max,
-			min: min,
+			people: people,
+			rooms: rooms,
+			otherPeople: otherPeople,
+			otherRooms: otherRooms,
 		};
 	}
 
 	buildMenuItems (maxSelect, itemText) {
 		const rs = [];
-		rs[rs.length] = (
-			<MenuItem key={0} value={0}>
-				0 {itemText}
-			</MenuItem>
-		);
 		for (let ct = 0; ct < maxSelect; ct++) {
+			let miText = '';
+			if (itemText === 'Person' || itemText === 'People') {
+				miText = ct === 0 ? 'Person' : 'People';
+			} else {
+				miText = ct === 0 ? itemText : `${itemText}s`;
+			}
 			rs[rs.length] = (
 				<MenuItem key={ct + 1} value={ct + 1}>
-					{ct + 1} {itemText}
-					{ct === 0 ? '' : 's'}
+					{ct + 1} {miText}
 				</MenuItem>
 			);
 		}
@@ -66,55 +96,65 @@ class BotHeader extends React.Component {
 	}
 
 	render () {
-		console.log('>>>>BotHeader, render()', this.state);
+		console.log('>>>>BotHeader.render', this.state);
 		const { classes, instPackage, rates, cities } = this.props;
 		const { packageRates, carRates, flightRates } = rates;
-		const {
-			isCustomised,
-			hotels,
-			items,
-			totalAdults,
-			totalKids,
-			startDate,
-			carOption,
-			totalDays,
-		} = instPackage;
-		const { adults, kids, max, min } = this.state;
+		const { isCustomised, hotels, items, startDate, carOption } = instPackage;
+		const { people, rooms, otherPeople, otherRooms } = this.state;
+		// Set min & max
+		let max = 0;
+		let min = 999;
+		_.each(this.props.rates.packageRates, pr => {
+			if (pr.maxParticipant >= max) {
+				max = pr.maxParticipant;
+			}
+			if (pr.minParticipant <= max) {
+				min = pr.minParticipant;
+			}
+		});
+
 		const finalCost = { price: 0, promo: '' };
 		const maxSelect = 30;
 
 		const params = {
 			startDate: startDate,
-			adults: adults + totalAdults,
-			kids: kids + totalKids,
+			totalPeople: otherPeople + people,
+			totalRooms: otherRooms + rooms,
 		};
 		// ====== Event Handler ======
-		// Handle adult change
-		const handleAdultsChange = e => {
-			console.log('>>>>BotHeader, handleAdultsChange()', { e, packageRates });
-			const { handleInvalidParticipant } = this.props;
-			const total = kids + e.target.value;
+		// Handle people change
+		const handlePeopleChange = e => {
+			console.log('>>>>BotHeader.handlePeopleChange', { e, packageRates });
+			const { handleInvalidPeople } = this.props;
+			const total = otherPeople + e.target.value;
 			if (total > max || total < min) {
-				handleInvalidParticipant({ total, max, min });
+				handleInvalidPeople({ total, max, min });
 			} else {
-				this.setState({ adults: e.target.value });
+				const newRooms = Math.ceil(e.target.value / standardRoomCapacity);
+				this.setState({ people: e.target.value, rooms: newRooms });
 			}
 		};
-		// Handle kid change
-		const handleKidsChange = e => {
-			console.log('>>>>BotHeader, handleKidsChange()', { e, packageRates });
-			const { handleInvalidParticipant } = this.props;
-			const total = adults + e.target.value;
-			if (total > max || total < min) {
-				handleInvalidParticipant({ total, max, min });
+		// Handle room change
+		const handleRoomChange = e => {
+			console.log('>>>>BotHeader.handleRoomChange', { e, packageRates });
+			const { handleInvalidRoom } = this.props;
+			if (
+				e.target.value > people
+				|| e.target.value < Math.ceil(people / maxRoomCapacity)
+			) {
+				handleInvalidRoom({
+					total: e.target.value,
+					max: people,
+					min: Math.ceil(people / maxRoomCapacity),
+				});
 			} else {
-				this.setState({ kids: e.target.value });
+				this.setState({ rooms: e.target.value });
 			}
 		};
 
 		if (!isCustomised) {
 			/* ==== Regular tour group ====
-			 * - packageRates: totalAdults, totalKids
+			 * - packageRates: totalPeople
 			 * - flightRates: startDate, endDate
 			 * ============================ */
 			const curRatePackageReg = Rate.calPackageRate(params, packageRates);
@@ -125,16 +165,13 @@ class BotHeader extends React.Component {
 					curRatePackageReg.maxParticipant
 					&& instPackage.maxParticipant > curRatePackageReg.maxParticipant
 				) {
-					params.adults = curRatePackageReg.maxParticipant + 1;
-					params.kids = 0;
+					params.totalPeople = curRatePackageReg.maxParticipant + 1;
 					nxtRatePackageReq = Rate.calPackageRate(params, packageRates);
 				} else {
 					nxtRatePackageReq = null;
 				}
 				const gap
-					= curRatePackageReg.maxParticipant
-					+ 1
-					- (adults + totalAdults + kids + totalKids);
+					= curRatePackageReg.maxParticipant + 1 - (people + otherPeople);
 				finalCost.price = curRatePackageReg.price + curRateFlight;
 				finalCost.promo = nxtRatePackageReq
 					? `${gap} more people $${nxtRatePackageReq.price + curRateFlight} pp`
@@ -145,11 +182,11 @@ class BotHeader extends React.Component {
 			}
 		} else {
 			/* ==== DIY tour group ====
-			 * - packageRates: totalAdults, totalKids, [startDate]
+			 * - packageRates: people, [startDate]
 			 * - flightRates: [startDate], [type]
-			 * - carRates: totalAdults, totalKids, [startDate], [type]
+			 * - carRates: people, [startDate], [type]
 			 * - packageItems: all package items
-			 * - packageHotels: To Be Added
+			 * - packageHotels: rooms
 			 * ============================ */
 			const curRatePackageDiy = Rate.calPackageRate(params, packageRates);
 			console.log('>>>>Rate.calPackageRate', curRatePackageDiy);
@@ -170,8 +207,7 @@ class BotHeader extends React.Component {
 							curRatePackageDiy.maxParticipant
 							&& instPackage.maxParticipant > curRatePackageDiy.maxParticipant
 						) {
-							params.adults = curRatePackageDiy.maxParticipant + 1;
-							params.kids = 0;
+							params.totalPeople = curRatePackageDiy.maxParticipant + 1;
 							nxtRatePackageDiy = Rate.calPackageRate(params, packageRates);
 							nxtRateCarDiy = Rate.calCarRate(
 								{ ...params, carOption, hotels, items },
@@ -182,9 +218,7 @@ class BotHeader extends React.Component {
 							nxtRateCarDiy = null;
 						}
 						const gap
-							= curRatePackageDiy.maxParticipant
-							+ 1
-							- (adults + totalAdults + kids + totalKids);
+							= curRatePackageDiy.maxParticipant + 1 - (people + otherPeople);
 						const nextPrice
 							= nxtRatePackageDiy && nxtRateCarDiy
 								? nxtRatePackageDiy.price
@@ -216,17 +250,17 @@ class BotHeader extends React.Component {
 			}
 		}
 
-		const miAdults = this.buildMenuItems(maxSelect, 'Adult');
-		const miKids = this.buildMenuItems(maxSelect, 'Kid');
+		const miPeople = this.buildMenuItems(maxSelect, 'Person');
+		const miRooms = this.buildMenuItems(maxSelect, 'Room');
 
 		return (
 			<Table className={classes.table}>
 				<TableBody>
 					<TableRow>
 						<TableCell style={{ padding: '4px', width: '22%' }}>
-							{totalAdults + adults} Adults
+							{otherPeople + people} People
 							<br />
-							{totalKids + kids} Kids
+							{otherRooms + rooms} Rooms
 						</TableCell>
 						<TableCell style={{ padding: '4px', width: '20%' }}>
 							${finalCost.price} pp
@@ -237,26 +271,26 @@ class BotHeader extends React.Component {
 						<TableCell style={{ padding: '4px', width: '25%' }}>
 							<FormControl className={classes.formControl}>
 								<Select
-									value={adults}
-									onChange={handleAdultsChange}
-									input={<Input name="adults" id="adults-label-placeholder" />}
+									value={people + otherPeople}
+									onChange={handlePeopleChange}
+									input={<Input name="people" id="people-label-placeholder" />}
 									displayEmpty
-									name="adults"
+									name="people"
 									className={classes.selectEmpty}
 								>
-									{miAdults}
+									{miPeople}
 								</Select>
 							</FormControl>
 							<FormControl className={classes.formControl}>
 								<Select
-									value={kids}
-									onChange={handleKidsChange}
-									input={<Input name="kids" id="kids-label-placeholder" />}
+									value={rooms + otherRooms}
+									onChange={handleRoomChange}
+									input={<Input name="rooms" id="rooms-label-placeholder" />}
 									displayEmpty
-									name="kids"
+									name="room"
 									className={classes.selectEmpty}
 								>
-									{miKids}
+									{miRooms}
 								</Select>
 							</FormControl>
 						</TableCell>

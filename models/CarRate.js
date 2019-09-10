@@ -34,6 +34,8 @@ CarRate.add({
 	rate: { type: Types.Number, default: 0 },
 	costLocalGuide: { type: Types.Number, default: 0 },
 	rateLocalGuide: { type: Types.Number, default: 0 },
+	costAirport: { type: Types.Number, default: 0 },
+	rateAirport: { type: Types.Number, default: 0 },
 	costExtra: { type: Types.Number, default: 0 },
 	rateExtra: { type: Types.Number, default: 0 },
 	priority: { type: Types.Number, default: 0 },
