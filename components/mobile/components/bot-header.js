@@ -30,6 +30,18 @@ class BotHeader extends React.Component {
 	constructor (props) {
 		console.log('>>>>BotHeader.constructor', props);
 		super(props);
+		const isCustomised = props.instPackage.isCustomised;
+		// Set min & max
+		let max = 0;
+		let min = 999;
+		_.each(this.props.rates.packageRates, pr => {
+			if (pr.maxParticipant >= max) {
+				max = pr.maxParticipant;
+			}
+			if (pr.minParticipant <= max) {
+				min = pr.minParticipant;
+			}
+		});
 		// Get people & rooms
 		const otherRooms
 			= _.sumBy(
@@ -48,7 +60,7 @@ class BotHeader extends React.Component {
 				m => {
 					return m.rooms;
 				}
-			) || 1;
+			) || Math.floor(min / standardRoomCapacity);
 		const otherPeople
 			= _.sumBy(
 				_.filter(props.instPackage.members, m => {
@@ -66,7 +78,7 @@ class BotHeader extends React.Component {
 				m => {
 					return m.people;
 				}
-			) || 1;
+			) || min;
 
 		// Set initial state
 		this.state = {
@@ -74,12 +86,14 @@ class BotHeader extends React.Component {
 			rooms: rooms,
 			otherPeople: otherPeople,
 			otherRooms: otherRooms,
+			max: max,
+			min: min,
 		};
 	}
 
-	buildMenuItems (maxSelect, itemText) {
+	buildMenuItems (minSelect, maxSelect, itemText) {
 		const rs = [];
-		for (let ct = 0; ct < maxSelect; ct++) {
+		for (let ct = minSelect - 1; ct < maxSelect; ct++) {
 			let miText = '';
 			if (itemText === 'Person' || itemText === 'People') {
 				miText = ct === 0 ? 'Person' : 'People';
@@ -97,24 +111,12 @@ class BotHeader extends React.Component {
 
 	render () {
 		console.log('>>>>BotHeader.render', this.state);
-		const { classes, instPackage, rates, cities } = this.props;
+		const { classes, instPackage, rates } = this.props;
 		const { packageRates, carRates, flightRates } = rates;
 		const { isCustomised, hotels, items, startDate, carOption } = instPackage;
-		const { people, rooms, otherPeople, otherRooms } = this.state;
-		// Set min & max
-		let max = 0;
-		let min = 999;
-		_.each(this.props.rates.packageRates, pr => {
-			if (pr.maxParticipant >= max) {
-				max = pr.maxParticipant;
-			}
-			if (pr.minParticipant <= max) {
-				min = pr.minParticipant;
-			}
-		});
+		const { people, rooms, otherPeople, otherRooms, max, min } = this.state;
 
 		const finalCost = { price: 0, promo: '' };
-		const maxSelect = 30;
 
 		const params = {
 			startDate: startDate,
@@ -130,7 +132,7 @@ class BotHeader extends React.Component {
 			if (total > max || total < min) {
 				handleInvalidPeople({ total, max, min });
 			} else {
-				const newRooms = Math.ceil(e.target.value / standardRoomCapacity);
+				const newRooms = Math.floor(e.target.value / standardRoomCapacity);
 				this.setState({ people: e.target.value, rooms: newRooms });
 			}
 		};
@@ -250,17 +252,21 @@ class BotHeader extends React.Component {
 			}
 		}
 
-		const miPeople = this.buildMenuItems(maxSelect, 'Person');
-		const miRooms = this.buildMenuItems(maxSelect, 'Room');
+		const miPeople = this.buildMenuItems(min, max, 'Person');
+		const miRooms = this.buildMenuItems(
+			Math.ceil(params.totalPeople / maxRoomCapacity),
+			max,
+			'Room'
+		);
 
 		return (
 			<Table className={classes.table}>
 				<TableBody>
 					<TableRow>
 						<TableCell style={{ padding: '4px', width: '22%' }}>
-							{otherPeople + people} People
+							{params.totalPeople} People
 							<br />
-							{otherRooms + rooms} Rooms
+							{params.totalRooms} Rooms
 						</TableCell>
 						<TableCell style={{ padding: '4px', width: '20%' }}>
 							${finalCost.price} pp
@@ -271,7 +277,7 @@ class BotHeader extends React.Component {
 						<TableCell style={{ padding: '4px', width: '25%' }}>
 							<FormControl className={classes.formControl}>
 								<Select
-									value={people + otherPeople}
+									value={params.totalPeople}
 									onChange={handlePeopleChange}
 									input={<Input name="people" id="people-label-placeholder" />}
 									displayEmpty
@@ -281,9 +287,12 @@ class BotHeader extends React.Component {
 									{miPeople}
 								</Select>
 							</FormControl>
-							<FormControl className={classes.formControl}>
+							<FormControl
+								className={classes.formControl}
+								disabled={!isCustomised}
+							>
 								<Select
-									value={rooms + otherRooms}
+									value={params.totalRooms}
 									onChange={handleRoomChange}
 									input={<Input name="rooms" id="rooms-label-placeholder" />}
 									displayEmpty

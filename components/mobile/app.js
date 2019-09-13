@@ -371,7 +371,6 @@ class MobileApp extends React.Component {
 							userId={userId}
 							instPackage={instPackage}
 							rates={rates}
-							cities={cities}
 							handleInvalidPeople={this.handleInvalidParticipant}
 							handleInvalidRoom={this.handleInvalidParticipant}
 						/>
