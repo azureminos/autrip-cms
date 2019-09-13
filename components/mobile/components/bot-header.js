@@ -174,9 +174,17 @@ class BotHeader extends React.Component {
 				}
 				const gap
 					= curRatePackageReg.maxParticipant + 1 - (people + otherPeople);
-				finalCost.price = curRatePackageReg.price + curRateFlight;
+				const nextPrice = nxtRatePackageReq
+					? nxtRatePackageReq.price
+					  + curRateFlight.rate
+					  + curRateFlight.rateDomesticTotal
+					: 0;
+				finalCost.price
+					= curRatePackageReg.price
+					+ curRateFlight.rate
+					+ curRateFlight.rateDomesticTotal;
 				finalCost.promo = nxtRatePackageReq
-					? `${gap} more people $${nxtRatePackageReq.price + curRateFlight} pp`
+					? `${gap} more people $${nextPrice} pp`
 					: `Max group size is ${curRatePackageReg.maxParticipant}`;
 			} else {
 				finalCost.price = 'ERROR';
@@ -203,7 +211,7 @@ class BotHeader extends React.Component {
 					console.log('>>>>Rate.calCarRate', curRateCarDiy);
 					if (curRateCarDiy) {
 						const curRateItemDiy = Rate.calItemRate({ startDate }, items);
-						const curRateHotelDiy = Rate.calHotelRate({ startDate }, hotels);
+						const curRateHotelDiy = Rate.calHotelRate(params, hotels);
 						var nxtRatePackageDiy, nxtRateCarDiy;
 						if (
 							curRatePackageDiy.maxParticipant
@@ -223,15 +231,17 @@ class BotHeader extends React.Component {
 							= curRatePackageDiy.maxParticipant + 1 - (people + otherPeople);
 						const nextPrice
 							= nxtRatePackageDiy && nxtRateCarDiy
-								? nxtRatePackageDiy.price
-								  + curRateFlightDiy
+								? nxtRatePackageDiy.premiumFee
+								  + curRateFlightDiy.rate
+								  + curRateFlightDiy.rateDomesticTotal
 								  + nxtRateCarDiy
 								  + curRateItemDiy
 								  + curRateHotelDiy
 								: 0;
 						finalCost.price
-							= curRatePackageDiy.price
-							+ curRateFlightDiy
+							= curRatePackageDiy.premiumFee
+							+ curRateFlightDiy.rate
+							+ curRateFlightDiy.rateDomesticTotal
 							+ curRateCarDiy
 							+ curRateItemDiy
 							+ curRateHotelDiy;
