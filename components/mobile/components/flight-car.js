@@ -61,6 +61,7 @@ class FlightCar extends React.Component {
 			selectedDepartDate,
 			selectedReturnDate,
 			selectedCarOption,
+			isCustomised,
 		} = this.props;
 		// Reference
 		const isReadonly = carOptions && carOptions.length === 1;
@@ -71,8 +72,10 @@ class FlightCar extends React.Component {
 				</MenuItem>
 			);
 		});
-		const miReturnDates = (
+		const miReturnDates = selectedReturnDate ? (
 			<MenuItem value={selectedReturnDate}>{selectedReturnDate}</MenuItem>
+		) : (
+			''
 		);
 		const miCarOptions = carOptions
 			? _.map(carOptions, i => {
@@ -103,15 +106,15 @@ class FlightCar extends React.Component {
 								}}
 							>
 								<MenuItem value="" disabled>
-									<em>Depart</em>
+									<em>Fly Out</em>
 								</MenuItem>
 								{miDepartDates}
 							</Select>
 						</FormControl>
-						<FormControl className={classes.formControl} disabled>
+						<FormControl className={classes.formControl}>
 							<Select value={selectedReturnDate || ''} displayEmpty>
-								<MenuItem value="">
-									<em>Arrive</em>
+								<MenuItem value="" disabled>
+									<em>Fly Back</em>
 								</MenuItem>
 								{miReturnDates}
 							</Select>

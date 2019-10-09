@@ -270,52 +270,56 @@ class BotHeader extends React.Component {
 		);
 
 		return (
-			<Table className={classes.table}>
-				<TableBody>
-					<TableRow>
-						<TableCell style={{ padding: '4px', width: '22%' }}>
-							{params.totalPeople} People
-							<br />
-							{params.totalRooms} Rooms
-						</TableCell>
-						<TableCell style={{ padding: '4px', width: '20%' }}>
-							${finalCost.price} pp
-						</TableCell>
-						<TableCell style={{ padding: '4px', width: '33%' }}>
-							{finalCost.promo}
-						</TableCell>
-						<TableCell style={{ padding: '4px', width: '25%' }}>
-							<FormControl className={classes.formControl}>
-								<Select
-									value={params.totalPeople}
-									onChange={handlePeopleChange}
-									input={<Input name="people" id="people-label-placeholder" />}
-									displayEmpty
-									name="people"
-									className={classes.selectEmpty}
+			<div>
+				<Table className={classes.table}>
+					<TableBody>
+						<TableRow>
+							<TableCell style={{ padding: '4px', width: '22%' }}>
+								{params.totalPeople} People
+								<br />
+								{params.totalRooms} Rooms
+							</TableCell>
+							<TableCell style={{ padding: '4px', width: '20%' }}>
+								${finalCost.price} pp
+							</TableCell>
+							<TableCell style={{ padding: '4px', width: '33%' }}>
+								{finalCost.promo}
+							</TableCell>
+							<TableCell style={{ padding: '4px', width: '25%' }}>
+								<FormControl className={classes.formControl}>
+									<Select
+										value={params.totalPeople}
+										onChange={handlePeopleChange}
+										input={
+											<Input name="people" id="people-label-placeholder" />
+										}
+										displayEmpty
+										name="people"
+										className={classes.selectEmpty}
+									>
+										{miPeople}
+									</Select>
+								</FormControl>
+								<FormControl
+									className={classes.formControl}
+									disabled={!isCustomised}
 								>
-									{miPeople}
-								</Select>
-							</FormControl>
-							<FormControl
-								className={classes.formControl}
-								disabled={!isCustomised}
-							>
-								<Select
-									value={params.totalRooms}
-									onChange={handleRoomChange}
-									input={<Input name="rooms" id="rooms-label-placeholder" />}
-									displayEmpty
-									name="room"
-									className={classes.selectEmpty}
-								>
-									{miRooms}
-								</Select>
-							</FormControl>
-						</TableCell>
-					</TableRow>
-				</TableBody>
-			</Table>
+									<Select
+										value={params.totalRooms}
+										onChange={handleRoomChange}
+										input={<Input name="rooms" id="rooms-label-placeholder" />}
+										displayEmpty
+										name="room"
+										className={classes.selectEmpty}
+									>
+										{miRooms}
+									</Select>
+								</FormControl>
+							</TableCell>
+						</TableRow>
+					</TableBody>
+				</Table>
+			</div>
 		);
 	}
 }

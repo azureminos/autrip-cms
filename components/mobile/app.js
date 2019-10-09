@@ -11,6 +11,7 @@ import PackageHelper from '../../lib/package-helper';
 import BotModal from './components/bot-modal';
 import BotHeader from './components/bot-header';
 import FixedTab from './components/fixed-tab';
+import ProgressBar from './components/progress-bar';
 import PackageAttraction from './package-attraction';
 import PackageItinerary from './package-itinerary';
 import CONSTANTS from '../../lib/constants';
@@ -366,15 +367,23 @@ class MobileApp extends React.Component {
 		return (
 			<div id="app">
 				<Paper>
-					<FixedTab tabs={tabs}>
-						<BotHeader
-							userId={userId}
-							instPackage={instPackage}
-							rates={rates}
-							handleInvalidPeople={this.handleInvalidParticipant}
-							handleInvalidRoom={this.handleInvalidParticipant}
-						/>
-					</FixedTab>
+					<ProgressBar activeStep={0} isCustomised={true} />
+					<BotHeader
+						userId={userId}
+						instPackage={instPackage}
+						rates={rates}
+						handleInvalidPeople={this.handleInvalidParticipant}
+						handleInvalidRoom={this.handleInvalidParticipant}
+					/>
+					<PackageItinerary
+						isCustomised={instPackage.isCustomised}
+						rates={rates}
+						transport={transport}
+						itAttractions={itAttractions}
+						handleSelectHotel={this.handleSelectHotel}
+						handleSelectFlight={this.handleSelectFlight}
+						handleSelectCar={this.handleSelectCar}
+					/>
 					{elModal}
 				</Paper>
 			</div>
