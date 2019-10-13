@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -14,6 +16,18 @@ import CONSTANTS from '../../../lib/constants';
 
 const { maxRoomCapacity, standardRoomCapacity } = CONSTANTS.get().Global;
 const styles = theme => ({
+	appBar: {
+		position: 'absolute',
+		width: '100%',
+		height: 80,
+		top: 0,
+		bottom: 'auto',
+	},
+	toolbar: {
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		padding: 0,
+	},
 	table: {
 		minWidth: 200,
 	},
@@ -125,8 +139,8 @@ class BotHeader extends React.Component {
 		};
 		// ====== Event Handler ======
 		// Handle people change
-		const handlePeopleChange = e => {
-			console.log('>>>>BotHeader.handlePeopleChange', { e, packageRates });
+		const doHandlePeopleChange = e => {
+			console.log('>>>>BotHeader.doHandlePeopleChange', { e, packageRates });
 			const { handleInvalidPeople } = this.props;
 			const total = otherPeople + e.target.value;
 			if (total > max || total < min) {
@@ -137,8 +151,8 @@ class BotHeader extends React.Component {
 			}
 		};
 		// Handle room change
-		const handleRoomChange = e => {
-			console.log('>>>>BotHeader.handleRoomChange', { e, packageRates });
+		const doHandleRoomChange = e => {
+			console.log('>>>>BotHeader.doHandleRoomChange', { e, packageRates });
 			const { handleInvalidRoom } = this.props;
 			if (
 				e.target.value > people
@@ -270,56 +284,60 @@ class BotHeader extends React.Component {
 		);
 
 		return (
-			<div>
-				<Table className={classes.table}>
-					<TableBody>
-						<TableRow>
-							<TableCell style={{ padding: '4px', width: '22%' }}>
-								{params.totalPeople} People
-								<br />
-								{params.totalRooms} Rooms
-							</TableCell>
-							<TableCell style={{ padding: '4px', width: '20%' }}>
-								${finalCost.price} pp
-							</TableCell>
-							<TableCell style={{ padding: '4px', width: '33%' }}>
-								{finalCost.promo}
-							</TableCell>
-							<TableCell style={{ padding: '4px', width: '25%' }}>
-								<FormControl className={classes.formControl}>
-									<Select
-										value={params.totalPeople}
-										onChange={handlePeopleChange}
-										input={
-											<Input name="people" id="people-label-placeholder" />
-										}
-										displayEmpty
-										name="people"
-										className={classes.selectEmpty}
+			<AppBar position="fixed" color="default" className={classes.appBar}>
+				<Toolbar className={classes.toolbar}>
+					<Table className={classes.table}>
+						<TableBody>
+							<TableRow>
+								<TableCell style={{ padding: '4px', width: '22%' }}>
+									{params.totalPeople} People
+									<br />
+									{params.totalRooms} Rooms
+								</TableCell>
+								<TableCell style={{ padding: '4px', width: '20%' }}>
+									${finalCost.price} pp
+								</TableCell>
+								<TableCell style={{ padding: '4px', width: '33%' }}>
+									{finalCost.promo}
+								</TableCell>
+								<TableCell style={{ padding: '4px', width: '25%' }}>
+									<FormControl className={classes.formControl}>
+										<Select
+											value={params.totalPeople}
+											onChange={doHandlePeopleChange}
+											input={
+												<Input name="people" id="people-label-placeholder" />
+											}
+											displayEmpty
+											name="people"
+											className={classes.selectEmpty}
+										>
+											{miPeople}
+										</Select>
+									</FormControl>
+									<FormControl
+										className={classes.formControl}
+										disabled={!isCustomised}
 									>
-										{miPeople}
-									</Select>
-								</FormControl>
-								<FormControl
-									className={classes.formControl}
-									disabled={!isCustomised}
-								>
-									<Select
-										value={params.totalRooms}
-										onChange={handleRoomChange}
-										input={<Input name="rooms" id="rooms-label-placeholder" />}
-										displayEmpty
-										name="room"
-										className={classes.selectEmpty}
-									>
-										{miRooms}
-									</Select>
-								</FormControl>
-							</TableCell>
-						</TableRow>
-					</TableBody>
-				</Table>
-			</div>
+										<Select
+											value={params.totalRooms}
+											onChange={doHandleRoomChange}
+											input={
+												<Input name="rooms" id="rooms-label-placeholder" />
+											}
+											displayEmpty
+											name="room"
+											className={classes.selectEmpty}
+										>
+											{miRooms}
+										</Select>
+									</FormControl>
+								</TableCell>
+							</TableRow>
+						</TableBody>
+					</Table>
+				</Toolbar>
+			</AppBar>
 		);
 	}
 }

@@ -8,15 +8,11 @@ import DialogContent from '@material-ui/core/DialogContent';
 
 const styles = theme => ({
 	paper: {
-		position: 'absolute',
-		width: theme.spacing.unit * 100,
-		backgroundColor: theme.palette.background.paper,
-		boxShadow: theme.shadows[5],
-		padding: theme.spacing.unit * 4,
-		outline: 'none',
+		overflowY: 'hidden',
 	},
 	mobileView: {
-		height: '700px',
+		width: 580,
+		height: 600,
 	},
 });
 
@@ -27,17 +23,14 @@ class PackageDialog extends React.Component {
 		return (
 			<div>
 				<Dialog
+					scroll={'paper'}
 					open={!!open}
 					onClose={handleClose}
+					classes={{ paper: classes.paper }}
 				>
 					<DialogContent className={classes.mobileView}>
 						{this.props.children}
 					</DialogContent>
-					<DialogActions>
-					<Button onClick={handleClose} color="primary">
-						Close
-					</Button>
-					</DialogActions>
 				</Dialog>
 			</div>
 		);

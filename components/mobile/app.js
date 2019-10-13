@@ -2,6 +2,7 @@
 import _ from 'lodash';
 import Moment from 'moment';
 import React from 'react';
+import { withStyles } from '@material-ui/core/styles';
 import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS =======================================
@@ -10,7 +11,7 @@ import ModalHelper from '../../lib/bot-modal-helper';
 import PackageHelper from '../../lib/package-helper';
 import BotModal from './components/bot-modal';
 import BotHeader from './components/bot-header';
-import FixedTab from './components/fixed-tab';
+import BotFooter from './components/bot-footer';
 import ProgressBar from './components/progress-bar';
 import PackageAttraction from './package-attraction';
 import PackageItinerary from './package-itinerary';
@@ -21,13 +22,32 @@ import 'react-id-swiper/src/styles/css/swiper.css';
 
 const modal = CONSTANTS.get().Modal;
 const global = CONSTANTS.get().Global;
+const styles = theme => ({
+	appBody: {
+		position: 'absolute',
+		top: 80,
+		left: 0,
+		marginLeft: 8,
+		marginRight: 8,
+		maxHeight: 440,
+		overflowY: 'auto',
+	},
+});
 /* ==============================
    = React Application          =
    ============================== */
 class MobileApp extends React.Component {
 	constructor (props) {
 		super(props);
-
+		// Register event handler
+		this.handleFooterBtnBackward = this.handleFooterBtnBackward.bind(this);
+		this.handleFooterBtnForward = this.handleFooterBtnForward.bind(this);
+		this.handleFooterBtnShare = this.handleFooterBtnShare.bind(this);
+		this.handleFooterBtnPayment = this.handleFooterBtnPayment.bind(this);
+		this.handleFooterBtnJoin = this.handleFooterBtnJoin.bind(this);
+		this.handleFooterBtnLeave = this.handleFooterBtnLeave.bind(this);
+		this.handleFooterBtnLock = this.handleFooterBtnLock.bind(this);
+		// tbd
 		this.handleModalClose = this.handleModalClose.bind(this);
 		this.enablePackageDiy = this.enablePackageDiy.bind(this);
 		this.handleLikeAttraction = this.handleLikeAttraction.bind(this);
@@ -78,6 +98,32 @@ class MobileApp extends React.Component {
 		this.setState({
 			botModal: '',
 		});
+	}
+	// ----------  BotFooter  ----------
+	handleFooterBtnBackward () {
+		console.log('>>>>MobileApp.handleFooterBtnBackward');
+		const instPackage = this.state.instPackage;
+		this.setState({ instPackage: instPackage });
+	}
+	handleFooterBtnForward () {
+		console.log('>>>>MobileApp.handleFooterBtnForward');
+		const instPackage = this.state.instPackage;
+		this.setState({ instPackage: instPackage });
+	}
+	handleFooterBtnShare () {
+		console.log('>>>>MobileApp.handleFooterBtnShare');
+	}
+	handleFooterBtnPayment () {
+		console.log('>>>>MobileApp.handleFooterBtnPayment');
+	}
+	handleFooterBtnJoin () {
+		console.log('>>>>MobileApp.handleFooterBtnJoin');
+	}
+	handleFooterBtnLeave () {
+		console.log('>>>>MobileApp.handleFooterBtnLeave');
+	}
+	handleFooterBtnLock () {
+		console.log('>>>>MobileApp.handleFooterBtnLock');
 	}
 	// ----------  Package  ----------
 	// ----------  Package Instance -------
@@ -285,7 +331,7 @@ class MobileApp extends React.Component {
 
 	render () {
 		const { botModal, refModal, instPackage, userId } = this.state;
-		const { rates, reference } = this.props;
+		const { classes, rates, reference } = this.props;
 		const { packageRates, flightRates } = rates;
 		const { cities, packageSummary } = reference;
 		rates.carRates = _.map(cities, c => {
@@ -366,15 +412,15 @@ class MobileApp extends React.Component {
 		// Display Web Widget
 		return (
 			<div id="app">
-				<Paper>
-					<ProgressBar activeStep={0} isCustomised={true} />
-					<BotHeader
-						userId={userId}
-						instPackage={instPackage}
-						rates={rates}
-						handleInvalidPeople={this.handleInvalidParticipant}
-						handleInvalidRoom={this.handleInvalidParticipant}
-					/>
+				<BotHeader
+					userId={userId}
+					instPackage={instPackage}
+					rates={rates}
+					handleInvalidPeople={this.handleInvalidParticipant}
+					handleInvalidRoom={this.handleInvalidParticipant}
+				/>
+				<div className={classes.appBody}>
+					<ProgressBar instPackage={instPackage} />
 					<PackageItinerary
 						isCustomised={instPackage.isCustomised}
 						rates={rates}
@@ -384,11 +430,21 @@ class MobileApp extends React.Component {
 						handleSelectFlight={this.handleSelectFlight}
 						handleSelectCar={this.handleSelectCar}
 					/>
-					{elModal}
-				</Paper>
+				</div>
+				<BotFooter
+					instPackage={instPackage}
+					handleBackward={this.handleFooterBtnBackward}
+					handleForward={this.handleFooterBtnForward}
+					handleShare={this.handleFooterBtnShare}
+					handlePayment={this.handleFooterBtnPayment}
+					handleJoin={this.handleFooterBtnJoin}
+					handleLeave={this.handleFooterBtnLeave}
+					handleLock={this.handleFooterBtnLock}
+				/>
+				{elModal}
 			</div>
 		);
 	}
 }
 
-export default MobileApp;
+export default withStyles(styles, { withTheme: true })(MobileApp);

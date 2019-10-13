@@ -18,19 +18,24 @@ class ProgressBar extends React.Component {
 	constructor (props) {
 		console.log('>>>>ProgressBar.constructor', props);
 		super(props);
+		// Get current step
+		const step = props.instPackage.step || 0;
 		// Set initial state
-		this.state = {};
+		this.state = {
+			step: step,
+		};
 	}
 
 	render () {
 		console.log('>>>>ProgressBar.render', this.state);
-		const { classes, activeStep, isCustomised } = this.props;
+		const { classes, instPackage } = this.props;
+		const { step, isCustomised } = instPackage;
 		const steps = isCustomised ? diy : regular;
 		// ====== Event Handler ======
 
 		return (
 			<div className={classes.root}>
-				<Stepper activeStep={activeStep}>
+				<Stepper activeStep={step}>
 					{steps.map(label => (
 						<Step key={label}>
 							<StepLabel>{label}</StepLabel>

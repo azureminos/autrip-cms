@@ -112,7 +112,7 @@ class FlightCar extends React.Component {
 							</Select>
 						</FormControl>
 						<FormControl className={classes.formControl}>
-							<Select value={selectedReturnDate || ''} displayEmpty>
+							<Select value={selectedReturnDate || ''} displayEmpty disabled>
 								<MenuItem value="" disabled>
 									<em>Fly Back</em>
 								</MenuItem>
