@@ -20,8 +20,8 @@ import CONSTANTS from '../../lib/constants';
 // ==== CSS ==============================================
 import 'react-id-swiper/src/styles/css/swiper.css';
 
-const modal = CONSTANTS.get().Modal;
-const global = CONSTANTS.get().Global;
+const { Modal, Global, Instance } = CONSTANTS.get();
+
 const styles = theme => ({
 	appBody: {
 		position: 'absolute',
@@ -47,6 +47,7 @@ class MobileApp extends React.Component {
 		this.handleFooterBtnJoin = this.handleFooterBtnJoin.bind(this);
 		this.handleFooterBtnLeave = this.handleFooterBtnLeave.bind(this);
 		this.handleFooterBtnLock = this.handleFooterBtnLock.bind(this);
+		this.handleFooterBtnStatus = this.handleFooterBtnStatus.bind(this);
 		// tbd
 		this.handleModalClose = this.handleModalClose.bind(this);
 		this.enablePackageDiy = this.enablePackageDiy.bind(this);
@@ -102,19 +103,50 @@ class MobileApp extends React.Component {
 	// ----------  BotFooter  ----------
 	handleFooterBtnBackward () {
 		console.log('>>>>MobileApp.handleFooterBtnBackward');
-		const instPackage = this.state.instPackage;
+		const { instPackage, userId } = this.state;
+		for (var i = 0; i < instPackage.members.length; i++) {
+			if (instPackage.members[i].loginId === userId) {
+				instPackage.members[i].status = PackageHelper.getPreviousStatus(
+					instPackage.isCustomised,
+					instPackage.members[i].status
+				);
+			}
+		}
 		this.setState({ instPackage: instPackage });
 	}
 	handleFooterBtnForward () {
 		console.log('>>>>MobileApp.handleFooterBtnForward');
-		const instPackage = this.state.instPackage;
-		this.setState({ instPackage: instPackage });
+		const { instPackage, userId } = this.state;
+		if (PackageHelper.validateInstance(instPackage, userId)) {
+			for (var i = 0; i < instPackage.members.length; i++) {
+				if (instPackage.members[i].loginId === userId) {
+					instPackage.members[i].status = PackageHelper.getNextStatus(
+						instPackage.isCustomised,
+						instPackage.members[i].status
+					);
+				}
+			}
+			this.setState({ instPackage: instPackage });
+		} else {
+			// Todo
+		}
 	}
 	handleFooterBtnShare () {
 		console.log('>>>>MobileApp.handleFooterBtnShare');
 	}
 	handleFooterBtnPayment () {
 		console.log('>>>>MobileApp.handleFooterBtnPayment');
+		const { instPackage, userId } = this.state;
+		if (PackageHelper.validateInstance(instPackage, userId)) {
+			for (var i = 0; i < instPackage.members.length; i++) {
+				if (instPackage.members[i].loginId === userId) {
+					instPackage.members[i].status = Instance.status.DEPOSIT_PAID;
+				}
+			}
+			this.setState({ instPackage: instPackage });
+		} else {
+			// Todo
+		}
 	}
 	handleFooterBtnJoin () {
 		console.log('>>>>MobileApp.handleFooterBtnJoin');
@@ -124,6 +156,9 @@ class MobileApp extends React.Component {
 	}
 	handleFooterBtnLock () {
 		console.log('>>>>MobileApp.handleFooterBtnLock');
+	}
+	handleFooterBtnStatus () {
+		console.log('>>>>MobileApp.handleFooterBtnStatus');
 	}
 	// ----------  Package  ----------
 	// ----------  Package Instance -------
@@ -261,10 +296,10 @@ class MobileApp extends React.Component {
 					const newItem = {
 						id: -1,
 						isMustVisit: false,
-						timePlannable: global.timePlannable,
+						timePlannable: Global.timePlannable,
 						description: '',
 						dayNo: itinerary.dayNo,
-						daySeq: global.idxLastItem,
+						daySeq: Global.idxLastItem,
 						attraction: { ...attraction },
 					};
 					dayItems[itinerary.dayNo].push(newItem);
@@ -334,6 +369,8 @@ class MobileApp extends React.Component {
 		const { classes, rates, reference } = this.props;
 		const { packageRates, flightRates } = rates;
 		const { cities, packageSummary } = reference;
+		const extras = PackageHelper.enhanceInstance(instPackage, userId);
+
 		rates.carRates = _.map(cities, c => {
 			return {
 				id: c.id || '',
@@ -360,6 +397,16 @@ class MobileApp extends React.Component {
 			packageItems: instPackage.items,
 			packageHotels: instPackage.hotels,
 		});
+		const footerActions = {
+			handleBackward: this.handleFooterBtnBackward,
+			handleForward: this.handleFooterBtnForward,
+			handleShare: this.handleFooterBtnShare,
+			handlePayment: this.handleFooterBtnPayment,
+			handleJoin: this.handleFooterBtnJoin,
+			handleLeave: this.handleFooterBtnLeave,
+			handleLock: this.handleFooterBtnLock,
+			handleStatus: this.handleFooterBtnStatus,
+		};
 
 		// ======Web Elements======
 		// Setup modal element
@@ -420,7 +467,10 @@ class MobileApp extends React.Component {
 					handleInvalidRoom={this.handleInvalidParticipant}
 				/>
 				<div className={classes.appBody}>
-					<ProgressBar instPackage={instPackage} />
+					<ProgressBar
+						step={extras.step}
+						isCustomised={instPackage.isCustomised}
+					/>
 					<PackageItinerary
 						isCustomised={instPackage.isCustomised}
 						rates={rates}
@@ -433,13 +483,8 @@ class MobileApp extends React.Component {
 				</div>
 				<BotFooter
 					instPackage={instPackage}
-					handleBackward={this.handleFooterBtnBackward}
-					handleForward={this.handleFooterBtnForward}
-					handleShare={this.handleFooterBtnShare}
-					handlePayment={this.handleFooterBtnPayment}
-					handleJoin={this.handleFooterBtnJoin}
-					handleLeave={this.handleFooterBtnLeave}
-					handleLock={this.handleFooterBtnLock}
+					extras={extras}
+					actions={footerActions}
 				/>
 				{elModal}
 			</div>

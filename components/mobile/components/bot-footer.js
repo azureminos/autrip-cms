@@ -12,8 +12,10 @@ import IconPayment from '@material-ui/icons/Payment';
 import IconPersonAdd from '@material-ui/icons/PersonAdd';
 import IconPersonAddUndo from '@material-ui/icons/Undo';
 import IconLock from '@material-ui/icons/Lock';
+import IconStatus from '@material-ui/icons/TrackChanges';
 import CONSTANTS from '../../../lib/constants';
 
+const { Instance } = CONSTANTS.get();
 const { diy, regular } = CONSTANTS.get().Steps;
 
 const styles = theme => ({
@@ -43,10 +45,7 @@ const styles = theme => ({
 	},
 });
 
-const calcVisibility = input => {
-	const { instPackage, steps } = input;
-	const step = instPackage.step || 0;
-
+const calcVisibility = (instPackage, extras) => {
 	const vs = {
 		BtnBackward: { isHidden: true, isDisabled: false },
 		BtnForward: { isHidden: true, isDisabled: false },
@@ -55,16 +54,88 @@ const calcVisibility = input => {
 		BtnJoin: { isHidden: true, isDisabled: false },
 		BtnLeave: { isHidden: true, isDisabled: false },
 		BtnLock: { isHidden: true, isDisabled: false },
+		BtnStatus: { isHidden: true, isDisabled: false },
 	};
-
-	// Default visibility
-	vs.BtnBackward.isHidden = false;
-	vs.BtnForward.isHidden = false;
-	vs.BtnShare.isHidden = false;
 	// Logic starts here
-	vs.BtnBackward.isDisabled = step === 0;
-	vs.BtnForward.isDisabled = step === steps.length - 1;
-	vs.BtnPayment.isHidden = step !== steps.length - 1;
+	if (!extras.isCustomised) {
+		if (extras.isOwner) {
+			if (extras.statusMember === Instance.status.INITIATED) {
+				vs.BtnForward.isHidden = false;
+				vs.BtnShare.isHidden = false;
+			} else if (extras.statusMember === Instance.status.SUBMIT_PAYMENT) {
+				vs.BtnBackward.isHidden = false;
+				vs.BtnShare.isHidden = false;
+				vs.BtnPayment.isHidden = false;
+			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
+				vs.BtnShare.isHidden = false;
+				vs.BtnStatus.isHidden = false;
+				vs.BtnLock.isHidden = false;
+			} else {
+				vs.BtnShare.isHidden = false;
+			}
+		} else {
+			if (!extras.statusMember) {
+				vs.BtnJoin.isHidden = false;
+			} else if (extras.statusMember === Instance.status.INITIATED) {
+				vs.BtnForward.isHidden = false;
+				vs.BtnShare.isHidden = false;
+				vs.BtnLeave.isHidden = false;
+			} else if (extras.statusMember === Instance.status.SUBMIT_PAYMENT) {
+				vs.BtnBackward.isHidden = false;
+				vs.BtnShare.isHidden = false;
+				vs.BtnPayment.isHidden = false;
+			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
+				vs.BtnShare.isHidden = false;
+				vs.BtnStatus.isHidden = false;
+			} else {
+				vs.BtnShare.isHidden = false;
+			}
+		}
+	} else {
+		if (extras.isOwner) {
+			if (
+				extras.statusMember === Instance.status.INITIATED
+				|| extras.statusMember === Instance.status.SELECT_ATTRACTION
+			) {
+				vs.BtnForward.isHidden = false;
+				vs.BtnShare.isHidden = false;
+			} else if (extras.statusMember === Instance.status.SELECT_HOTEL) {
+				vs.BtnBackward.isHidden = false;
+				vs.BtnForward.isHidden = false;
+				vs.BtnShare.isHidden = false;
+			} else if (extras.statusMember === Instance.status.SUBMIT_PAYMENT) {
+				vs.BtnBackward.isHidden = false;
+				vs.BtnShare.isHidden = false;
+				vs.BtnPayment.isHidden = false;
+			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
+				vs.BtnShare.isHidden = false;
+				vs.BtnStatus.isHidden = false;
+				vs.BtnLock.isHidden = false;
+			} else {
+				vs.BtnShare.isHidden = false;
+			}
+		} else {
+			if (!extras.statusMember) {
+				vs.BtnJoin.isHidden = false;
+			} else if (
+				extras.statusMember === Instance.status.INITIATED
+				|| extras.statusMember === Instance.status.SELECT_ATTRACTION
+				|| extras.statusMember === Instance.status.SELECT_HOTEL
+			) {
+				vs.BtnShare.isHidden = false;
+				vs.BtnLeave.isHidden = false;
+			} else if (extras.statusMember === Instance.status.SUBMIT_PAYMENT) {
+				vs.BtnShare.isHidden = false;
+				vs.BtnPayment.isHidden = false;
+				vs.BtnLeave.isHidden = false;
+			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
+				vs.BtnShare.isHidden = false;
+				vs.BtnStatus.isHidden = false;
+			} else {
+				vs.BtnShare.isHidden = false;
+			}
+		}
+	}
 
 	return vs;
 };
@@ -79,12 +150,8 @@ class BotFooter extends React.Component {
 	// Render footer bar, including buttons []
 	render () {
 		console.log('>>>>BotFooter.render', this.state);
+		const { classes, instPackage, extras, actions } = this.props;
 		const {
-			classes,
-			// isCustomised,
-			// isOwner,
-			// isJoined,
-			instPackage,
 			handleBackward,
 			handleForward,
 			handleShare,
@@ -92,9 +159,9 @@ class BotFooter extends React.Component {
 			handleJoin,
 			handleLeave,
 			handleLock,
-		} = this.props;
-		const steps = instPackage.isCustomised ? diy : regular;
-		const vs = calcVisibility({ instPackage, steps });
+			handleStatus,
+		} = actions;
+		const vs = calcVisibility(instPackage, extras);
 		// ====== Event Handler ======
 		const doHandleBackward = () => {
 			console.log('>>>>BotFooter.doHandleBackward');
@@ -123,6 +190,10 @@ class BotFooter extends React.Component {
 		const doHandleLock = () => {
 			console.log('>>>>BotFooter.doHandleLock');
 			handleLock();
+		};
+		const doHandleStatus = () => {
+			console.log('>>>>BotFooter.doHandleStatus');
+			handleStatus();
 		};
 		// ====== Web Elements ======
 		const btnBackward = !vs.BtnBackward.isHidden ? (
@@ -223,6 +294,20 @@ class BotFooter extends React.Component {
 		) : (
 			''
 		);
+		const btnStatus = !vs.BtnStatus.isHidden ? (
+			<Button
+				classes={{ root: classes.button, label: classes.label }}
+				variant="contained"
+				disableRipple={true}
+				disabled={vs.BtnStatus.isDisabled}
+				onClick={doHandleStatus}
+			>
+				<IconStatus />
+				Status
+			</Button>
+		) : (
+			''
+		);
 
 		return (
 			<AppBar position="fixed" color="default" className={classes.appBar}>
@@ -231,6 +316,9 @@ class BotFooter extends React.Component {
 					{btnShare}
 					{btnPayment}
 					{btnLock}
+					{btnJoin}
+					{btnLeave}
+					{btnStatus}
 					{btnForward}
 				</Toolbar>
 			</AppBar>
