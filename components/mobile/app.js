@@ -31,6 +31,7 @@ const styles = theme => ({
 		marginRight: 8,
 		maxHeight: 440,
 		overflowY: 'auto',
+		width: '98%',
 	},
 });
 /* ==============================
@@ -48,6 +49,7 @@ class MobileApp extends React.Component {
 		this.handleFooterBtnLeave = this.handleFooterBtnLeave.bind(this);
 		this.handleFooterBtnLock = this.handleFooterBtnLock.bind(this);
 		this.handleFooterBtnStatus = this.handleFooterBtnStatus.bind(this);
+		this.handleFooterBtnCustomise = this.handleFooterBtnCustomise.bind(this);
 		// tbd
 		this.handleModalClose = this.handleModalClose.bind(this);
 		this.enablePackageDiy = this.enablePackageDiy.bind(this);
@@ -101,6 +103,12 @@ class MobileApp extends React.Component {
 		});
 	}
 	// ----------  BotFooter  ----------
+	handleFooterBtnCustomise () {
+		console.log('>>>>MobileApp.handleFooterBtnBackward');
+		const { instPackage } = this.state;
+		instPackage.isCustomised = true;
+		this.setState({ instPackage: instPackage });
+	}
 	handleFooterBtnBackward () {
 		console.log('>>>>MobileApp.handleFooterBtnBackward');
 		const { instPackage, userId } = this.state;
@@ -406,6 +414,7 @@ class MobileApp extends React.Component {
 			handleLeave: this.handleFooterBtnLeave,
 			handleLock: this.handleFooterBtnLock,
 			handleStatus: this.handleFooterBtnStatus,
+			handleCustomise: this.handleFooterBtnCustomise,
 		};
 
 		// ======Web Elements======

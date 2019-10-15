@@ -13,10 +13,10 @@ import IconPersonAdd from '@material-ui/icons/PersonAdd';
 import IconPersonAddUndo from '@material-ui/icons/Undo';
 import IconLock from '@material-ui/icons/Lock';
 import IconStatus from '@material-ui/icons/TrackChanges';
+import IconCustomise from '@material-ui/icons/Ballot';
 import CONSTANTS from '../../../lib/constants';
 
 const { Instance } = CONSTANTS.get();
-const { diy, regular } = CONSTANTS.get().Steps;
 
 const styles = theme => ({
 	button: {
@@ -55,17 +55,15 @@ const calcVisibility = (instPackage, extras) => {
 		BtnLeave: { isHidden: true, isDisabled: false },
 		BtnLock: { isHidden: true, isDisabled: false },
 		BtnStatus: { isHidden: true, isDisabled: false },
+		BtnCustomise: { isHidden: true, isDisabled: false },
 	};
 	// Logic starts here
 	if (!extras.isCustomised) {
 		if (extras.isOwner) {
 			if (extras.statusMember === Instance.status.INITIATED) {
-				vs.BtnForward.isHidden = false;
-				vs.BtnShare.isHidden = false;
-			} else if (extras.statusMember === Instance.status.SUBMIT_PAYMENT) {
-				vs.BtnBackward.isHidden = false;
 				vs.BtnShare.isHidden = false;
 				vs.BtnPayment.isHidden = false;
+				vs.BtnCustomise.isHidden = extras.isCustomised;
 			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnStatus.isHidden = false;
@@ -77,11 +75,7 @@ const calcVisibility = (instPackage, extras) => {
 			if (!extras.statusMember) {
 				vs.BtnJoin.isHidden = false;
 			} else if (extras.statusMember === Instance.status.INITIATED) {
-				vs.BtnForward.isHidden = false;
-				vs.BtnShare.isHidden = false;
 				vs.BtnLeave.isHidden = false;
-			} else if (extras.statusMember === Instance.status.SUBMIT_PAYMENT) {
-				vs.BtnBackward.isHidden = false;
 				vs.BtnShare.isHidden = false;
 				vs.BtnPayment.isHidden = false;
 			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
@@ -101,12 +95,8 @@ const calcVisibility = (instPackage, extras) => {
 				vs.BtnShare.isHidden = false;
 			} else if (extras.statusMember === Instance.status.SELECT_HOTEL) {
 				vs.BtnBackward.isHidden = false;
-				vs.BtnForward.isHidden = false;
-				vs.BtnShare.isHidden = false;
-			} else if (extras.statusMember === Instance.status.SUBMIT_PAYMENT) {
-				vs.BtnBackward.isHidden = false;
-				vs.BtnShare.isHidden = false;
 				vs.BtnPayment.isHidden = false;
+				vs.BtnShare.isHidden = false;
 			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnStatus.isHidden = false;
@@ -124,10 +114,7 @@ const calcVisibility = (instPackage, extras) => {
 			) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnLeave.isHidden = false;
-			} else if (extras.statusMember === Instance.status.SUBMIT_PAYMENT) {
-				vs.BtnShare.isHidden = false;
 				vs.BtnPayment.isHidden = false;
-				vs.BtnLeave.isHidden = false;
 			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnStatus.isHidden = false;
@@ -160,6 +147,7 @@ class BotFooter extends React.Component {
 			handleLeave,
 			handleLock,
 			handleStatus,
+			handleCustomise,
 		} = actions;
 		const vs = calcVisibility(instPackage, extras);
 		// ====== Event Handler ======
@@ -194,6 +182,10 @@ class BotFooter extends React.Component {
 		const doHandleStatus = () => {
 			console.log('>>>>BotFooter.doHandleStatus');
 			handleStatus();
+		};
+		const doHandleCustomise = () => {
+			console.log('>>>>BotFooter.doHandleCustomise');
+			handleCustomise();
 		};
 		// ====== Web Elements ======
 		const btnBackward = !vs.BtnBackward.isHidden ? (
@@ -308,12 +300,27 @@ class BotFooter extends React.Component {
 		) : (
 			''
 		);
+		const btnCustomise = !vs.BtnCustomise.isHidden ? (
+			<Button
+				classes={{ root: classes.button, label: classes.label }}
+				variant="contained"
+				disableRipple={true}
+				disabled={vs.BtnCustomise.isDisabled}
+				onClick={doHandleCustomise}
+			>
+				<IconCustomise />
+				Customise
+			</Button>
+		) : (
+			''
+		);
 
 		return (
 			<AppBar position="fixed" color="default" className={classes.appBar}>
 				<Toolbar className={classes.toolbar}>
 					{btnBackward}
 					{btnShare}
+					{btnCustomise}
 					{btnPayment}
 					{btnLock}
 					{btnJoin}
