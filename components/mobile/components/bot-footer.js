@@ -95,6 +95,10 @@ const calcVisibility = (instPackage, extras) => {
 				vs.BtnShare.isHidden = false;
 			} else if (extras.statusMember === Instance.status.SELECT_HOTEL) {
 				vs.BtnBackward.isHidden = false;
+				vs.BtnForward.isHidden = false;
+				vs.BtnShare.isHidden = false;
+			} else if (extras.statusMember === Instance.status.REVIEW_ITINERARY) {
+				vs.BtnBackward.isHidden = false;
 				vs.BtnPayment.isHidden = false;
 				vs.BtnShare.isHidden = false;
 			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
@@ -111,6 +115,7 @@ const calcVisibility = (instPackage, extras) => {
 				extras.statusMember === Instance.status.INITIATED
 				|| extras.statusMember === Instance.status.SELECT_ATTRACTION
 				|| extras.statusMember === Instance.status.SELECT_HOTEL
+				|| extras.statusMember === Instance.status.REVIEW_ITINERARY
 			) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnLeave.isHidden = false;

@@ -56,12 +56,12 @@ class FlightCar extends React.Component {
 		console.log('>>>>FlightCar, render()', this.props);
 		const {
 			classes,
+			isCustomised,
 			departDates,
 			carOptions,
 			selectedDepartDate,
 			selectedReturnDate,
 			selectedCarOption,
-			isCustomised,
 		} = this.props;
 		// Reference
 		const isReadonly = carOptions && carOptions.length === 1;
@@ -127,7 +127,7 @@ class FlightCar extends React.Component {
 			</ListItem>
 		);
 		const divCarOptions
-			= miCarOptions && miCarOptions.length > 0 ? (
+			= miCarOptions && miCarOptions.length > 1 ? (
 				<ListItem>
 					<ListItemIcon>
 						<DirectionsCar color="primary" />

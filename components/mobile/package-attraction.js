@@ -47,9 +47,9 @@ class PackageAttraction extends React.Component {
 		console.log('>>>>PackageAttraction props', this.props);
 		const {
 			classes,
+			isCustomised,
 			itAttractions,
 			handleLikeAttraction,
-			isCustomised,
 			handleAddItinerary,
 			handleDeleteItinerary,
 		} = this.props;

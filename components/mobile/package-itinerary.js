@@ -13,6 +13,7 @@ import Helper from '../../lib/helper';
 import CONSTANTS from '../../lib/constants';
 
 const dtFormat = CONSTANTS.get().Global.dateFormat;
+const status = CONSTANTS.get().Instance.status;
 const triggerText = (dayNo, city) => `Day ${dayNo}: ${city}`;
 
 export default class PackageItinerary extends React.Component {
@@ -31,16 +32,21 @@ export default class PackageItinerary extends React.Component {
 	render () {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
 		const {
-			rates,
-			transport: { departDates, carOption, totalDays },
 			isCustomised,
-			itAttractions,
+			extras,
+			transport: { departDates, carOption, totalDays },
+			itineraries,
+			actions,
+		} = this.props;
+		const {
 			handleSelectHotel,
 			handleSelectFlight,
 			handleSelectCar,
-		} = this.props;
+			handleLikeAttraction,
+			handleAddItinerary,
+			handleDeleteItinerary,
+		} = actions;
 		const { startDate } = this.state;
-		const { packageRates, carRates, flightRates } = rates;
 		const doHandleSelectFlight = stStartDate => {
 			const sDate = stStartDate ? Moment(stStartDate, dtFormat).toDate() : null;
 			const eDate = stStartDate
@@ -59,9 +65,6 @@ export default class PackageItinerary extends React.Component {
 					.add(totalDays, 'days')
 					.format(dtFormat)
 			: '';
-		const carOptions = isCustomised
-			? Helper.getValidCarOptions(carRates)
-			: [carOption];
 		// Add Flight and Cars
 		elItineraries['Flight and Car'] = (
 			<FlightCar
@@ -69,7 +72,7 @@ export default class PackageItinerary extends React.Component {
 				departDates={departDates}
 				selectedDepartDate={stStartDate}
 				selectedReturnDate={stEndDate}
-				carOptions={carOptions}
+				carOptions={extras.carOptions}
 				selectedCarOption={carOption}
 				handleSelectFlight={doHandleSelectFlight}
 				handleSelectCar={handleSelectCar}
@@ -77,29 +80,46 @@ export default class PackageItinerary extends React.Component {
 		);
 
 		// Add itinerary for each days
-		_.forEach(itAttractions, it => {
+		_.forEach(itineraries, (it, idx) => {
+			let secAttraction = '';
+			let secHotel = '';
 			const title = triggerText(it.dayNo, it.cityBase);
-			// Prepare attraction card list
-			const hotelSelector = it.hotels ? (
-				isCustomised ? (
-					<HotelSlider
-						dayNo={it.dayNo}
-						hotels={it.hotels}
-						handleSelectHotel={handleSelectHotel}
-					/>
-				) : (
-					<HotelItem hotels={it.hotels} />
-				)
-			) : (
-				''
-			);
+			if (!isCustomised) {
+				// always display attraction / hotel icon
+				secAttraction = <ItineraryItem attractions={it.attractions} />;
+				secHotel = <HotelItem hotels={it.hotels} />;
+			} else {
+				if (
+					extras.statusMember === status.INITIATED
+					|| extras.statusMember === status.SELECT_ATTRACTION
+				) {
+					secAttraction = <ItineraryItem attractions={it.attractions} />;
+				} else if (extras.statusMember === status.SELECT_HOTEL) {
+					secAttraction = <ItineraryItem attractions={it.attractions} />;
+					secHotel = (
+						<HotelSlider
+							dayNo={it.dayNo}
+							hotels={it.hotels}
+							handleSelectHotel={handleSelectHotel}
+						/>
+					);
+				} else {
+					secAttraction = <ItineraryItem attractions={it.attractions} />;
+					secHotel = <HotelItem hotels={it.hotels} />;
+				}
+			}
 			// Display the desciption of package-item
-			const desc = !isCustomised ? <Typography>{it.cityDesc}</Typography> : '';
+			const desc
+				= !isCustomised || idx === 0 || idx === itineraries.length - 1 ? (
+					<Typography>{it.cityDesc}</Typography>
+				) : (
+					''
+				);
 			elItineraries[title] = (
 				<div style={{ width: '-webkit-fill-available' }}>
 					{desc}
-					<ItineraryItem attractions={it.attractions} />
-					{hotelSelector}
+					{secAttraction}
+					{secHotel}
 				</div>
 			);
 		});

@@ -29,7 +29,7 @@ const styles = theme => ({
 		left: 0,
 		marginLeft: 8,
 		marginRight: 8,
-		maxHeight: 440,
+		maxHeight: 515,
 		overflowY: 'auto',
 		width: '98%',
 	},
@@ -377,8 +377,11 @@ class MobileApp extends React.Component {
 		const { classes, rates, reference } = this.props;
 		const { packageRates, flightRates } = rates;
 		const { cities, packageSummary } = reference;
-		const extras = PackageHelper.enhanceInstance(instPackage, userId);
 
+		console.log('>>>>MobileApp.render >> instPackage', instPackage);
+		console.log('>>>>MobileApp.render >> reference', reference);
+		console.log('>>>>MobileApp.render >> rates', rates);
+		// Variables
 		rates.carRates = _.map(cities, c => {
 			return {
 				id: c.id || '',
@@ -386,10 +389,11 @@ class MobileApp extends React.Component {
 				carRates: c.carRates || [],
 			};
 		});
-		console.log('>>>>MobileApp.render >> instPackage', instPackage);
-		console.log('>>>>MobileApp.render >> reference', reference);
-		console.log('>>>>MobileApp.render >> rates', rates);
-		// Variables
+		const extras = PackageHelper.enhanceInstance(instPackage, userId);
+		extras.carOptions = instPackage.isCustomised
+			? Helper.getValidCarOptions(rates.carRates)
+			: [instPackage.carOption];
+
 		const departDates = _.map(packageSummary.departureDate.split(','), d => {
 			return d.trim();
 		});
@@ -399,7 +403,7 @@ class MobileApp extends React.Component {
 			totalDays: instPackage.totalDays,
 			carOption: instPackage.carOption,
 		};
-		const itAttractions = PackageHelper.getItineraryAttractionList({
+		const itineraries = PackageHelper.getItineraryAttractionList({
 			isCustomised: instPackage.isCustomised,
 			cities,
 			packageItems: instPackage.items,
@@ -416,6 +420,14 @@ class MobileApp extends React.Component {
 			handleStatus: this.handleFooterBtnStatus,
 			handleCustomise: this.handleFooterBtnCustomise,
 		};
+		const itineraryActions = {
+			handleSelectHotel: this.handleSelectHotel,
+			handleSelectFlight: this.handleSelectFlight,
+			handleSelectCar: this.handleSelectCar,
+			handleLikeAttraction: this.handleLikeAttraction,
+			handleAddItinerary: this.confirmAddItinerary,
+			handleDeleteItinerary: this.confirmDeleteItinerary,
+		};
 
 		// ======Web Elements======
 		// Setup modal element
@@ -425,7 +437,7 @@ class MobileApp extends React.Component {
 			<div id="package-attraction">
 				<PackageAttraction
 					isCustomised={instPackage.isCustomised}
-					itAttractions={itAttractions}
+					itineraries={itineraries}
 					handleLikeAttraction={this.handleLikeAttraction}
 					handleAddItinerary={this.confirmAddItinerary}
 					handleDeleteItinerary={this.confirmDeleteItinerary}
@@ -437,12 +449,10 @@ class MobileApp extends React.Component {
 			<div id="package-itinerary">
 				<PackageItinerary
 					isCustomised={instPackage.isCustomised}
-					rates={rates}
+					extras={extras}
 					transport={transport}
-					itAttractions={itAttractions}
-					handleSelectHotel={this.handleSelectHotel}
-					handleSelectFlight={this.handleSelectFlight}
-					handleSelectCar={this.handleSelectCar}
+					itineraries={itineraries}
+					actions={itineraryActions}
 				/>
 			</div>
 		);
@@ -484,10 +494,9 @@ class MobileApp extends React.Component {
 						isCustomised={instPackage.isCustomised}
 						rates={rates}
 						transport={transport}
-						itAttractions={itAttractions}
-						handleSelectHotel={this.handleSelectHotel}
-						handleSelectFlight={this.handleSelectFlight}
-						handleSelectCar={this.handleSelectCar}
+						itineraries={itineraries}
+						extras={extras}
+						actions={itineraryActions}
 					/>
 				</div>
 				<BotFooter

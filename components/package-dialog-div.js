@@ -12,7 +12,7 @@ const styles = theme => ({
 	},
 	mobileView: {
 		width: 580,
-		height: 600,
+		height: 800,
 	},
 });
 
