@@ -7,6 +7,10 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 let scrollToComponent;
@@ -18,6 +22,18 @@ const styles = theme => ({
 	heading: {
 		fontSize: theme.typography.pxToRem(20),
 		fontWeight: theme.typography.fontWeightRegular,
+	},
+	accodionTitleText: {
+		float: 'left',
+		paddingRight: 8,
+	},
+	accodionTitleIcon: {
+		float: 'right',
+		margin: 4,
+	},
+	accodionSummary: {
+		display: 'flex',
+		alignItems: 'center',
 	},
 });
 
@@ -107,10 +123,38 @@ class ControlledAccordion extends React.Component {
 						expanded={panelMap[title]}
 						onChange={this.handleChange(title)}
 					>
-						<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-							<Typography className={classes.heading} variant="h5">
+						<ExpansionPanelSummary
+							expandIcon={<ExpandMoreIcon />}
+							classes={{ content: classes.accodionSummary }}
+						>
+							<Typography className={classes.accodionTitleText} variant="h5">
 								{title}
 							</Typography>
+							<Fab
+								size="small"
+								color="secondary"
+								aria-label="add"
+								className={classes.accodionTitleIcon}
+							>
+								<AddIcon />
+							</Fab>
+							<Fab
+								size="small"
+								color="secondary"
+								aria-label="delete"
+								className={classes.accodionTitleIcon}
+							>
+								<DeleteIcon />
+							</Fab>
+							<Fab
+								size="small"
+								color="secondary"
+								aria-label="edit"
+								className={classes.accodionTitleIcon}
+								style={{ padding: '0px' }}
+							>
+								<EditIcon />
+							</Fab>
 						</ExpansionPanelSummary>
 						<ExpansionPanelDetails>{mapContents[title]}</ExpansionPanelDetails>
 					</ExpansionPanel>
