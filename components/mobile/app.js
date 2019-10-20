@@ -174,7 +174,7 @@ class MobileApp extends React.Component {
 	confirmAddItinerary (ref) {
 		console.log('>>>>MobileApp.confirmAddItinerary', ref);
 		this.setState({
-			botModal: modal.ADD_ITINERARY.key,
+			botModal: Modal.ADD_ITINERARY.key,
 			refModal: ref,
 		});
 	}
@@ -195,12 +195,12 @@ class MobileApp extends React.Component {
 		const { total, max, min } = ref;
 		if (total > max) {
 			this.setState({
-				botModal: modal.INVALID_MAX_PARTICIPANT.key,
+				botModal: Modal.INVALID_MAX_PARTICIPANT.key,
 				refModal: ref,
 			});
 		} else if (total < min) {
 			this.setState({
-				botModal: modal.INVALID_MIN_PARTICIPANT.key,
+				botModal: Modal.INVALID_MIN_PARTICIPANT.key,
 				refModal: ref,
 			});
 		}
@@ -208,7 +208,7 @@ class MobileApp extends React.Component {
 	confirmDeleteItinerary (ref) {
 		console.log('>>>>MobileApp.confirmDeleteItinerary', ref);
 		this.setState({
-			botModal: modal.DELETE_ITINERARY.key,
+			botModal: Modal.DELETE_ITINERARY.key,
 			refModal: ref,
 		});
 	}
@@ -217,7 +217,7 @@ class MobileApp extends React.Component {
 		console.log('>>>>MobileApp.handleDeleteItinerary', ref);
 		if (ref.isRequired) {
 			this.setState({
-				botModal: modal.FAILED_DELETE_ITINERARY.key,
+				botModal: Modal.FAILED_DELETE_ITINERARY.key,
 			});
 		} else {
 			const instPackage = PackageHelper.deleteItinerary(
@@ -284,7 +284,7 @@ class MobileApp extends React.Component {
 		if (!instPackage.isCustomised) {
 			// Package is not customised (DIY) yet, ask customer to confirm enabling DIY
 			this.setState({
-				botModal: modal.ENABLE_DIY.key,
+				botModal: Modal.ENABLE_DIY.key,
 			});
 		} else {
 			// Package is customised (DIY) already, move on with rest of logic
@@ -293,7 +293,7 @@ class MobileApp extends React.Component {
 				if (isOverloaded(itinerary)) {
 					// Activities over booked
 					this.setState({
-						botModal: modal.FULL_ITINERARY.key,
+						botModal: Modal.FULL_ITINERARY.key,
 						refModal: itinerary,
 					});
 				} else {
@@ -321,7 +321,7 @@ class MobileApp extends React.Component {
 				if (dayItems[itinerary.dayNo].length === 1) {
 					// Only one activity, can not be deleted
 					this.setState({
-						botModal: modal.ONLY_ITINERARY.key,
+						botModal: Modal.ONLY_ITINERARY.key,
 						refModal: itinerary,
 					});
 				} else {

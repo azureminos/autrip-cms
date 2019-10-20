@@ -44,7 +44,8 @@ class BotHeader extends React.Component {
 	constructor (props) {
 		console.log('>>>>BotHeader.constructor', props);
 		super(props);
-		const isCustomised = props.instPackage.isCustomised;
+		this.doHandlePeopleChange = this.doHandlePeopleChange.bind(this);
+		this.doHandleRoomChange = this.doHandleRoomChange.bind(this);
 		// Set min & max
 		let max = 0;
 		let min = 999;
@@ -52,7 +53,7 @@ class BotHeader extends React.Component {
 			if (pr.maxParticipant >= max) {
 				max = pr.maxParticipant;
 			}
-			if (pr.minParticipant <= max) {
+			if (pr.minParticipant <= min) {
 				min = pr.minParticipant;
 			}
 		});
@@ -102,9 +103,10 @@ class BotHeader extends React.Component {
 			otherRooms: otherRooms,
 			max: max,
 			min: min,
+			updated: false,
 		};
 	}
-
+	// ====== Helper ======
 	buildMenuItems (minSelect, maxSelect, itemText) {
 		const rs = [];
 		for (let ct = minSelect - 1; ct < maxSelect; ct++) {
@@ -122,13 +124,53 @@ class BotHeader extends React.Component {
 		}
 		return rs;
 	}
-
+	// ====== Event Handler ======
+	// Handle people change
+	doHandlePeopleChange (e) {
+		console.log('>>>>BotHeader.doHandlePeopleChange', e);
+		const { handleInvalidPeople } = this.props;
+		const { otherPeople, max, min } = this.state;
+		const total = otherPeople + e.target.value;
+		if (total > max || total < min) {
+			handleInvalidPeople({ total, max, min });
+		} else {
+			const newRooms = Math.floor(e.target.value / standardRoomCapacity);
+			this.setState({ people: e.target.value, rooms: newRooms, update: true });
+		}
+	}
+	// Handle room change
+	doHandleRoomChange (e) {
+		console.log('>>>>BotHeader.doHandleRoomChange', e);
+		const { handleInvalidRoom } = this.props;
+		const { people } = this.state;
+		if (
+			e.target.value > people
+			|| e.target.value < Math.ceil(people / maxRoomCapacity)
+		) {
+			handleInvalidRoom({
+				total: e.target.value,
+				max: people,
+				min: Math.ceil(people / maxRoomCapacity),
+			});
+		} else {
+			this.setState({ rooms: e.target.value, update: true });
+		}
+	}
+	// Display widget
 	render () {
 		console.log('>>>>BotHeader.render', this.state);
 		const { classes, instPackage, rates } = this.props;
 		const { packageRates, carRates, flightRates } = rates;
 		const { isCustomised, hotels, items, startDate, carOption } = instPackage;
-		const { people, rooms, otherPeople, otherRooms, max, min } = this.state;
+		const {
+			people,
+			rooms,
+			otherPeople,
+			otherRooms,
+			max,
+			min,
+			update,
+		} = this.state;
 
 		const finalCost = { price: 0, promo: '' };
 
@@ -136,36 +178,6 @@ class BotHeader extends React.Component {
 			startDate: startDate,
 			totalPeople: otherPeople + people,
 			totalRooms: otherRooms + rooms,
-		};
-		// ====== Event Handler ======
-		// Handle people change
-		const doHandlePeopleChange = e => {
-			console.log('>>>>BotHeader.doHandlePeopleChange', { e, packageRates });
-			const { handleInvalidPeople } = this.props;
-			const total = otherPeople + e.target.value;
-			if (total > max || total < min) {
-				handleInvalidPeople({ total, max, min });
-			} else {
-				const newRooms = Math.floor(e.target.value / standardRoomCapacity);
-				this.setState({ people: e.target.value, rooms: newRooms });
-			}
-		};
-		// Handle room change
-		const doHandleRoomChange = e => {
-			console.log('>>>>BotHeader.doHandleRoomChange', { e, packageRates });
-			const { handleInvalidRoom } = this.props;
-			if (
-				e.target.value > people
-				|| e.target.value < Math.ceil(people / maxRoomCapacity)
-			) {
-				handleInvalidRoom({
-					total: e.target.value,
-					max: people,
-					min: Math.ceil(people / maxRoomCapacity),
-				});
-			} else {
-				this.setState({ rooms: e.target.value });
-			}
 		};
 
 		if (!isCustomised) {
@@ -181,7 +193,12 @@ class BotHeader extends React.Component {
 					curRatePackageReg.maxParticipant
 					&& instPackage.maxParticipant > curRatePackageReg.maxParticipant
 				) {
-					params.totalPeople = curRatePackageReg.maxParticipant + 1;
+					if (!update) {
+						params.totalPeople = curRatePackageReg.maxParticipant + 1;
+						params.totalRooms = Math.ceil(
+							params.totalPeople / standardRoomCapacity
+						);
+					}
 					nxtRatePackageReq = Rate.calPackageRate(params, packageRates);
 				} else {
 					nxtRatePackageReq = null;
@@ -279,7 +296,7 @@ class BotHeader extends React.Component {
 		const miPeople = this.buildMenuItems(min, max, 'Person');
 		const miRooms = this.buildMenuItems(
 			Math.ceil(params.totalPeople / maxRoomCapacity),
-			max,
+			params.totalPeople,
 			'Room'
 		);
 
@@ -304,7 +321,7 @@ class BotHeader extends React.Component {
 									<FormControl className={classes.formControl}>
 										<Select
 											value={params.totalPeople}
-											onChange={doHandlePeopleChange}
+											onChange={this.doHandlePeopleChange}
 											input={
 												<Input name="people" id="people-label-placeholder" />
 											}
@@ -321,7 +338,7 @@ class BotHeader extends React.Component {
 									>
 										<Select
 											value={params.totalRooms}
-											onChange={doHandleRoomChange}
+											onChange={this.doHandleRoomChange}
 											input={
 												<Input name="rooms" id="rooms-label-placeholder" />
 											}
