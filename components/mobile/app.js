@@ -403,9 +403,9 @@ class MobileApp extends React.Component {
 			totalDays: instPackage.totalDays,
 			carOption: instPackage.carOption,
 		};
-		const itineraries = PackageHelper.getItineraryAttractionList({
+		const itineraries = PackageHelper.getFullItinerary({
 			isCustomised: instPackage.isCustomised,
-			cities,
+			cities: cities,
 			packageItems: instPackage.items,
 			packageHotels: instPackage.hotels,
 		});

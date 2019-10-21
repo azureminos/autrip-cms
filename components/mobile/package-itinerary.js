@@ -3,8 +3,16 @@ import React from 'react';
 import Moment from 'moment';
 // import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import { withStyles } from '@material-ui/core/styles';
-import { Typography } from '@material-ui/core';
-import ControlledAccordion from './components/accordion';
+import { Typography, Fab } from '@material-ui/core';
+import {
+	ExpansionPanel,
+	ExpansionPanelSummary,
+	ExpansionPanelDetails,
+} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import HotelSlider from './components/hotel-slider';
 import FlightCar from './components/flight-car';
 import ItineraryItem from './components/itinerary-item';
@@ -15,23 +23,85 @@ import CONSTANTS from '../../lib/constants';
 const dtFormat = CONSTANTS.get().Global.dateFormat;
 const status = CONSTANTS.get().Instance.status;
 const triggerText = (dayNo, city) => `Day ${dayNo}: ${city}`;
+const titleFlightCar = 'Flight and Car';
 
-export default class PackageItinerary extends React.Component {
+const styles = theme => ({
+	root: {
+		width: '100%',
+	},
+	heading: {
+		fontSize: theme.typography.pxToRem(20),
+		fontWeight: theme.typography.fontWeightRegular,
+	},
+	accodionTitleText: {
+		float: 'left',
+		paddingRight: 8,
+	},
+	accodionTitleIcon: {
+		float: 'right',
+		margin: 4,
+	},
+	accodionSummary: {
+		display: 'flex',
+		alignItems: 'center',
+	},
+});
+class PackageItinerary extends React.Component {
 	constructor (props) {
 		super(props);
+		// Bind handler
+		this.doHandleAccordionClick = this.doHandleAccordionClick.bind(this);
+		this.doHandleSelectFlight = this.doHandleSelectFlight.bind(this);
+		// Init data
 		const { startDate } = props.transport;
 		const likedHotel = _.find(props.hotels, h => {
 			return h.isLiked;
 		});
+		const panelMap = {};
+		panelMap[titleFlightCar] = true;
+		_.each(this.props.itineraries, it => {
+			const title = triggerText(it.dayNo, it.cityBase);
+			panelMap[title] = true;
+		});
+		// Setup state
 		this.state = {
+			panelMap: panelMap,
 			idxSelected: likedHotel ? likedHotel.id : -1,
 			startDate: startDate,
 		};
 	}
-
+	// Event Handlers
+	doHandleSelectFlight (stStartDate) {
+		const sDate = stStartDate ? Moment(stStartDate, dtFormat).toDate() : null;
+		const eDate = stStartDate
+			? Moment(stStartDate, dtFormat)
+					.add(this.props.transport.totalDays, 'days')
+					.toDate()
+			: null;
+		this.props.handleSelectFlight(sDate, eDate);
+		this.setState({ startDate: sDate });
+	}
+	doHandleAccordionClick (panel) {
+		return (event, expanded) => {
+			console.log('>>>>ControlledAccordion, handleChange()', {
+				panel: panel,
+				expanded: expanded,
+			});
+			const that = this;
+			const { panelMap } = that.state;
+			const clicked = that.state.clicked + 1;
+			panelMap[panel] = !panelMap[panel];
+			that.setState({
+				panelMap: panelMap,
+				clicked: clicked,
+			});
+		};
+	}
+	// Display Widget
 	render () {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
 		const {
+			classes,
 			isCustomised,
 			extras,
 			transport: { departDates, carOption, totalDays },
@@ -46,19 +116,9 @@ export default class PackageItinerary extends React.Component {
 			handleAddItinerary,
 			handleDeleteItinerary,
 		} = actions;
-		const { startDate } = this.state;
-		const doHandleSelectFlight = stStartDate => {
-			const sDate = stStartDate ? Moment(stStartDate, dtFormat).toDate() : null;
-			const eDate = stStartDate
-				? Moment(stStartDate, dtFormat)
-						.add(totalDays, 'days')
-						.toDate()
-				: null;
-			handleSelectFlight(sDate, eDate);
-			this.setState({ startDate: sDate });
-		};
-		// Generate itinerary accordion
-		const elItineraries = {};
+		const { startDate, panelMap } = this.state;
+		// Sub Widgets
+		const accordions = [];
 		const stStartDate = startDate ? Moment(startDate).format(dtFormat) : '';
 		const stEndDate = startDate
 			? Moment(startDate)
@@ -66,19 +126,34 @@ export default class PackageItinerary extends React.Component {
 					.format(dtFormat)
 			: '';
 		// Add Flight and Cars
-		elItineraries['Flight and Car'] = (
-			<FlightCar
-				isCustomised={isCustomised}
-				departDates={departDates}
-				selectedDepartDate={stStartDate}
-				selectedReturnDate={stEndDate}
-				carOptions={extras.carOptions}
-				selectedCarOption={carOption}
-				handleSelectFlight={doHandleSelectFlight}
-				handleSelectCar={handleSelectCar}
-			/>
+		accordions.push(
+			<ExpansionPanel
+				key={titleFlightCar}
+				expanded={panelMap[titleFlightCar]}
+				onChange={this.doHandleAccordionClick(titleFlightCar)}
+			>
+				<ExpansionPanelSummary
+					expandIcon={<ExpandMoreIcon />}
+					classes={{ content: classes.accodionSummary }}
+				>
+					<Typography className={classes.accodionTitleText} variant="h5">
+						{titleFlightCar}
+					</Typography>
+				</ExpansionPanelSummary>
+				<ExpansionPanelDetails>
+					<FlightCar
+						isCustomised={isCustomised}
+						departDates={departDates}
+						selectedDepartDate={stStartDate}
+						selectedReturnDate={stEndDate}
+						carOptions={extras.carOptions}
+						selectedCarOption={carOption}
+						handleSelectFlight={this.doHandleSelectFlight}
+						handleSelectCar={handleSelectCar}
+					/>
+				</ExpansionPanelDetails>
+			</ExpansionPanel>
 		);
-
 		// Add itinerary for each days
 		_.forEach(itineraries, (it, idx) => {
 			let secAttraction = '';
@@ -115,15 +190,81 @@ export default class PackageItinerary extends React.Component {
 				) : (
 					''
 				);
-			elItineraries[title] = (
-				<div style={{ width: '-webkit-fill-available' }}>
-					{desc}
-					{secAttraction}
-					{secHotel}
-				</div>
+			// Display Add icon
+			const iconAdd
+				= isCustomised && it.isClonable > 0 ? (
+					<Fab
+						size="small"
+						color="secondary"
+						aria-label="add"
+						className={classes.accodionTitleIcon}
+						style={{ padding: '0px' }}
+					>
+						<AddIcon />
+					</Fab>
+				) : (
+					''
+				);
+			// Display Delete icon
+			const iconDelete
+				= isCustomised && !it.isRequired ? (
+					<Fab
+						size="small"
+						color="secondary"
+						aria-label="delete"
+						className={classes.accodionTitleIcon}
+						style={{ padding: '0px' }}
+					>
+						<DeleteIcon />
+					</Fab>
+				) : (
+					''
+				);
+			// Display Edit icon
+			const iconEdit
+				= isCustomised && it.timePlannable > 0 ? (
+					<Fab
+						size="small"
+						color="secondary"
+						aria-label="edit"
+						className={classes.accodionTitleIcon}
+						style={{ padding: '0px' }}
+					>
+						<EditIcon />
+					</Fab>
+				) : (
+					''
+				);
+			accordions.push(
+				<ExpansionPanel
+					key={title}
+					expanded={panelMap[title]}
+					onChange={this.doHandleAccordionClick(title)}
+				>
+					<ExpansionPanelSummary
+						expandIcon={<ExpandMoreIcon />}
+						classes={{ content: classes.accodionSummary }}
+					>
+						<Typography className={classes.accodionTitleText} variant="h5">
+							{title}
+						</Typography>
+						{iconAdd}
+						{iconEdit}
+						{iconDelete}
+					</ExpansionPanelSummary>
+					<ExpansionPanelDetails>
+						<div style={{ width: '-webkit-fill-available' }}>
+							{desc}
+							{secAttraction}
+							{secHotel}
+						</div>
+					</ExpansionPanelDetails>
+				</ExpansionPanel>
 			);
 		});
 
-		return <ControlledAccordion mapContents={elItineraries} />;
+		return <div>{accordions}</div>;
 	}
 }
+
+export default withStyles(styles, { withTheme: true })(PackageItinerary);
