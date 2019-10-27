@@ -1,9 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Modal from '@material-ui/core/Modal';
-import Button from '@material-ui/core/Button';
+import { Typography, Grid, Modal, Button } from '@material-ui/core';
 
 const styles = theme => ({
 	paper: {
@@ -16,6 +14,9 @@ const styles = theme => ({
 		left: '50%',
 		transform: `translate(-50%, -50%)`,
 	},
+	button: {
+		width: '100%',
+	},
 });
 
 class BotModal extends React.Component {
@@ -25,19 +26,23 @@ class BotModal extends React.Component {
 			buttons,
 			title,
 			description,
+			contents,
 			isModalOpen,
 			handleModalClose,
 		} = this.props;
 		const dButtons = _.map(buttons, b => {
 			return (
-				<Button
-					key={b.title}
-					onClick={() => {
-						b.handleClick();
-					}}
-				>
-					{b.title}
-				</Button>
+				<Grid item xs>
+					<Button
+						key={b.title}
+						onClick={() => {
+							b.handleClick();
+						}}
+						className={classes.button}
+					>
+						{b.title}
+					</Button>
+				</Grid>
 			);
 		});
 		return (
@@ -47,10 +52,13 @@ class BotModal extends React.Component {
 						<Typography variant="h6" id="modal-title">
 							{title}
 						</Typography>
-						<Typography variant="subtitle1" id="simple-modal-description">
-							{description}
-						</Typography>
-						{dButtons}
+						<div>
+							<Typography variant="subtitle1" id="simple-modal-description">
+								{description}
+							</Typography>
+							{contents ? contents : ''}
+						</div>
+						<Grid container>{dButtons}</Grid>
 					</div>
 				</Modal>
 			</div>

@@ -28,21 +28,37 @@ const styles = {
 
 class AttractionCard extends React.Component {
 	render () {
-		const { classes, item, handleClick } = this.props;
-		const cardContent = !item.description ? '' : (<CardContent><Typography component='p'>{item.description}</Typography></CardContent>);
+		const { classes, item, doLikeAttraction } = this.props;
+		const cardContent = !item.description ? (
+			''
+		) : (
+			<CardContent>
+				<Typography component="p">{item.description}</Typography>
+			</CardContent>
+		);
 		return (
 			<Card className={classes.card}>
 				<CardHeader
 					classes={{ root: classes.headerRoot }}
 					action={
-						<IconButton onClick={() => handleClick(item)}>
-							<SolidCheckIcon style={{ display: item.isLiked ? 'block' : 'none', color: blue[500] }} />
-							<CheckIcon style={{ display: item.isLiked ? 'none' : 'block', color: grey[500] }} />
+						<IconButton onClick={() => doLikeAttraction(item)}>
+							<SolidCheckIcon
+								style={{
+									display: item.isLiked ? 'block' : 'none',
+									color: blue[500],
+								}}
+							/>
+							<CheckIcon
+								style={{
+									display: item.isLiked ? 'none' : 'block',
+									color: grey[500],
+								}}
+							/>
 						</IconButton>
 					}
 					title={item.name}
 				/>
-				<CardActionArea onClick={() => handleClick(item)}>
+				<CardActionArea onClick={() => doLikeAttraction(item)}>
 					<CardMedia
 						className={classes.media}
 						image={item.imageUrl}

@@ -16,6 +16,7 @@ class HotelSlider extends React.Component {
 
 	render () {
 		const params = {
+			centeredSlides: true,
 			slidesPerView: 2,
 			spaceBetween: 8,
 		};
@@ -37,12 +38,7 @@ class HotelSlider extends React.Component {
 					</div>
 				);
 			});
-			return (
-				<div>
-					<div>Hotels</div>
-					<Swiper {...params}>{hotelSlider}</Swiper>
-				</div>
-			);
+			return <Swiper {...params}>{hotelSlider}</Swiper>;
 		}
 
 		return '';

@@ -4,26 +4,20 @@ import Moment from 'moment';
 // import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography, Fab } from '@material-ui/core';
-import {
-	ExpansionPanel,
-	ExpansionPanelSummary,
-	ExpansionPanelDetails,
-} from '@material-ui/core';
+import FlightCar from './components/flight-car';
+import HotelSlider from './components/hotel-slider';
+import HotelList from './components/hotel-list';
+import AttractionSlider from './components/attraction-slider';
+import AttractionList from './components/attraction-list';
+import DescPanel from './components/description-panel';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import HotelSlider from './components/hotel-slider';
-import FlightCar from './components/flight-car';
-import ItineraryItem from './components/itinerary-item';
-import HotelItem from './components/hotel-item';
 import Helper from '../../lib/helper';
 import CONSTANTS from '../../lib/constants';
 
 const dtFormat = CONSTANTS.get().Global.dateFormat;
 const status = CONSTANTS.get().Instance.status;
 const triggerText = (dayNo, city) => `Day ${dayNo}: ${city}`;
-const titleFlightCar = 'Flight and Car';
 
 const styles = theme => ({
 	root: {
@@ -45,27 +39,37 @@ const styles = theme => ({
 		display: 'flex',
 		alignItems: 'center',
 	},
+	itinerary: {
+		border: '1px solid',
+		borderColor: 'lightgrey',
+		padding: '4px',
+		margin: '4px',
+	},
+	dayCity: {
+		display: 'table',
+		clear: 'both',
+		width: '100%',
+	},
+	titleDayCity: {
+		float: 'left',
+	},
+	iconDayCity: {
+		float: 'right',
+		margin: '8px',
+	},
 });
 class PackageItinerary extends React.Component {
 	constructor (props) {
 		super(props);
 		// Bind handler
-		this.doHandleAccordionClick = this.doHandleAccordionClick.bind(this);
 		this.doHandleSelectFlight = this.doHandleSelectFlight.bind(this);
 		// Init data
 		const { startDate } = props.transport;
 		const likedHotel = _.find(props.hotels, h => {
 			return h.isLiked;
 		});
-		const panelMap = {};
-		panelMap[titleFlightCar] = true;
-		_.each(this.props.itineraries, it => {
-			const title = triggerText(it.dayNo, it.cityBase);
-			panelMap[title] = true;
-		});
 		// Setup state
 		this.state = {
-			panelMap: panelMap,
 			idxSelected: likedHotel ? likedHotel.id : -1,
 			startDate: startDate,
 		};
@@ -78,24 +82,8 @@ class PackageItinerary extends React.Component {
 					.add(this.props.transport.totalDays, 'days')
 					.toDate()
 			: null;
-		this.props.handleSelectFlight(sDate, eDate);
+		this.props.actions.handleSelectFlight(sDate, eDate);
 		this.setState({ startDate: sDate });
-	}
-	doHandleAccordionClick (panel) {
-		return (event, expanded) => {
-			console.log('>>>>ControlledAccordion, handleChange()', {
-				panel: panel,
-				expanded: expanded,
-			});
-			const that = this;
-			const { panelMap } = that.state;
-			const clicked = that.state.clicked + 1;
-			panelMap[panel] = !panelMap[panel];
-			that.setState({
-				panelMap: panelMap,
-				clicked: clicked,
-			});
-		};
 	}
 	// Display Widget
 	render () {
@@ -110,15 +98,13 @@ class PackageItinerary extends React.Component {
 		} = this.props;
 		const {
 			handleSelectHotel,
-			handleSelectFlight,
 			handleSelectCar,
 			handleLikeAttraction,
 			handleAddItinerary,
 			handleDeleteItinerary,
 		} = actions;
-		const { startDate, panelMap } = this.state;
+		const { startDate } = this.state;
 		// Sub Widgets
-		const accordions = [];
 		const stStartDate = startDate ? Moment(startDate).format(dtFormat) : '';
 		const stEndDate = startDate
 			? Moment(startDate)
@@ -126,51 +112,159 @@ class PackageItinerary extends React.Component {
 					.format(dtFormat)
 			: '';
 		// Add Flight and Cars
-		accordions.push(
-			<ExpansionPanel
-				key={titleFlightCar}
-				expanded={panelMap[titleFlightCar]}
-				onChange={this.doHandleAccordionClick(titleFlightCar)}
-			>
-				<ExpansionPanelSummary
-					expandIcon={<ExpandMoreIcon />}
-					classes={{ content: classes.accodionSummary }}
-				>
-					<Typography className={classes.accodionTitleText} variant="h5">
-						{titleFlightCar}
-					</Typography>
-				</ExpansionPanelSummary>
-				<ExpansionPanelDetails>
-					<FlightCar
-						isCustomised={isCustomised}
-						departDates={departDates}
-						selectedDepartDate={stStartDate}
-						selectedReturnDate={stEndDate}
-						carOptions={extras.carOptions}
-						selectedCarOption={carOption}
-						handleSelectFlight={this.doHandleSelectFlight}
-						handleSelectCar={handleSelectCar}
-					/>
-				</ExpansionPanelDetails>
-			</ExpansionPanel>
+		const secFlightCar = (
+			<FlightCar
+				isCustomised={isCustomised}
+				departDates={departDates}
+				selectedDepartDate={stStartDate}
+				selectedReturnDate={stEndDate}
+				carOptions={extras.carOptions}
+				selectedCarOption={carOption}
+				handleSelectFlight={this.doHandleSelectFlight}
+				handleSelectCar={handleSelectCar}
+			/>
 		);
 		// Add itinerary for each days
-		_.forEach(itineraries, (it, idx) => {
+		const secItinerary = _.map(itineraries, (it, idx) => {
+			// Event Handlers
+			const doHandleAddItinerary = () => {
+				// console.log('>>>>PackageAttraction.doHandleAddItinerary', it);
+				handleAddItinerary(it);
+			};
+			const doHandleDeleteItinerary = () => {
+				// console.log('>>>>PackageAttraction.doHandleDeleteItinerary', it);
+				handleDeleteItinerary(it);
+			};
+			// Local Variables
+			const title = triggerText(it.dayNo, it.cityVisit);
+			const isDayChangable
+				= isCustomised && idx !== 0 && idx !== itineraries.length - 1;
+			// Sub components
 			let secAttraction = '';
 			let secHotel = '';
-			const title = triggerText(it.dayNo, it.cityBase);
+			let btnDelete = '';
+			let btnAdd = '';
 			if (!isCustomised) {
 				// always display attraction / hotel icon
-				secAttraction = <ItineraryItem attractions={it.attractions} />;
-				secHotel = <HotelItem hotels={it.hotels} />;
+				secAttraction = <AttractionList attractions={it.attractions} />;
+				secHotel = <HotelList hotels={it.hotels} />;
 			} else {
 				if (
 					extras.statusMember === status.INITIATED
 					|| extras.statusMember === status.SELECT_ATTRACTION
 				) {
-					secAttraction = <ItineraryItem attractions={it.attractions} />;
+					secAttraction = (
+						<div>
+							<AttractionList attractions={it.attractions} />
+							<AttractionSlider
+								dayNo={it.dayNo}
+								timePlannable={it.timePlannable}
+								attractions={it.attractions}
+								handleLikeAttraction={handleLikeAttraction}
+							/>
+						</div>
+					);
+					secHotel = <HotelList hotels={it.hotels} />;
+					btnDelete = isDayChangable ? (
+						<Fab
+							size="small"
+							color="secondary"
+							aria-label="delete"
+							onClick={doHandleDeleteItinerary}
+							className={classes.iconDayCity}
+						>
+							<DeleteIcon />
+						</Fab>
+					) : (
+						''
+					);
+					btnAdd = isDayChangable ? (
+						<Fab
+							size="small"
+							color="primary"
+							aria-label="add"
+							onClick={doHandleAddItinerary}
+							className={classes.iconDayCity}
+						>
+							<AddIcon />
+						</Fab>
+					) : (
+						''
+					);
 				} else if (extras.statusMember === status.SELECT_HOTEL) {
-					secAttraction = <ItineraryItem attractions={it.attractions} />;
+					secAttraction = <AttractionList attractions={it.attractions} />;
+					secHotel = (
+						<div>
+							<HotelList hotels={it.hotels} />
+							<HotelSlider
+								dayNo={it.dayNo}
+								hotels={it.hotels}
+								handleSelectHotel={handleSelectHotel}
+							/>
+						</div>
+					);
+					btnDelete = isDayChangable ? (
+						<Fab
+							size="small"
+							color="secondary"
+							aria-label="delete"
+							onClick={doHandleDeleteItinerary}
+							className={classes.iconDayCity}
+						>
+							<DeleteIcon />
+						</Fab>
+					) : (
+						''
+					);
+					btnAdd = isDayChangable ? (
+						<Fab
+							size="small"
+							color="primary"
+							aria-label="add"
+							onClick={doHandleAddItinerary}
+							className={classes.iconDayCity}
+						>
+							<AddIcon />
+						</Fab>
+					) : (
+						''
+					);
+				} else {
+					secAttraction = <AttractionList attractions={it.attractions} />;
+					secHotel = <HotelList hotels={it.hotels} />;
+				}
+			}
+
+			return (
+				<div key={it.dayNo} className={classes.itinerary}>
+					<Typography variant="h5" gutterBottom className={classes.dayCity}>
+						<div className={classes.titleDayCity}>{title}</div>
+						{btnDelete}
+						{btnAdd}
+					</Typography>
+					<DescPanel descShort={it.cityDescShort} descFull={it.cityDesc} />
+					{secAttraction}
+					{secHotel}
+				</div>
+			);
+		});
+
+		/* _.forEach(itineraries, (it, idx) => {
+			let secAttraction = '';
+			let secHotel = '';
+			const title = triggerText(it.dayNo, it.cityBase);
+			if (!isCustomised) {
+				// always display attraction / hotel icon
+				secAttraction = <AttractionList attractions={it.attractions} />;
+				secHotel = <HotelList hotels={it.hotels} />;
+			} else {
+				if (
+					extras.statusMember === status.INITIATED
+					|| extras.statusMember === status.SELECT_ATTRACTION
+				) {
+					secAttraction = <AttractionList attractions={it.attractions} />;
+				} else if (extras.statusMember === status.SELECT_HOTEL) {
+					secAttraction = <AttractionList attractions={it.attractions} />;
 					secHotel = (
 						<HotelSlider
 							dayNo={it.dayNo}
@@ -179,8 +273,8 @@ class PackageItinerary extends React.Component {
 						/>
 					);
 				} else {
-					secAttraction = <ItineraryItem attractions={it.attractions} />;
-					secHotel = <HotelItem hotels={it.hotels} />;
+					secAttraction = <AttractionList attractions={it.attractions} />;
+					secHotel = <HotelList hotels={it.hotels} />;
 				}
 			}
 			// Display the desciption of package-item
@@ -261,9 +355,9 @@ class PackageItinerary extends React.Component {
 					</ExpansionPanelDetails>
 				</ExpansionPanel>
 			);
-		});
+		});*/
 
-		return <div>{accordions}</div>;
+		return <section>{[secFlightCar].concat(secItinerary)}</section>;
 	}
 }
 

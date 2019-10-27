@@ -128,33 +128,13 @@ class BotHeader extends React.Component {
 	// Handle people change
 	doHandlePeopleChange (e) {
 		console.log('>>>>BotHeader.doHandlePeopleChange', e);
-		const { handleInvalidPeople } = this.props;
-		const { otherPeople, max, min } = this.state;
-		const total = otherPeople + e.target.value;
-		if (total > max || total < min) {
-			handleInvalidPeople({ total, max, min });
-		} else {
-			const newRooms = Math.floor(e.target.value / standardRoomCapacity);
-			this.setState({ people: e.target.value, rooms: newRooms, update: true });
-		}
+		const newRooms = Math.floor(e.target.value / standardRoomCapacity);
+		this.setState({ people: e.target.value, rooms: newRooms, update: true });
 	}
 	// Handle room change
 	doHandleRoomChange (e) {
 		console.log('>>>>BotHeader.doHandleRoomChange', e);
-		const { handleInvalidRoom } = this.props;
-		const { people } = this.state;
-		if (
-			e.target.value > people
-			|| e.target.value < Math.ceil(people / maxRoomCapacity)
-		) {
-			handleInvalidRoom({
-				total: e.target.value,
-				max: people,
-				min: Math.ceil(people / maxRoomCapacity),
-			});
-		} else {
-			this.setState({ rooms: e.target.value, update: true });
-		}
+		this.setState({ rooms: e.target.value, update: true });
 	}
 	// Display widget
 	render () {

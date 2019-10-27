@@ -13,21 +13,23 @@ const getTagSetting = items => {
 	};
 };
 
-export default class HotelItem extends React.Component {
+export default class HotelList extends React.Component {
 	render () {
-		// console.log('>>>>HotelItem, Start render with props', this.props);
+		// console.log('>>>>HotelList, Start render with props', this.props);
 		// Get data from props
 		const { hotels } = this.props;
 		const likedHotel = _.filter(hotels, hh => {
 			return hh.isLiked;
 		});
-		return (
+		return likedHotel && likedHotel.length > 0 ? (
 			<div className="hotel-day-item">
 				<div>Hotels</div>
 				<div className="dnd-container">
 					<ChipList {...getTagSetting(likedHotel)} />
 				</div>
 			</div>
+		) : (
+			''
 		);
 	}
 }

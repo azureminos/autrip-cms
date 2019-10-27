@@ -13,6 +13,7 @@ import IconPersonAddUndo from '@material-ui/icons/Undo';
 import IconLock from '@material-ui/icons/Lock';
 import IconStatus from '@material-ui/icons/TrackChanges';
 import IconCustomise from '@material-ui/icons/Ballot';
+import IconCancelCustomise from '@material-ui/icons/Cancel';
 import CONSTANTS from '../../../lib/constants';
 
 const { Instance } = CONSTANTS.get();
@@ -55,6 +56,7 @@ const calcVisibility = (instPackage, extras) => {
 		BtnLock: { isHidden: true, isDisabled: false },
 		BtnStatus: { isHidden: true, isDisabled: false },
 		BtnCustomise: { isHidden: true, isDisabled: false },
+		BtnCancelCustomise: { isHidden: true, isDisabled: false },
 	};
 	// Logic starts here
 	if (!extras.isCustomised) {
@@ -91,15 +93,18 @@ const calcVisibility = (instPackage, extras) => {
 				|| extras.statusMember === Instance.status.SELECT_ATTRACTION
 			) {
 				vs.BtnForward.isHidden = false;
+				vs.BtnCancelCustomise.isHidden = false;
 				vs.BtnShare.isHidden = false;
 			} else if (extras.statusMember === Instance.status.SELECT_HOTEL) {
 				vs.BtnBackward.isHidden = false;
 				vs.BtnForward.isHidden = false;
 				vs.BtnShare.isHidden = false;
+				vs.BtnCancelCustomise.isHidden = false;
 			} else if (extras.statusMember === Instance.status.REVIEW_ITINERARY) {
 				vs.BtnBackward.isHidden = false;
 				vs.BtnPayment.isHidden = false;
 				vs.BtnShare.isHidden = false;
+				vs.BtnCancelCustomise.isHidden = false;
 			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnStatus.isHidden = false;
@@ -152,44 +157,49 @@ class BotFooter extends React.Component {
 			handleLock,
 			handleStatus,
 			handleCustomise,
+			handleCancelCustomise,
 		} = actions;
 		const vs = calcVisibility(instPackage, extras);
 		// ====== Event Handler ======
 		const doHandleBackward = () => {
 			console.log('>>>>BotFooter.doHandleBackward');
-			handleBackward();
+			if (handleBackward) handleBackward();
 		};
 		const doHandleForward = () => {
 			console.log('>>>>BotFooter.doHandleForward');
-			handleForward();
+			if (handleForward) handleForward();
 		};
 		const doHandleShare = () => {
 			console.log('>>>>BotFooter.doHandleShare');
-			handleShare();
+			if (handleShare) handleShare();
 		};
 		const doHandlePayment = () => {
 			console.log('>>>>BotFooter.doHandlePayment');
-			handlePayment();
+			if (handlePayment) handlePayment();
 		};
 		const doHandleJoin = () => {
 			console.log('>>>>BotFooter.doHandleJoin');
-			handleJoin();
+			if (handleJoin) handleJoin();
 		};
 		const doHandleLeave = () => {
 			console.log('>>>>BotFooter.doHandleLeave');
-			handleLeave();
+			if (handleLeave) handleLeave();
 		};
 		const doHandleLock = () => {
 			console.log('>>>>BotFooter.doHandleLock');
-			handleLock();
+			if (handleLock) handleLock();
 		};
 		const doHandleStatus = () => {
 			console.log('>>>>BotFooter.doHandleStatus');
-			handleStatus();
+			if (handleStatus) handleStatus();
 		};
 		const doHandleCustomise = () => {
 			console.log('>>>>BotFooter.doHandleCustomise');
-			handleCustomise();
+			if (handleCustomise) handleCustomise();
+		};
+		const doHandleCancelCustomise = () => {
+			console.log('>>>>BotFooter.doHandleCancelCustomise');
+			if (handleCancelCustomise) handleCancelCustomise();
 		};
 		// ====== Web Elements ======
 		const btnBackward = !vs.BtnBackward.isHidden ? (
@@ -313,7 +323,21 @@ class BotFooter extends React.Component {
 				onClick={doHandleCustomise}
 			>
 				<IconCustomise />
-				Customise
+				Start DIY
+			</Button>
+		) : (
+			''
+		);
+		const btnCancelCustomise = !vs.BtnCancelCustomise.isHidden ? (
+			<Button
+				classes={{ root: classes.button, label: classes.label }}
+				variant="contained"
+				disableRipple={true}
+				disabled={vs.BtnCancelCustomise.isDisabled}
+				onClick={doHandleCancelCustomise}
+			>
+				<IconCancelCustomise />
+				Cancel DIY
 			</Button>
 		) : (
 			''
@@ -325,6 +349,7 @@ class BotFooter extends React.Component {
 					{btnBackward}
 					{btnShare}
 					{btnCustomise}
+					{btnCancelCustomise}
 					{btnPayment}
 					{btnLock}
 					{btnJoin}

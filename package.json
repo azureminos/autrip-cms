@@ -23,6 +23,7 @@
     "react-id-swiper": "^1.6.8",
     "react-jss": "^8.1.0",
     "react-loader-advanced": "^1.7.1",
+    "react-paypal-express-checkout": "^1.0.5",
     "react-scroll-to-component": "^1.0.2",
     "react-spinners": "^0.5.12",
     "socket.io": "^2.0.3",

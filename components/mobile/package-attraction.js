@@ -7,7 +7,6 @@ import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 import AttractionCard from './components/attraction-card';
-import CardSlider from './components/card-slider';
 import ChipList from './components/chip-list';
 import DescPanel from './components/description-panel';
 import Helper from '../../lib/helper';
