@@ -151,7 +151,7 @@ class BotFooter extends React.Component {
 			handleBackward,
 			handleForward,
 			handleShare,
-			handlePayment,
+			handlePay,
 			handleJoin,
 			handleLeave,
 			handleLock,
@@ -173,9 +173,9 @@ class BotFooter extends React.Component {
 			console.log('>>>>BotFooter.doHandleShare');
 			if (handleShare) handleShare();
 		};
-		const doHandlePayment = () => {
-			console.log('>>>>BotFooter.doHandlePayment');
-			if (handlePayment) handlePayment();
+		const doHandlePay = () => {
+			console.log('>>>>BotFooter.doHandlePay');
+			if (handlePay) handlePay();
 		};
 		const doHandleJoin = () => {
 			console.log('>>>>BotFooter.doHandleJoin');
@@ -250,7 +250,7 @@ class BotFooter extends React.Component {
 				variant="contained"
 				disableRipple={true}
 				disabled={vs.BtnPayment.isDisabled}
-				onClick={doHandlePayment}
+				onClick={doHandlePay}
 			>
 				<IconPayment />
 				Pay

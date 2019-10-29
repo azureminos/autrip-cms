@@ -7,7 +7,6 @@ import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS =======================================
 import Helper from '../../lib/helper';
-import ModalHelper from '../../lib/bot-modal-helper';
 import PackageHelper from '../../lib/package-helper';
 import BotModal from './components/bot-modal';
 import BotHeader from './components/bot-header';
@@ -40,18 +39,17 @@ class MobileApp extends React.Component {
 	constructor (props) {
 		super(props);
 		// Register event handler
-		this.handleFooterBtnBackward = this.handleFooterBtnBackward.bind(this);
-		this.handleFooterBtnForward = this.handleFooterBtnForward.bind(this);
-		this.handleFooterBtnShare = this.handleFooterBtnShare.bind(this);
-		this.handleFooterBtnPayment = this.handleFooterBtnPayment.bind(this);
-		this.handleFooterBtnJoin = this.handleFooterBtnJoin.bind(this);
-		this.handleFooterBtnLeave = this.handleFooterBtnLeave.bind(this);
-		this.handleFooterBtnLock = this.handleFooterBtnLock.bind(this);
-		this.handleFooterBtnStatus = this.handleFooterBtnStatus.bind(this);
-		this.handleFooterBtnCustomise = this.handleFooterBtnCustomise.bind(this);
-		this.handleFooterBtnCancelCustomise = this.handleFooterBtnCancelCustomise.bind(
-			this
-		);
+		this.handleFtBtnBackward = this.handleFtBtnBackward.bind(this);
+		this.handleFtBtnForward = this.handleFtBtnForward.bind(this);
+		this.handleFtBtnShare = this.handleFtBtnShare.bind(this);
+		this.handleFtBtnPayment = this.handleFtBtnPayment.bind(this);
+		this.confirmSubmitPayment = this.confirmSubmitPayment.bind(this);
+		this.handleFtBtnJoin = this.handleFtBtnJoin.bind(this);
+		this.handleFtBtnLeave = this.handleFtBtnLeave.bind(this);
+		this.handleFtBtnLock = this.handleFtBtnLock.bind(this);
+		this.handleFtBtnStatus = this.handleFtBtnStatus.bind(this);
+		this.handleFtBtnCustomise = this.handleFtBtnCustomise.bind(this);
+		this.handleFtBtnNoCustomise = this.handleFtBtnNoCustomise.bind(this);
 		// tbd
 		this.handleModalClose = this.handleModalClose.bind(this);
 		this.enablePackageDiy = this.enablePackageDiy.bind(this);
@@ -78,8 +76,8 @@ class MobileApp extends React.Component {
 		this.state = {
 			updating: false,
 			message: '',
-			botModal: '',
-			refModal: null,
+			modalType: '',
+			modalRef: null,
 			userId: props.userId,
 			instPackage: {
 				...props.instPackage,
@@ -100,12 +98,12 @@ class MobileApp extends React.Component {
 	handleModalClose () {
 		console.log('>>>>MobileApp.handleModalClose');
 		this.setState({
-			botModal: '',
+			modalType: '',
 		});
 	}
 	// ----------  BotFooter  ----------
-	handleFooterBtnCustomise () {
-		console.log('>>>>MobileApp.handleFooterBtnCustomise');
+	handleFtBtnCustomise () {
+		console.log('>>>>MobileApp.handleFtBtnCustomise');
 		const { instPackage, userId } = this.state;
 		for (var i = 0; i < instPackage.members.length; i++) {
 			if (instPackage.members[i].loginId === userId) {
@@ -115,8 +113,8 @@ class MobileApp extends React.Component {
 		instPackage.isCustomised = true;
 		this.setState({ instPackage: instPackage });
 	}
-	handleFooterBtnCancelCustomise () {
-		console.log('>>>>MobileApp.handleFooterBtnCancelCustomise');
+	handleFtBtnNoCustomise () {
+		console.log('>>>>MobileApp.handleFtBtnNoCustomise');
 		const { instPackage, userId } = this.state;
 		for (var i = 0; i < instPackage.members.length; i++) {
 			if (instPackage.members[i].loginId === userId) {
@@ -126,8 +124,8 @@ class MobileApp extends React.Component {
 		instPackage.isCustomised = false;
 		this.setState({ instPackage: instPackage });
 	}
-	handleFooterBtnBackward () {
-		console.log('>>>>MobileApp.handleFooterBtnBackward');
+	handleFtBtnBackward () {
+		console.log('>>>>MobileApp.handleFtBtnBackward');
 		const { instPackage, userId } = this.state;
 		for (var i = 0; i < instPackage.members.length; i++) {
 			if (instPackage.members[i].loginId === userId) {
@@ -139,8 +137,8 @@ class MobileApp extends React.Component {
 		}
 		this.setState({ instPackage: instPackage });
 	}
-	handleFooterBtnForward () {
-		console.log('>>>>MobileApp.handleFooterBtnForward');
+	handleFtBtnForward () {
+		console.log('>>>>MobileApp.handleFtBtnForward');
 		const { instPackage, userId } = this.state;
 		if (PackageHelper.validateInstance(instPackage, userId)) {
 			for (var i = 0; i < instPackage.members.length; i++) {
@@ -156,52 +154,62 @@ class MobileApp extends React.Component {
 			// Todo
 		}
 	}
-	handleFooterBtnShare () {
-		console.log('>>>>MobileApp.handleFooterBtnShare');
+	handleFtBtnShare () {
+		console.log('>>>>MobileApp.handleFtBtnShare');
 	}
-	handleFooterBtnPayment () {
-		console.log('>>>>MobileApp.handleFooterBtnPayment');
+	handleFtBtnPayment (outcome) {
+		console.log('>>>>MobileApp.handleFtBtnPayment', outcome);
 		const { instPackage, userId } = this.state;
 		if (PackageHelper.validateInstance(instPackage, userId)) {
-			for (var i = 0; i < instPackage.members.length; i++) {
-				if (instPackage.members[i].loginId === userId) {
-					instPackage.members[i].status = Instance.status.DEPOSIT_PAID;
-				}
-			}
-			this.setState({ instPackage: instPackage });
+			instPackage.status = outcome.status;
+			this.setState({
+				instPackage: instPackage,
+				modalType: '',
+				modalRef: null,
+			});
 		} else {
 			// Todo
 		}
 	}
-	handleFooterBtnJoin () {
-		console.log('>>>>MobileApp.handleFooterBtnJoin');
+	handleFtBtnJoin () {
+		console.log('>>>>MobileApp.handleFtBtnJoin');
 	}
-	handleFooterBtnLeave () {
-		console.log('>>>>MobileApp.handleFooterBtnLeave');
+	handleFtBtnLeave () {
+		console.log('>>>>MobileApp.handleFtBtnLeave');
 	}
-	handleFooterBtnLock () {
-		console.log('>>>>MobileApp.handleFooterBtnLock');
+	handleFtBtnLock () {
+		console.log('>>>>MobileApp.handleFtBtnLock');
 	}
-	handleFooterBtnStatus () {
-		console.log('>>>>MobileApp.handleFooterBtnStatus');
+	handleFtBtnStatus () {
+		console.log('>>>>MobileApp.handleFtBtnStatus');
 	}
 	// ----------  Payment  ---------
 	confirmSubmitPayment () {
-		console.log('>>>>MobileApp.confirmSubmitPayment');
+		const { instPackage } = this.state;
+		console.log('>>>>MobileApp.confirmSubmitPayment', instPackage);
+		const ref = {
+			dtStart: new Date(),
+			dtEnd: new Date(),
+			people: 0,
+			rooms: 0,
+			rate: 0,
+			totalRate: 0,
+		};
 		this.setState({
-			botModal: Modal.SUBMIT_PAYMENT.key,
+			modalType: Modal.SUBMIT_PAYMENT.key,
+			modalRef: ref,
 		});
 	}
 	// ----------  Itinerary  -------
 	confirmAddItinerary (ref) {
 		console.log('>>>>MobileApp.confirmAddItinerary', ref);
 		this.setState({
-			botModal: Modal.ADD_ITINERARY.key,
-			refModal: ref,
+			modalType: Modal.ADD_ITINERARY.key,
+			modalRef: ref,
 		});
 	}
 	handleAddItinerary () {
-		const ref = this.state.refModal;
+		const ref = this.state.modalRef;
 		const userId = this.state.userId;
 		console.log('>>>>MobileApp.handleAddItinerary', ref);
 		const instPackage = PackageHelper.addItinerary(
@@ -217,7 +225,7 @@ class MobileApp extends React.Component {
 			}
 			this.setState({
 				instPackage: instPackage,
-				botModal: '',
+				modalType: '',
 			});
 		} else {
 			// Todo
@@ -226,17 +234,17 @@ class MobileApp extends React.Component {
 	confirmDeleteItinerary (ref) {
 		console.log('>>>>MobileApp.confirmDeleteItinerary', ref);
 		this.setState({
-			botModal: Modal.DELETE_ITINERARY.key,
-			refModal: ref,
+			modalType: Modal.DELETE_ITINERARY.key,
+			modalRef: ref,
 		});
 	}
 	handleDeleteItinerary () {
-		const ref = this.state.refModal;
+		const ref = this.state.modalRef;
 		const userId = this.state.userId;
 		console.log('>>>>MobileApp.handleDeleteItinerary', ref);
 		if (ref.isRequired) {
 			this.setState({
-				botModal: Modal.FAILED_DELETE_ITINERARY.key,
+				modalType: Modal.FAILED_DELETE_ITINERARY.key,
 			});
 		} else {
 			const instPackage = PackageHelper.deleteItinerary(
@@ -252,7 +260,7 @@ class MobileApp extends React.Component {
 				}
 				this.setState({
 					instPackage: instPackage,
-					botModal: '',
+					modalType: '',
 				});
 			} else {
 				// Todo
@@ -265,7 +273,7 @@ class MobileApp extends React.Component {
 		const { instPackage } = this.state;
 		instPackage.isCustomised = true;
 		this.setState({
-			botModal: '',
+			modalType: '',
 		});
 	}
 	handleLikeAttraction (dayNo, timePlannable, item, attractions) {
@@ -313,7 +321,7 @@ class MobileApp extends React.Component {
 		if (!instPackage.isCustomised) {
 			// Package is not customised (DIY) yet, ask customer to confirm enabling DIY
 			this.setState({
-				botModal: Modal.ENABLE_DIY.key,
+				modalType: Modal.ENABLE_DIY.key,
 			});
 		} else {
 			// Package is customised (DIY) already, move on with rest of logic
@@ -322,8 +330,8 @@ class MobileApp extends React.Component {
 				if (isOverloaded(attractions)) {
 					// Activities over booked
 					this.setState({
-						botModal: Modal.FULL_ITINERARY.key,
-						refModal: { dayNo: dayNo },
+						modalType: Modal.FULL_ITINERARY.key,
+						modalRef: { dayNo: dayNo },
 					});
 				} else {
 					// Enough time for extra Activity
@@ -350,8 +358,8 @@ class MobileApp extends React.Component {
 				if (dayItems[dayNo].length === 1) {
 					// Only one activity, can not be deleted
 					this.setState({
-						botModal: Modal.ONLY_ITINERARY.key,
-						refModal: { dayNo: dayNo },
+						modalType: Modal.ONLY_ITINERARY.key,
+						modalRef: { dayNo: dayNo },
 					});
 				} else {
 					const newItems = [];
@@ -402,7 +410,7 @@ class MobileApp extends React.Component {
 	}
 
 	render () {
-		const { botModal, refModal, instPackage, userId } = this.state;
+		const { modalType, modalRef, instPackage, userId } = this.state;
 		const { classes, rates, reference } = this.props;
 		const { packageRates, flightRates } = rates;
 		const { cities, packageSummary } = reference;
@@ -410,6 +418,7 @@ class MobileApp extends React.Component {
 		console.log('>>>>MobileApp.render >> instPackage', instPackage);
 		console.log('>>>>MobileApp.render >> reference', reference);
 		console.log('>>>>MobileApp.render >> rates', rates);
+
 		// Variables
 		rates.carRates = _.map(cities, c => {
 			return {
@@ -439,16 +448,16 @@ class MobileApp extends React.Component {
 			packageHotels: instPackage.hotels,
 		});
 		const footerActions = {
-			handleBackward: this.handleFooterBtnBackward,
-			handleForward: this.handleFooterBtnForward,
-			handleShare: this.handleFooterBtnShare,
-			handlePayment: this.handleFooterBtnPayment,
-			handleJoin: this.handleFooterBtnJoin,
-			handleLeave: this.handleFooterBtnLeave,
-			handleLock: this.handleFooterBtnLock,
-			handleStatus: this.handleFooterBtnStatus,
-			handleCustomise: this.handleFooterBtnCustomise,
-			handleCancelCustomise: this.handleFooterBtnCancelCustomise,
+			handleBackward: this.handleFtBtnBackward,
+			handleForward: this.handleFtBtnForward,
+			handleShare: this.handleFtBtnShare,
+			handlePay: this.confirmSubmitPayment,
+			handleJoin: this.handleFtBtnJoin,
+			handleLeave: this.handleFtBtnLeave,
+			handleLock: this.handleFtBtnLock,
+			handleStatus: this.handleFtBtnStatus,
+			handleCustomise: this.handleFtBtnCustomise,
+			handleCancelCustomise: this.handleFtBtnNoCustomise,
 		};
 		const itineraryActions = {
 			handleSelectHotel: this.handleSelectHotel,
@@ -458,23 +467,20 @@ class MobileApp extends React.Component {
 			handleAddItinerary: this.confirmAddItinerary,
 			handleDeleteItinerary: this.confirmDeleteItinerary,
 		};
+		const modalActions = {
+			handleModalClose: this.handleModalClose,
+			handleDeleteItinerary: this.handleDeleteItinerary,
+			handleAddItinerary: this.handleAddItinerary,
+			handlePayment: this.handleFtBtnPayment,
+		};
 
 		// ======Web Elements======
-		// Setup modal element
-		const paramModal = ModalHelper.getModal(botModal, this, refModal);
 		// Bot Modal
-		const elModal
-			= paramModal && botModal ? (
-				<BotModal
-					isModalOpen={!!botModal}
-					title={paramModal.title}
-					description={paramModal.description}
-					buttons={paramModal.buttons}
-					handleModalClose={this.handleModalClose}
-				/>
-			) : (
-				''
-			);
+		const elModal = modalType ? (
+			<BotModal modal={modalType} actions={modalActions} reference={modalRef} />
+		) : (
+			''
+		);
 
 		// Display Web Widget
 		return (
