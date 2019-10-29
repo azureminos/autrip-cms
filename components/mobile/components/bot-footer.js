@@ -11,6 +11,7 @@ import IconPayment from '@material-ui/icons/Payment';
 import IconPersonAdd from '@material-ui/icons/PersonAdd';
 import IconPersonAddUndo from '@material-ui/icons/Undo';
 import IconLock from '@material-ui/icons/Lock';
+import IconUnlock from '@material-ui/icons/LockOpen';
 import IconStatus from '@material-ui/icons/TrackChanges';
 import IconCustomise from '@material-ui/icons/Ballot';
 import IconCancelCustomise from '@material-ui/icons/Cancel';
@@ -45,42 +46,39 @@ const styles = theme => ({
 	},
 });
 
-const calcVisibility = (instPackage, extras) => {
+const calcVisibility = extras => {
 	const vs = {
 		BtnBackward: { isHidden: true, isDisabled: false },
 		BtnForward: { isHidden: true, isDisabled: false },
 		BtnShare: { isHidden: true, isDisabled: false },
-		BtnPayment: { isHidden: true, isDisabled: false },
 		BtnJoin: { isHidden: true, isDisabled: false },
 		BtnLeave: { isHidden: true, isDisabled: false },
 		BtnLock: { isHidden: true, isDisabled: false },
+		BtnUnlock: { isHidden: true, isDisabled: false },
 		BtnStatus: { isHidden: true, isDisabled: false },
 		BtnCustomise: { isHidden: true, isDisabled: false },
 		BtnCancelCustomise: { isHidden: true, isDisabled: false },
+		BtnPayment: { isHidden: true, isDisabled: false },
 	};
 	// Logic starts here
 	if (!extras.isCustomised) {
 		if (extras.isOwner) {
-			if (extras.statusMember === Instance.status.INITIATED) {
+			if (extras.statusInstance === Instance.status.INITIATED) {
 				vs.BtnShare.isHidden = false;
-				vs.BtnPayment.isHidden = false;
 				vs.BtnCustomise.isHidden = extras.isCustomised;
-			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
-				vs.BtnShare.isHidden = false;
-				vs.BtnStatus.isHidden = false;
 				vs.BtnLock.isHidden = false;
+			} else if (extras.statusInstance === Instance.status.PENDING_PAYMENT) {
+				vs.BtnUnlock.isHidden = false;
+				vs.BtnPayment.isHidden = false;
 			} else {
-				vs.BtnShare.isHidden = false;
+				vs.BtnStatus.isHidden = false;
 			}
 		} else {
-			if (!extras.statusMember) {
-				vs.BtnJoin.isHidden = false;
-			} else if (extras.statusMember === Instance.status.INITIATED) {
-				vs.BtnLeave.isHidden = false;
+			if (extras.statusInstance === Instance.status.INITIATED) {
 				vs.BtnShare.isHidden = false;
-				vs.BtnPayment.isHidden = false;
-			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
-				vs.BtnShare.isHidden = false;
+				vs.BtnJoin.isHidden = !extras.isJoined;
+				vs.BtnLeave.isHidden = extras.isJoined;
+			} else if (extras.statusInstance === Instance.status.PENDING_PAYMENT) {
 				vs.BtnStatus.isHidden = false;
 			} else {
 				vs.BtnShare.isHidden = false;
@@ -146,20 +144,21 @@ class BotFooter extends React.Component {
 	// Render footer bar, including buttons []
 	render () {
 		console.log('>>>>BotFooter.render', this.state);
-		const { classes, instPackage, extras, actions } = this.props;
+		const { classes, extras, actions } = this.props;
 		const {
 			handleBackward,
 			handleForward,
 			handleShare,
-			handlePay,
 			handleJoin,
 			handleLeave,
 			handleLock,
+			handleUnlock,
 			handleStatus,
 			handleCustomise,
 			handleCancelCustomise,
+			handlePay,
 		} = actions;
-		const vs = calcVisibility(instPackage, extras);
+		const vs = calcVisibility(extras);
 		// ====== Event Handler ======
 		const doHandleBackward = () => {
 			console.log('>>>>BotFooter.doHandleBackward');
@@ -188,6 +187,10 @@ class BotFooter extends React.Component {
 		const doHandleLock = () => {
 			console.log('>>>>BotFooter.doHandleLock');
 			if (handleLock) handleLock();
+		};
+		const doHandleUnlock = () => {
+			console.log('>>>>BotFooter.doHandleUnlock');
+			if (handleUnlock) handleUnlock();
 		};
 		const doHandleStatus = () => {
 			console.log('>>>>BotFooter.doHandleStatus');
@@ -300,6 +303,20 @@ class BotFooter extends React.Component {
 		) : (
 			''
 		);
+		const btnUnlock = !vs.BtnUnlock.isHidden ? (
+			<Button
+				classes={{ root: classes.button, label: classes.label }}
+				variant="contained"
+				disableRipple={true}
+				disabled={vs.BtnUnlock.isDisabled}
+				onClick={doHandleUnlock}
+			>
+				<IconUnlock />
+				UnLock
+			</Button>
+		) : (
+			''
+		);
 		const btnStatus = !vs.BtnStatus.isHidden ? (
 			<Button
 				classes={{ root: classes.button, label: classes.label }}
@@ -352,6 +369,7 @@ class BotFooter extends React.Component {
 					{btnCancelCustomise}
 					{btnPayment}
 					{btnLock}
+					{btnUnlock}
 					{btnJoin}
 					{btnLeave}
 					{btnStatus}

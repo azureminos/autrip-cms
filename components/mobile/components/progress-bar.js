@@ -24,8 +24,8 @@ class ProgressBar extends React.Component {
 
 	render () {
 		console.log('>>>>ProgressBar.render', this.state);
-		const { classes, step, isCustomised } = this.props;
-		const steps = isCustomised ? diy : regular;
+		const { classes, step, isCustomised, isOwner } = this.props;
+		const steps = isCustomised && isOwner ? diy : regular;
 		// ====== Event Handler ======
 
 		return (

@@ -14,7 +14,6 @@ const styles = theme => ({
 	paper: {
 		position: 'relative',
 		width: 500,
-		minHeight: 300,
 		backgroundColor: theme.palette.background.paper,
 		outline: 'none',
 		top: '50%',
@@ -66,17 +65,14 @@ class BotModal extends React.Component {
 	render () {
 		const { isTermsAgreed } = this.state;
 		const { classes, modal, actions, reference } = this.props;
-		const { dtStart, dtEnd, people, rooms, rate, totalRate } = reference;
-		const { PAYPAL_ENV, PAYPAL_ID, PAYPAL_DUMMY_ID } = publicRuntimeConfig;
-		const { TERMS_CONDS, DEF_CURRENCY, DEF_DEPOSIT } = publicRuntimeConfig;
+
 		// Event Handler
 		const checkTermsHandler = e => {
 			console.log('>>>>ProductPayment Terms updated', e);
 			e.preventDefault();
 			this.setState({ isTermsAgreed: !this.state.isTermsAgreed });
 		};
-		// Local Variables
-		const paypalId = PAYPAL_ENV === 'production' ? PAYPAL_ID : PAYPAL_DUMMY_ID;
+		// Sub Components
 		const secModal = {};
 		if (modal === ModalConst.ENABLE_DIY.key) {
 			const pBtnModal = [
@@ -86,7 +82,20 @@ class BotModal extends React.Component {
 			secModal.title = ModalConst.ENABLE_DIY.title;
 			secModal.description = ModalConst.ENABLE_DIY.description;
 			secModal.buttons = pBtnModal;
+		} else if (modal === ModalConst.INVALID_DATE.key) {
+			const pBtnModal = [
+				{ title: ModalConst.button.OK, handleClick: actions.handleModalClose },
+			];
+			secModal.title = ModalConst.INVALID_DATE.title;
+			secModal.description = ModalConst.INVALID_DATE.description;
+			secModal.buttons = pBtnModal;
 		} else if (modal === ModalConst.SUBMIT_PAYMENT.key) {
+			// Local Variables
+			const { PAYPAL_ENV, PAYPAL_ID, PAYPAL_DUMMY_ID } = publicRuntimeConfig;
+			const { TERMS_CONDS, DEF_CURRENCY, DEF_DEPOSIT } = publicRuntimeConfig;
+			const paypalId
+				= PAYPAL_ENV === 'production' ? PAYPAL_ID : PAYPAL_DUMMY_ID;
+			const { dtStart, dtEnd, people, rooms, rate, totalRate } = reference;
 			const divTime = (
 				<tr>
 					<td>

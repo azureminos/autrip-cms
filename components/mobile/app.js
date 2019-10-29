@@ -47,6 +47,7 @@ class MobileApp extends React.Component {
 		this.handleFtBtnJoin = this.handleFtBtnJoin.bind(this);
 		this.handleFtBtnLeave = this.handleFtBtnLeave.bind(this);
 		this.handleFtBtnLock = this.handleFtBtnLock.bind(this);
+		this.handleFtBtnUnlock = this.handleFtBtnUnlock.bind(this);
 		this.handleFtBtnStatus = this.handleFtBtnStatus.bind(this);
 		this.handleFtBtnCustomise = this.handleFtBtnCustomise.bind(this);
 		this.handleFtBtnNoCustomise = this.handleFtBtnNoCustomise.bind(this);
@@ -178,27 +179,56 @@ class MobileApp extends React.Component {
 		console.log('>>>>MobileApp.handleFtBtnLeave');
 	}
 	handleFtBtnLock () {
-		console.log('>>>>MobileApp.handleFtBtnLock');
+		const { instPackage, userId } = this.state;
+		console.log('>>>>MobileApp.handleFtBtnLock', { instPackage, userId });
+		// Before lock the package, start date and end date cannot be null
+		if (!instPackage.startDate || !instPackage.endDate) {
+			this.setState({
+				modalType: Modal.INVALID_DATE.key,
+			});
+		} else if (false) {
+		} else {
+			instPackage.status = Instance.status.PENDING_PAYMENT;
+			this.setState({ instPackage: instPackage });
+		}
+	}
+	handleFtBtnUnlock () {
+		const { instPackage, userId } = this.state;
+		console.log('>>>>MobileApp.handleFtBtnLock', { instPackage, userId });
+		if (!instPackage.isCustomised) {
+			// Regular package, change status to INITIATED
+			instPackage.status = Instance.status.INITIATED;
+			this.setState({ instPackage: instPackage });
+		} else {
+			// Customised package, change status to REVIEW ITINERARY
+			instPackage.status = Instance.status.REVIEW_ITINERARY;
+			this.setState({ instPackage: instPackage });
+		}
 	}
 	handleFtBtnStatus () {
 		console.log('>>>>MobileApp.handleFtBtnStatus');
 	}
 	// ----------  Payment  ---------
 	confirmSubmitPayment () {
-		const { instPackage } = this.state;
-		console.log('>>>>MobileApp.confirmSubmitPayment', instPackage);
-		const ref = {
-			dtStart: new Date(),
-			dtEnd: new Date(),
-			people: 0,
-			rooms: 0,
-			rate: 0,
-			totalRate: 0,
-		};
-		this.setState({
-			modalType: Modal.SUBMIT_PAYMENT.key,
-			modalRef: ref,
-		});
+		const { instPackage, userId } = this.state;
+		const { startDate, endDate, totalPeople, totalRooms, rate } = instPackage;
+		console.log('>>>>MobileApp.confirmSubmitPayment', { instPackage, userId });
+		if (PackageHelper.validateInstance(instPackage, userId)) {
+			const ref = {
+				dtStart: startDate,
+				dtEnd: endDate,
+				people: totalPeople,
+				rooms: totalRooms,
+				rate: rate,
+				totalRate: totalPeople * rate,
+			};
+			this.setState({
+				modalType: Modal.SUBMIT_PAYMENT.key,
+				modalRef: ref,
+			});
+		} else {
+			// Todo
+		}
 	}
 	// ----------  Itinerary  -------
 	confirmAddItinerary (ref) {
@@ -455,6 +485,7 @@ class MobileApp extends React.Component {
 			handleJoin: this.handleFtBtnJoin,
 			handleLeave: this.handleFtBtnLeave,
 			handleLock: this.handleFtBtnLock,
+			handleUnlock: this.handleFtBtnUnlock,
 			handleStatus: this.handleFtBtnStatus,
 			handleCustomise: this.handleFtBtnCustomise,
 			handleCancelCustomise: this.handleFtBtnNoCustomise,
@@ -489,7 +520,8 @@ class MobileApp extends React.Component {
 				<div className={classes.appBody}>
 					<ProgressBar
 						step={extras.step}
-						isCustomised={instPackage.isCustomised}
+						isOwner={extras.isOwner}
+						isCustomised={extras.isCustomised}
 					/>
 					<PackageItinerary
 						isCustomised={instPackage.isCustomised}

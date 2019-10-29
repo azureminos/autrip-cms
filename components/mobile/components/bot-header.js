@@ -75,7 +75,7 @@ class BotHeader extends React.Component {
 				m => {
 					return m.rooms;
 				}
-			) || Math.floor(min / standardRoomCapacity);
+			) || 0;
 		const otherPeople
 			= _.sumBy(
 				_.filter(props.instPackage.members, m => {
@@ -93,17 +93,17 @@ class BotHeader extends React.Component {
 				m => {
 					return m.people;
 				}
-			) || min;
+			) || 0;
 
 		// Set initial state
 		this.state = {
-			people: people,
-			rooms: rooms,
+			people: people || 2,
+			rooms: rooms || 1,
 			otherPeople: otherPeople,
 			otherRooms: otherRooms,
 			max: max,
 			min: min,
-			updated: false,
+			updated: people && rooms,
 		};
 	}
 	// ====== Helper ======
@@ -139,7 +139,7 @@ class BotHeader extends React.Component {
 	// Display widget
 	render () {
 		console.log('>>>>BotHeader.render', this.state);
-		const { classes, instPackage, rates } = this.props;
+		const { classes, instPackage, rates, actions } = this.props;
 		const { packageRates, carRates, flightRates } = rates;
 		const { isCustomised, hotels, items, startDate, carOption } = instPackage;
 		const {
@@ -153,12 +153,17 @@ class BotHeader extends React.Component {
 		} = this.state;
 
 		const finalCost = { price: 0, promo: '' };
-
 		const params = {
 			startDate: startDate,
-			totalPeople: otherPeople + people,
-			totalRooms: otherRooms + rooms,
 		};
+		if (otherPeople + people > min) {
+			params.totalPeople = otherPeople + people;
+			params.totalRooms = otherRooms + rooms;
+		} else {
+			params.totalPeople = min;
+			params.totalRooms
+				= Math.ceil(params.totalPeople / standardRoomCapacity) || 1;
+		}
 
 		if (!isCustomised) {
 			/* ==== Regular tour group ====
@@ -173,30 +178,53 @@ class BotHeader extends React.Component {
 					curRatePackageReg.maxParticipant
 					&& instPackage.maxParticipant > curRatePackageReg.maxParticipant
 				) {
-					if (!update) {
-						params.totalPeople = curRatePackageReg.maxParticipant + 1;
-						params.totalRooms = Math.ceil(
-							params.totalPeople / standardRoomCapacity
-						);
-					}
+					params.totalPeople = curRatePackageReg.maxParticipant + 1;
+					params.totalRooms
+						= Math.ceil(params.totalPeople / standardRoomCapacity) || 1;
 					nxtRatePackageReq = Rate.calPackageRate(params, packageRates);
 				} else {
 					nxtRatePackageReq = null;
 				}
-				const gap
-					= curRatePackageReg.maxParticipant + 1 - (people + otherPeople);
-				const nextPrice = nxtRatePackageReq
-					? nxtRatePackageReq.price
-					  + curRateFlight.rate
-					  + curRateFlight.rateDomesticTotal
-					: 0;
-				finalCost.price
-					= curRatePackageReg.price
-					+ curRateFlight.rate
-					+ curRateFlight.rateDomesticTotal;
-				finalCost.promo = nxtRatePackageReq
-					? `${gap} more people $${nextPrice} pp`
-					: `Max group size is ${curRatePackageReg.maxParticipant}`;
+				// Set display msg
+				if (otherPeople + people > min) {
+					const gap
+						= curRatePackageReg.maxParticipant + 1 - (people + otherPeople);
+					const nextPrice = nxtRatePackageReq
+						? nxtRatePackageReq.price
+						  + curRateFlight.rate
+						  + curRateFlight.rateDomesticTotal
+						: 0;
+					const curPrice
+						= curRatePackageReg.price
+						+ curRateFlight.rate
+						+ curRateFlight.rateDomesticTotal;
+					finalCost.price = `${curPrice} pp`;
+					finalCost.promo = nxtRatePackageReq
+						? `${gap} more people ${nextPrice} pp`
+						: `Max group size is ${curRatePackageReg.maxParticipant}`;
+				} else {
+					const gap1
+						= curRatePackageReg.minParticipant - (people + otherPeople);
+					const gap2
+						= curRatePackageReg.maxParticipant + 1 - (people + otherPeople);
+					const nextPrice = nxtRatePackageReq
+						? nxtRatePackageReq.price
+						  + curRateFlight.rate
+						  + curRateFlight.rateDomesticTotal
+						: 0;
+					const curPrice
+						= curRatePackageReg.price
+						+ curRateFlight.rate
+						+ curRateFlight.rateDomesticTotal;
+					finalCost.price = gap1
+						? `${gap1} more people $${curPrice} pp`
+						: `$${curPrice} pp`;
+					finalCost.promo = nxtRatePackageReq
+						? gap2
+							? `${gap2} more people $${nextPrice} pp`
+							: `$${nextPrice} pp`
+						: `Max group size is ${curRatePackageReg.maxParticipant}`;
+				}
 			} else {
 				finalCost.price = 'ERROR';
 				finalCost.promo = 'ERROR';
@@ -257,7 +285,9 @@ class BotHeader extends React.Component {
 							+ curRateItemDiy
 							+ curRateHotelDiy;
 						finalCost.promo = nxtRatePackageDiy
-							? `${gap} more people $${nextPrice} pp`
+							? gap
+								? `${gap} more people $${nextPrice} pp`
+								: `$${nextPrice} pp`
 							: `Max group size is ${curRatePackageDiy.maxParticipant}`;
 					} else {
 						finalCost.price = 'ERROR';
@@ -273,10 +303,10 @@ class BotHeader extends React.Component {
 			}
 		}
 
-		const miPeople = this.buildMenuItems(min, max, 'Person');
+		const miPeople = this.buildMenuItems(1, max, 'Person');
 		const miRooms = this.buildMenuItems(
-			Math.ceil(params.totalPeople / maxRoomCapacity),
-			params.totalPeople,
+			Math.ceil((otherPeople + people) / maxRoomCapacity) || 1,
+			otherPeople + people,
 			'Room'
 		);
 
@@ -287,12 +317,12 @@ class BotHeader extends React.Component {
 						<TableBody>
 							<TableRow>
 								<TableCell style={{ padding: '4px', width: '22%' }}>
-									{params.totalPeople} People
+									{otherPeople + people} People
 									<br />
-									{params.totalRooms} Rooms
+									{otherRooms + rooms} Rooms
 								</TableCell>
 								<TableCell style={{ padding: '4px', width: '20%' }}>
-									${finalCost.price} pp
+									{finalCost.price}
 								</TableCell>
 								<TableCell style={{ padding: '4px', width: '33%' }}>
 									{finalCost.promo}
@@ -300,7 +330,7 @@ class BotHeader extends React.Component {
 								<TableCell style={{ padding: '4px', width: '25%' }}>
 									<FormControl className={classes.formControl}>
 										<Select
-											value={params.totalPeople}
+											value={otherPeople + people}
 											onChange={this.doHandlePeopleChange}
 											input={
 												<Input name="people" id="people-label-placeholder" />
@@ -317,7 +347,7 @@ class BotHeader extends React.Component {
 										disabled={!isCustomised}
 									>
 										<Select
-											value={params.totalRooms}
+											value={otherRooms + rooms}
 											onChange={this.doHandleRoomChange}
 											input={
 												<Input name="rooms" id="rooms-label-placeholder" />
