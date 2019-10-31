@@ -46,7 +46,7 @@ const styles = theme => ({
 	},
 });
 
-const calcVisibility = extras => {
+const calcVisibility = ({ instPackage, extras }) => {
 	const vs = {
 		BtnBackward: { isHidden: true, isDisabled: false },
 		BtnForward: { isHidden: true, isDisabled: false },
@@ -61,24 +61,24 @@ const calcVisibility = extras => {
 		BtnPayment: { isHidden: true, isDisabled: false },
 	};
 	// Logic starts here
-	if (!extras.isCustomised) {
+	if (!instPackage.isCustomised) {
 		if (extras.isOwner) {
-			if (extras.statusInstance === Instance.status.INITIATED) {
+			if (instPackage.status === Instance.status.INITIATED) {
 				vs.BtnShare.isHidden = false;
-				vs.BtnCustomise.isHidden = extras.isCustomised;
+				vs.BtnCustomise.isHidden = instPackage.isCustomised;
 				vs.BtnLock.isHidden = false;
-			} else if (extras.statusInstance === Instance.status.PENDING_PAYMENT) {
+			} else if (instPackage.status === Instance.status.PENDING_PAYMENT) {
 				vs.BtnUnlock.isHidden = false;
 				vs.BtnPayment.isHidden = false;
 			} else {
 				vs.BtnStatus.isHidden = false;
 			}
 		} else {
-			if (extras.statusInstance === Instance.status.INITIATED) {
+			if (instPackage.status === Instance.status.INITIATED) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnJoin.isHidden = !extras.isJoined;
 				vs.BtnLeave.isHidden = extras.isJoined;
-			} else if (extras.statusInstance === Instance.status.PENDING_PAYMENT) {
+			} else if (instPackage.status === Instance.status.PENDING_PAYMENT) {
 				vs.BtnStatus.isHidden = false;
 			} else {
 				vs.BtnShare.isHidden = false;
@@ -144,7 +144,7 @@ class BotFooter extends React.Component {
 	// Render footer bar, including buttons []
 	render () {
 		console.log('>>>>BotFooter.render', this.state);
-		const { classes, extras, actions } = this.props;
+		const { classes, instPackage, extras, actions } = this.props;
 		const {
 			handleBackward,
 			handleForward,
@@ -158,7 +158,7 @@ class BotFooter extends React.Component {
 			handleCancelCustomise,
 			handlePay,
 		} = actions;
-		const vs = calcVisibility(extras);
+		const vs = calcVisibility({ instPackage, extras });
 		// ====== Event Handler ======
 		const doHandleBackward = () => {
 			console.log('>>>>BotFooter.doHandleBackward');
@@ -186,7 +186,7 @@ class BotFooter extends React.Component {
 		};
 		const doHandleLock = () => {
 			console.log('>>>>BotFooter.doHandleLock');
-			if (handleLock) handleLock();
+			if (handleLock) handleLock(extras);
 		};
 		const doHandleUnlock = () => {
 			console.log('>>>>BotFooter.doHandleUnlock');
@@ -367,9 +367,9 @@ class BotFooter extends React.Component {
 					{btnShare}
 					{btnCustomise}
 					{btnCancelCustomise}
-					{btnPayment}
 					{btnLock}
 					{btnUnlock}
+					{btnPayment}
 					{btnJoin}
 					{btnLeave}
 					{btnStatus}

@@ -74,7 +74,29 @@ class BotModal extends React.Component {
 		};
 		// Sub Components
 		const secModal = {};
-		if (modal === ModalConst.ENABLE_DIY.key) {
+		if (modal === ModalConst.LESS_THAN_MIN.key) {
+			const replacements = { '#Min#': reference.min };
+			const pBtnModal = [
+				{
+					title: ModalConst.button.CLOSE,
+					handleClick: actions.handleModalClose,
+				},
+			];
+			secModal.title = format(ModalConst.LESS_THAN_MIN.title, replacements);
+			secModal.description = ModalConst.LESS_THAN_MIN.description;
+			secModal.buttons = pBtnModal;
+		} else if (modal === ModalConst.ZERO_OWNER.key) {
+			const replacements = { '#Min#': reference.min };
+			const pBtnModal = [
+				{
+					title: ModalConst.button.CLOSE,
+					handleClick: actions.handleModalClose,
+				},
+			];
+			secModal.title = format(ModalConst.ZERO_OWNER.title, replacements);
+			secModal.description = ModalConst.ZERO_OWNER.description;
+			secModal.buttons = pBtnModal;
+		} else if (modal === ModalConst.ENABLE_DIY.key) {
 			const pBtnModal = [
 				{ title: ModalConst.button.YES, handleClick: actions.enablePackageDiy },
 				{ title: ModalConst.button.NO, handleClick: actions.handleModalClose },

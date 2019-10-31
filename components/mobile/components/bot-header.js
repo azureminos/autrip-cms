@@ -14,7 +14,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Rate from '../../../lib/rate-calculator';
 import CONSTANTS from '../../../lib/constants';
 
+const InstanceStatus = CONSTANTS.get().Instance.status;
 const { maxRoomCapacity, standardRoomCapacity } = CONSTANTS.get().Global;
+
 const styles = theme => ({
 	appBar: {
 		position: 'absolute',
@@ -46,65 +48,6 @@ class BotHeader extends React.Component {
 		super(props);
 		this.doHandlePeopleChange = this.doHandlePeopleChange.bind(this);
 		this.doHandleRoomChange = this.doHandleRoomChange.bind(this);
-		// Set min & max
-		let max = 0;
-		let min = 999;
-		_.each(this.props.rates.packageRates, pr => {
-			if (pr.maxParticipant >= max) {
-				max = pr.maxParticipant;
-			}
-			if (pr.minParticipant <= min) {
-				min = pr.minParticipant;
-			}
-		});
-		// Get people & rooms
-		const otherRooms
-			= _.sumBy(
-				_.filter(props.instPackage.members, m => {
-					return m.userId !== props.userId;
-				}),
-				m => {
-					return m.rooms;
-				}
-			) || 0;
-		const rooms
-			= _.sumBy(
-				_.filter(props.instPackage.members, m => {
-					return m.userId === props.userId;
-				}),
-				m => {
-					return m.rooms;
-				}
-			) || 0;
-		const otherPeople
-			= _.sumBy(
-				_.filter(props.instPackage.members, m => {
-					return m.userId !== props.userId;
-				}),
-				m => {
-					return m.people;
-				}
-			) || 0;
-		const people
-			= _.sumBy(
-				_.filter(props.instPackage.members, m => {
-					return m.userId === props.userId;
-				}),
-				m => {
-					return m.people;
-				}
-			) || 0;
-
-		// Set initial state
-		this.state = {
-			people: people || 2,
-			rooms: rooms || 1,
-			otherPeople: otherPeople,
-			otherRooms: otherRooms,
-			max: max,
-			min: min,
-			updated: people && rooms,
-		};
 	}
 	// ====== Helper ======
 	buildMenuItems (minSelect, maxSelect, itemText) {
@@ -128,31 +71,33 @@ class BotHeader extends React.Component {
 	// Handle people change
 	doHandlePeopleChange (e) {
 		console.log('>>>>BotHeader.doHandlePeopleChange', e);
-		const newRooms = Math.floor(e.target.value / standardRoomCapacity);
-		this.setState({ people: e.target.value, rooms: newRooms, update: true });
+		const { handlePeople } = this.props.actions;
+		if (handlePeople) {
+			const newRooms = Math.ceil(e.target.value / standardRoomCapacity);
+			handlePeople({ people: e.target.value, rooms: newRooms });
+		}
 	}
 	// Handle room change
 	doHandleRoomChange (e) {
 		console.log('>>>>BotHeader.doHandleRoomChange', e);
-		this.setState({ rooms: e.target.value, update: true });
+		const { handleRoom } = this.props.actions;
+		if (handleRoom) {
+			handleRoom({ rooms: e.target.value });
+		}
 	}
 	// Display widget
 	render () {
-		console.log('>>>>BotHeader.render', this.state);
-		const { classes, instPackage, rates, actions } = this.props;
+		console.log('>>>>BotHeader.render');
+		const { classes, instPackage, extras, rates } = this.props;
 		const { packageRates, carRates, flightRates } = rates;
 		const { isCustomised, hotels, items, startDate, carOption } = instPackage;
-		const {
-			people,
-			rooms,
-			otherPeople,
-			otherRooms,
-			max,
-			min,
-			update,
-		} = this.state;
-
+		const { min, max, people, otherPeople, rooms, otherRooms } = extras;
+		// Local variables
 		const finalCost = { price: 0, promo: '' };
+		const isPeopleSelectable
+			= instPackage.status === InstanceStatus.PENDING_PAYMENT;
+		const isRoomSelectable
+			= !isCustomised || instPackage.status === InstanceStatus.PENDING_PAYMENT;
 		const params = {
 			startDate: startDate,
 		};
@@ -328,7 +273,10 @@ class BotHeader extends React.Component {
 									{finalCost.promo}
 								</TableCell>
 								<TableCell style={{ padding: '4px', width: '25%' }}>
-									<FormControl className={classes.formControl}>
+									<FormControl
+										className={classes.formControl}
+										disabled={isPeopleSelectable}
+									>
 										<Select
 											value={otherPeople + people}
 											onChange={this.doHandlePeopleChange}
@@ -344,7 +292,7 @@ class BotHeader extends React.Component {
 									</FormControl>
 									<FormControl
 										className={classes.formControl}
-										disabled={!isCustomised}
+										disabled={isRoomSelectable}
 									>
 										<Select
 											value={otherRooms + rooms}

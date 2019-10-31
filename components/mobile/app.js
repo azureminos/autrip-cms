@@ -39,6 +39,8 @@ class MobileApp extends React.Component {
 	constructor (props) {
 		super(props);
 		// Register event handler
+		this.handleHdPeopleChange = this.handleHdPeopleChange.bind(this);
+		this.handleHdRoomChange = this.handleHdRoomChange.bind(this);
 		this.handleFtBtnBackward = this.handleFtBtnBackward.bind(this);
 		this.handleFtBtnForward = this.handleFtBtnForward.bind(this);
 		this.handleFtBtnShare = this.handleFtBtnShare.bind(this);
@@ -100,7 +102,30 @@ class MobileApp extends React.Component {
 		console.log('>>>>MobileApp.handleModalClose');
 		this.setState({
 			modalType: '',
+			modalRef: null,
 		});
+	}
+	// ----------  BotHeader  ----------
+	handleHdPeopleChange (input) {
+		console.log('>>>>MobileApp.handleHdPeopleChange');
+		const { instPackage, userId } = this.state;
+		for (var i = 0; i < instPackage.members.length; i++) {
+			if (instPackage.members[i].loginId === userId) {
+				instPackage.members[i].people = input.people;
+				instPackage.members[i].rooms = input.rooms;
+			}
+		}
+		this.setState({ instPackage: instPackage });
+	}
+	handleHdRoomChange (input) {
+		console.log('>>>>MobileApp.handleHdRoomChange');
+		const { instPackage, userId } = this.state;
+		for (var i = 0; i < instPackage.members.length; i++) {
+			if (instPackage.members[i].loginId === userId) {
+				instPackage.members[i].rooms = input.rooms;
+			}
+		}
+		this.setState({ instPackage: instPackage });
 	}
 	// ----------  BotFooter  ----------
 	handleFtBtnCustomise () {
@@ -178,18 +203,33 @@ class MobileApp extends React.Component {
 	handleFtBtnLeave () {
 		console.log('>>>>MobileApp.handleFtBtnLeave');
 	}
-	handleFtBtnLock () {
+	handleFtBtnLock (extras) {
 		const { instPackage, userId } = this.state;
+		const { min, people, otherPeople, rooms, otherRooms } = extras;
 		console.log('>>>>MobileApp.handleFtBtnLock', { instPackage, userId });
 		// Before lock the package, start date and end date cannot be null
 		if (!instPackage.startDate || !instPackage.endDate) {
 			this.setState({
 				modalType: Modal.INVALID_DATE.key,
 			});
-		} else if (false) {
 		} else {
-			instPackage.status = Instance.status.PENDING_PAYMENT;
-			this.setState({ instPackage: instPackage });
+			// Check participants
+			if (people === 0) {
+				this.setState({
+					modalType: Modal.ZERO_OWNER.key,
+					modalRef: { min: min },
+				});
+			} else if (people + otherPeople < extras.min) {
+				this.setState({
+					modalType: Modal.LESS_THAN_MIN.key,
+					modalRef: { min: min },
+				});
+			} else {
+				instPackage.totalPeople = people + otherPeople;
+				instPackage.totalRooms = rooms + otherRooms;
+				instPackage.status = Instance.status.PENDING_PAYMENT;
+				this.setState({ instPackage: instPackage });
+			}
 		}
 	}
 	handleFtBtnUnlock () {
@@ -457,7 +497,11 @@ class MobileApp extends React.Component {
 				carRates: c.carRates || [],
 			};
 		});
-		const extras = PackageHelper.enhanceInstance(instPackage, userId);
+		const extras = PackageHelper.enhanceInstance({
+			userId,
+			instPackage,
+			rates,
+		});
 		extras.carOptions = instPackage.isCustomised
 			? Helper.getValidCarOptions(rates.carRates)
 			: [instPackage.carOption];
@@ -477,6 +521,10 @@ class MobileApp extends React.Component {
 			packageItems: instPackage.items,
 			packageHotels: instPackage.hotels,
 		});
+		const headerActions = {
+			handlePeople: this.handleHdPeopleChange,
+			handleRoom: this.handleHdRoomChange,
+		};
 		const footerActions = {
 			handleBackward: this.handleFtBtnBackward,
 			handleForward: this.handleFtBtnForward,
@@ -516,7 +564,12 @@ class MobileApp extends React.Component {
 		// Display Web Widget
 		return (
 			<div id="app">
-				<BotHeader userId={userId} instPackage={instPackage} rates={rates} />
+				<BotHeader
+					instPackage={instPackage}
+					extras={extras}
+					rates={rates}
+					actions={headerActions}
+				/>
 				<div className={classes.appBody}>
 					<ProgressBar
 						step={extras.step}
