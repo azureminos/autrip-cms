@@ -6,14 +6,16 @@ import { withStyles } from '@material-ui/core/styles';
 import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS =======================================
-import Helper from '../../lib/helper';
-import PackageHelper from '../../lib/package-helper';
 import BotModal from './components/bot-modal';
 import BotHeader from './components/bot-header';
 import BotFooter from './components/bot-footer';
 import ProgressBar from './components/progress-bar';
 import PackageItinerary from './package-itinerary';
 import CONSTANTS from '../../lib/constants';
+
+// ==== HELPERS =======================================
+import Helper from '../../lib/helper';
+import PackageHelper from '../../lib/package-helper';
 
 // ==== CSS ==============================================
 import 'react-id-swiper/src/styles/css/swiper.css';
@@ -65,28 +67,39 @@ class MobileApp extends React.Component {
 		this.handleSelectFlight = this.handleSelectFlight.bind(this);
 		this.handleSelectCar = this.handleSelectCar.bind(this);
 
-		var instItems = _.map(props.instPackage.items, item => {
+		const instItems = _.map(props.instPackage.items, item => {
 			return item.attraction
 				? Helper.enhanceItem(item, props.reference.cities)
 				: item;
 		});
-		var instHotels = _.map(props.instPackage.hotels, hotel => {
+		const instHotels = _.map(props.instPackage.hotels, hotel => {
 			return hotel.hotel
 				? Helper.enhanceHotel(hotel, props.reference.cities)
 				: hotel;
 		});
-
+		const instPackage = {
+			...props.instPackage,
+			items: instItems,
+			hotels: instHotels,
+		};
+		const instPackageExt = PackageHelper.enhanceInstance({
+			userId: props.userId,
+			instPackage: instPackage,
+			rates: props.rates,
+		});
+		const matchingRates = PackageHelper.doRating({
+			instPackage: instPackage,
+			instPackageExt: instPackageExt,
+			rates: props.rates,
+		});
 		this.state = {
 			updating: false,
 			message: '',
 			modalType: '',
 			modalRef: null,
 			userId: props.userId,
-			instPackage: {
-				...props.instPackage,
-				items: instItems,
-				hotels: instHotels,
-			},
+			instPackage: instPackage,
+			instPackageExt: { ...instPackageExt, ...matchingRates },
 		};
 	}
 
@@ -108,74 +121,84 @@ class MobileApp extends React.Component {
 	// ----------  BotHeader  ----------
 	handleHdPeopleChange (input) {
 		console.log('>>>>MobileApp.handleHdPeopleChange');
-		const { instPackage, userId } = this.state;
+		const { userId, instPackage, instPackageExt } = this.state;
 		for (var i = 0; i < instPackage.members.length; i++) {
 			if (instPackage.members[i].loginId === userId) {
 				instPackage.members[i].people = input.people;
 				instPackage.members[i].rooms = input.rooms;
 			}
 		}
-		this.setState({ instPackage: instPackage });
+		instPackageExt.people = input.people;
+		instPackageExt.rooms = input.rooms;
+
+		const matchingRates = PackageHelper.doRating({
+			instPackage: instPackage,
+			instPackageExt: instPackageExt,
+			rates: input.rates,
+		});
+
+		this.setState({
+			instPackage: { ...instPackage, rate: matchingRates.curRate },
+			instPackageExt: { ...instPackageExt, ...matchingRates },
+		});
 	}
 	handleHdRoomChange (input) {
 		console.log('>>>>MobileApp.handleHdRoomChange');
-		const { instPackage, userId } = this.state;
+		const { userId, instPackage, instPackageExt } = this.state;
 		for (var i = 0; i < instPackage.members.length; i++) {
 			if (instPackage.members[i].loginId === userId) {
 				instPackage.members[i].rooms = input.rooms;
 			}
 		}
-		this.setState({ instPackage: instPackage });
+
+		instPackageExt.rooms = input.rooms;
+
+		const matchingRates = PackageHelper.doRating({
+			instPackage: instPackage,
+			instPackageExt: instPackageExt,
+			rates: input.rates,
+		});
+
+		this.setState({
+			instPackage: { ...instPackage, rate: matchingRates.curRate },
+			instPackageExt: { ...instPackageExt, ...matchingRates },
+		});
 	}
 	// ----------  BotFooter  ----------
 	handleFtBtnCustomise () {
 		console.log('>>>>MobileApp.handleFtBtnCustomise');
-		const { instPackage, userId } = this.state;
-		for (var i = 0; i < instPackage.members.length; i++) {
-			if (instPackage.members[i].loginId === userId) {
-				instPackage.members[i].status = Instance.status.INITIATED;
-			}
-		}
+		const { instPackage } = this.state;
 		instPackage.isCustomised = true;
 		this.setState({ instPackage: instPackage });
 	}
 	handleFtBtnNoCustomise () {
 		console.log('>>>>MobileApp.handleFtBtnNoCustomise');
-		const { instPackage, userId } = this.state;
-		for (var i = 0; i < instPackage.members.length; i++) {
-			if (instPackage.members[i].loginId === userId) {
-				instPackage.members[i].status = Instance.status.INITIATED;
-			}
-		}
+		const { instPackage, instPackageExt } = this.state;
+		instPackage.status = Instance.status.INITIATED;
 		instPackage.isCustomised = false;
-		this.setState({ instPackage: instPackage });
+		instPackageExt.step = 0;
+		this.setState({ instPackage, instPackageExt });
 	}
-	handleFtBtnBackward () {
+	handleFtBtnBackward (rates) {
 		console.log('>>>>MobileApp.handleFtBtnBackward');
-		const { instPackage, userId } = this.state;
-		for (var i = 0; i < instPackage.members.length; i++) {
-			if (instPackage.members[i].loginId === userId) {
-				instPackage.members[i].status = PackageHelper.getPreviousStatus(
-					instPackage.isCustomised,
-					instPackage.members[i].status
-				);
-			}
-		}
-		this.setState({ instPackage: instPackage });
+		const { instPackage, instPackageExt } = this.state;
+		instPackage.status = PackageHelper.getPreviousStatus(
+			instPackage.isCustomised,
+			instPackage.status
+		);
+		instPackageExt.step = instPackageExt.step - 1;
+		this.setState({ instPackage, instPackageExt });
 	}
-	handleFtBtnForward () {
+	handleFtBtnForward (rates) {
 		console.log('>>>>MobileApp.handleFtBtnForward');
-		const { instPackage, userId } = this.state;
-		if (PackageHelper.validateInstance(instPackage, userId)) {
-			for (var i = 0; i < instPackage.members.length; i++) {
-				if (instPackage.members[i].loginId === userId) {
-					instPackage.members[i].status = PackageHelper.getNextStatus(
-						instPackage.isCustomised,
-						instPackage.members[i].status
-					);
-				}
-			}
-			this.setState({ instPackage: instPackage });
+		const { instPackage, instPackageExt } = this.state;
+		if (PackageHelper.validateInstance(instPackage)) {
+			instPackage.status = PackageHelper.getNextStatus(
+				instPackage.isCustomised,
+				instPackage.status
+			);
+			instPackageExt.step = instPackageExt.step + 1;
+			this.setState({ instPackage, instPackageExt });
 		} else {
 			// Todo
 		}
@@ -185,8 +208,8 @@ class MobileApp extends React.Component {
 	}
 	handleFtBtnPayment (outcome) {
 		console.log('>>>>MobileApp.handleFtBtnPayment', outcome);
-		const { instPackage, userId } = this.state;
-		if (PackageHelper.validateInstance(instPackage, userId)) {
+		const { instPackage } = this.state;
+		if (PackageHelper.validateInstance(instPackage)) {
 			instPackage.status = outcome.status;
 			this.setState({
 				instPackage: instPackage,
@@ -203,9 +226,9 @@ class MobileApp extends React.Component {
 	handleFtBtnLeave () {
 		console.log('>>>>MobileApp.handleFtBtnLeave');
 	}
-	handleFtBtnLock (extras) {
-		const { instPackage, userId } = this.state;
-		const { min, people, otherPeople, rooms, otherRooms } = extras;
+	handleFtBtnLock () {
+		const { userId, instPackage, instPackageExt } = this.state;
+		const { min, people, otherPeople, rooms, otherRooms } = instPackageExt;
 		console.log('>>>>MobileApp.handleFtBtnLock', { instPackage, userId });
 		// Before lock the package, start date and end date cannot be null
 		if (!instPackage.startDate || !instPackage.endDate) {
@@ -219,7 +242,7 @@ class MobileApp extends React.Component {
 					modalType: Modal.ZERO_OWNER.key,
 					modalRef: { min: min },
 				});
-			} else if (people + otherPeople < extras.min) {
+			} else if (people + otherPeople < min) {
 				this.setState({
 					modalType: Modal.LESS_THAN_MIN.key,
 					modalRef: { min: min },
@@ -228,32 +251,31 @@ class MobileApp extends React.Component {
 				instPackage.totalPeople = people + otherPeople;
 				instPackage.totalRooms = rooms + otherRooms;
 				instPackage.status = Instance.status.PENDING_PAYMENT;
-				this.setState({ instPackage: instPackage });
+				instPackageExt.step = instPackageExt.step + 1;
+				this.setState({ instPackage, instPackageExt });
 			}
 		}
 	}
 	handleFtBtnUnlock () {
-		const { instPackage, userId } = this.state;
-		console.log('>>>>MobileApp.handleFtBtnLock', { instPackage, userId });
+		const { instPackage, instPackageExt } = this.state;
+		instPackageExt.step = instPackageExt.step - 1;
 		if (!instPackage.isCustomised) {
 			// Regular package, change status to INITIATED
 			instPackage.status = Instance.status.INITIATED;
-			this.setState({ instPackage: instPackage });
 		} else {
 			// Customised package, change status to REVIEW ITINERARY
 			instPackage.status = Instance.status.REVIEW_ITINERARY;
-			this.setState({ instPackage: instPackage });
 		}
+		this.setState({ instPackage, instPackageExt });
 	}
 	handleFtBtnStatus () {
 		console.log('>>>>MobileApp.handleFtBtnStatus');
 	}
 	// ----------  Payment  ---------
 	confirmSubmitPayment () {
-		const { instPackage, userId } = this.state;
+		const { instPackage } = this.state;
 		const { startDate, endDate, totalPeople, totalRooms, rate } = instPackage;
-		console.log('>>>>MobileApp.confirmSubmitPayment', { instPackage, userId });
-		if (PackageHelper.validateInstance(instPackage, userId)) {
+		if (PackageHelper.validateInstance(instPackage)) {
 			const ref = {
 				dtStart: startDate,
 				dtEnd: endDate,
@@ -280,19 +302,13 @@ class MobileApp extends React.Component {
 	}
 	handleAddItinerary () {
 		const ref = this.state.modalRef;
-		const userId = this.state.userId;
 		console.log('>>>>MobileApp.handleAddItinerary', ref);
 		const instPackage = PackageHelper.addItinerary(
 			this.state.instPackage,
 			ref.dayNo
 		);
-		if (PackageHelper.validateInstance(instPackage, userId)) {
-			for (var i = 0; i < instPackage.members.length; i++) {
-				if (instPackage.members[i].loginId === userId) {
-					instPackage.members[i].status = Instance.status.SELECT_ATTRACTION;
-					break;
-				}
-			}
+		if (PackageHelper.validateInstance(instPackage)) {
+			instPackage.status = Instance.status.SELECT_ATTRACTION;
 			this.setState({
 				instPackage: instPackage,
 				modalType: '',
@@ -322,12 +338,7 @@ class MobileApp extends React.Component {
 				ref.dayNo
 			);
 			if (PackageHelper.validateInstance(instPackage, userId)) {
-				for (var i = 0; i < instPackage.members.length; i++) {
-					if (instPackage.members[i].loginId === userId) {
-						instPackage.members[i].status = Instance.status.SELECT_HOTEL;
-						break;
-					}
-				}
+				instPackage.status = Instance.status.SELECT_HOTEL;
 				this.setState({
 					instPackage: instPackage,
 					modalType: '',
@@ -343,7 +354,7 @@ class MobileApp extends React.Component {
 		const { instPackage } = this.state;
 		instPackage.isCustomised = true;
 		this.setState({
-			modalType: '',
+			instPackage: instPackage,
 		});
 	}
 	handleLikeAttraction (dayNo, timePlannable, item, attractions) {
@@ -480,32 +491,17 @@ class MobileApp extends React.Component {
 	}
 
 	render () {
-		const { modalType, modalRef, instPackage, userId } = this.state;
+		const { instPackage, instPackageExt } = this.state;
+		const { modalType, modalRef } = this.state;
 		const { classes, rates, reference } = this.props;
-		const { packageRates, flightRates } = rates;
 		const { cities, packageSummary } = reference;
 
-		console.log('>>>>MobileApp.render >> instPackage', instPackage);
-		console.log('>>>>MobileApp.render >> reference', reference);
-		console.log('>>>>MobileApp.render >> rates', rates);
+		console.log('>>>>MobileApp.render', this.state);
 
 		// Variables
-		rates.carRates = _.map(cities, c => {
-			return {
-				id: c.id || '',
-				name: c.name || '',
-				carRates: c.carRates || [],
-			};
-		});
-		const extras = PackageHelper.enhanceInstance({
-			userId,
-			instPackage,
-			rates,
-		});
-		extras.carOptions = instPackage.isCustomised
+		const carOptions = instPackage.isCustomised
 			? Helper.getValidCarOptions(rates.carRates)
 			: [instPackage.carOption];
-
 		const departDates = _.map(packageSummary.departureDate.split(','), d => {
 			return d.trim();
 		});
@@ -514,6 +510,7 @@ class MobileApp extends React.Component {
 			startDate: instPackage.startDate,
 			totalDays: instPackage.totalDays,
 			carOption: instPackage.carOption,
+			carOptions: carOptions,
 		};
 		const itineraries = PackageHelper.getFullItinerary({
 			isCustomised: instPackage.isCustomised,
@@ -566,28 +563,29 @@ class MobileApp extends React.Component {
 			<div id="app">
 				<BotHeader
 					instPackage={instPackage}
-					extras={extras}
+					instPackageExt={instPackageExt}
 					rates={rates}
 					actions={headerActions}
 				/>
 				<div className={classes.appBody}>
 					<ProgressBar
-						step={extras.step}
-						isOwner={extras.isOwner}
-						isCustomised={extras.isCustomised}
+						step={instPackageExt.step}
+						isOwner={instPackageExt.isOwner}
+						isCustomised={instPackage.isCustomised}
 					/>
 					<PackageItinerary
 						isCustomised={instPackage.isCustomised}
 						rates={rates}
 						transport={transport}
 						itineraries={itineraries}
-						extras={extras}
+						status={instPackage.status}
 						actions={itineraryActions}
 					/>
 				</div>
 				<BotFooter
 					instPackage={instPackage}
-					extras={extras}
+					instPackageExt={instPackageExt}
+					rates={rates}
 					actions={footerActions}
 				/>
 				{elModal}

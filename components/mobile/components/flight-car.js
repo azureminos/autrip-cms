@@ -56,7 +56,7 @@ class FlightCar extends React.Component {
 		console.log('>>>>FlightCar, render()', this.props);
 		const {
 			classes,
-			isCustomised,
+			isDisabled,
 			departDates,
 			carOptions,
 			selectedDepartDate,
@@ -95,7 +95,7 @@ class FlightCar extends React.Component {
 				</ListItemIcon>
 				<ListItemSecondaryAction>
 					<div>
-						<FormControl className={classes.formControl}>
+						<FormControl className={classes.formControl} disabled={isDisabled}>
 							<Select
 								value={selectedDepartDate || ''}
 								onChange={this.handleFlightChange}
@@ -133,7 +133,10 @@ class FlightCar extends React.Component {
 						<DirectionsCar color="primary" />
 					</ListItemIcon>
 					<ListItemSecondaryAction>
-						<FormControl className={classes.formControl} disabled={isReadonly}>
+						<FormControl
+							className={classes.formControl}
+							disabled={isReadonly || isDisabled}
+						>
 							<Select
 								value={selectedCarOption || ''}
 								onChange={this.handleCarChange}

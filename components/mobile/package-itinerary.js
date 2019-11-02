@@ -16,7 +16,7 @@ import Helper from '../../lib/helper';
 import CONSTANTS from '../../lib/constants';
 
 const dtFormat = CONSTANTS.get().Global.dateFormat;
-const status = CONSTANTS.get().Instance.status;
+const InstanceStatus = CONSTANTS.get().Instance.status;
 const triggerText = (dayNo, city) => `Day ${dayNo}: ${city}`;
 
 const styles = theme => ({
@@ -88,11 +88,12 @@ class PackageItinerary extends React.Component {
 	// Display Widget
 	render () {
 		console.log('>>>>PackageItinerary, Start render with props', this.props);
+		// Local variables
 		const {
 			classes,
 			isCustomised,
-			extras,
-			transport: { departDates, carOption, totalDays },
+			status,
+			transport: { totalDays, departDates, carOption, carOptions },
 			itineraries,
 			actions,
 		} = this.props;
@@ -104,21 +105,21 @@ class PackageItinerary extends React.Component {
 			handleDeleteItinerary,
 		} = actions;
 		const { startDate } = this.state;
-		// Sub Widgets
+		const isDisabled = status === InstanceStatus.PENDING_PAYMENT;
 		const stStartDate = startDate ? Moment(startDate).format(dtFormat) : '';
 		const stEndDate = startDate
 			? Moment(startDate)
 					.add(totalDays, 'days')
 					.format(dtFormat)
 			: '';
-		// Add Flight and Cars
+		// Sub Widgets
 		const secFlightCar = (
 			<FlightCar
-				isCustomised={isCustomised}
+				isDisabled={isDisabled}
 				departDates={departDates}
 				selectedDepartDate={stStartDate}
 				selectedReturnDate={stEndDate}
-				carOptions={extras.carOptions}
+				carOptions={carOptions}
 				selectedCarOption={carOption}
 				handleSelectFlight={this.doHandleSelectFlight}
 				handleSelectCar={handleSelectCar}
@@ -128,11 +129,11 @@ class PackageItinerary extends React.Component {
 		const secItinerary = _.map(itineraries, (it, idx) => {
 			// Event Handlers
 			const doHandleAddItinerary = () => {
-				// console.log('>>>>PackageAttraction.doHandleAddItinerary', it);
+				// console.log('>>>>PackageItinerary.doHandleAddItinerary', it);
 				handleAddItinerary(it);
 			};
 			const doHandleDeleteItinerary = () => {
-				// console.log('>>>>PackageAttraction.doHandleDeleteItinerary', it);
+				// console.log('>>>>PackageItinerary.doHandleDeleteItinerary', it);
 				handleDeleteItinerary(it);
 			};
 			// Local Variables
@@ -150,8 +151,8 @@ class PackageItinerary extends React.Component {
 				secHotel = <HotelList hotels={it.hotels} />;
 			} else {
 				if (
-					extras.statusMember === status.INITIATED
-					|| extras.statusMember === status.SELECT_ATTRACTION
+					status === InstanceStatus.INITIATED
+					|| status === InstanceStatus.SELECT_ATTRACTION
 				) {
 					secAttraction = (
 						<div>
@@ -191,7 +192,7 @@ class PackageItinerary extends React.Component {
 					) : (
 						''
 					);
-				} else if (extras.statusMember === status.SELECT_HOTEL) {
+				} else if (status === InstanceStatus.SELECT_HOTEL) {
 					secAttraction = <AttractionList attractions={it.attractions} />;
 					secHotel = (
 						<div>
@@ -259,11 +260,11 @@ class PackageItinerary extends React.Component {
 				secHotel = <HotelList hotels={it.hotels} />;
 			} else {
 				if (
-					extras.statusMember === status.INITIATED
-					|| extras.statusMember === status.SELECT_ATTRACTION
+					status === InstanceStatus.INITIATED
+					|| status === InstanceStatus.SELECT_ATTRACTION
 				) {
 					secAttraction = <AttractionList attractions={it.attractions} />;
-				} else if (extras.statusMember === status.SELECT_HOTEL) {
+				} else if (status === InstanceStatus.SELECT_HOTEL) {
 					secAttraction = <AttractionList attractions={it.attractions} />;
 					secHotel = (
 						<HotelSlider

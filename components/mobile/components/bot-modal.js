@@ -237,7 +237,6 @@ class BotModal extends React.Component {
 						{divPeople}
 						{divRooms}
 						{divRate}
-						{divTotal}
 						{divDeposit}
 					</table>
 					{divTerms}

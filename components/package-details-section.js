@@ -106,19 +106,21 @@ class PackageDetails extends React.Component {
 
 	render () {
 		console.log('>>>>PackageDetails.render', this.props.selectedPackage);
+		// Local Variables
 		const { validation } = this.state;
 		const isValid = validation && validation.isValid;
 		const { classes, theme, selectedPackage } = this.props;
-		const {
-			packageSummary,
-			packageItems,
-			packageHotels,
-			packageRates,
-			flightRates,
-			cities,
-		} = selectedPackage;
+		const { packageSummary, packageItems, packageHotels } = selectedPackage;
+		const { packageRates, flightRates, cities } = selectedPackage;
 		const isTemplate = !packageSummary.isSnapshot;
-
+		const carRates = _.map(cities, c => {
+			return {
+				id: c.id || '',
+				name: c.name || '',
+				carRates: c.carRates || [],
+			};
+		});
+		// Sub Components
 		const btnSnapshotList = isTemplate ? (
 			<Button
 				variant="contained"
@@ -308,7 +310,7 @@ class PackageDetails extends React.Component {
 					{this.state.openModal === 'mobile' ? (
 						<MobileApp
 							instPackage={instPackage}
-							rates={{ packageRates, flightRates }}
+							rates={{ packageRates, flightRates, carRates }}
 							reference={{ packageSummary, cities }}
 							userId={instPackage.members[0].loginId}
 						/>

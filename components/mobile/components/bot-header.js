@@ -11,7 +11,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
-import Rate from '../../../lib/rate-calculator';
 import CONSTANTS from '../../../lib/constants';
 
 const InstanceStatus = CONSTANTS.get().Instance.status;
@@ -71,181 +70,46 @@ class BotHeader extends React.Component {
 	// Handle people change
 	doHandlePeopleChange (e) {
 		console.log('>>>>BotHeader.doHandlePeopleChange', e);
-		const { handlePeople } = this.props.actions;
-		if (handlePeople) {
+		const { actions, rates } = this.props;
+		if (actions && actions.handlePeople) {
 			const newRooms = Math.ceil(e.target.value / standardRoomCapacity);
-			handlePeople({ people: e.target.value, rooms: newRooms });
+			actions.handlePeople({ people: e.target.value, rooms: newRooms, rates });
 		}
 	}
 	// Handle room change
 	doHandleRoomChange (e) {
 		console.log('>>>>BotHeader.doHandleRoomChange', e);
-		const { handleRoom } = this.props.actions;
-		if (handleRoom) {
-			handleRoom({ rooms: e.target.value });
+		const { actions, rates } = this.props;
+		if (actions && actions.handleRoom) {
+			actions.handleRoom({ rooms: e.target.value, rates });
 		}
 	}
 	// Display widget
 	render () {
 		console.log('>>>>BotHeader.render');
-		const { classes, instPackage, extras, rates } = this.props;
-		const { packageRates, carRates, flightRates } = rates;
-		const { isCustomised, hotels, items, startDate, carOption } = instPackage;
-		const { min, max, people, otherPeople, rooms, otherRooms } = extras;
+		const { classes, instPackage, instPackageExt } = this.props;
+		const { curGap, curRate, nxtGap, nxtRate, max } = instPackageExt;
+		const { people, otherPeople, rooms, otherRooms } = instPackageExt;
 		// Local variables
 		const finalCost = { price: 0, promo: '' };
-		const isPeopleSelectable
+		const isPeopleDisabled
 			= instPackage.status === InstanceStatus.PENDING_PAYMENT;
-		const isRoomSelectable
-			= !isCustomised || instPackage.status === InstanceStatus.PENDING_PAYMENT;
-		const params = {
-			startDate: startDate,
-		};
-		if (otherPeople + people > min) {
-			params.totalPeople = otherPeople + people;
-			params.totalRooms = otherRooms + rooms;
-		} else {
-			params.totalPeople = min;
-			params.totalRooms
-				= Math.ceil(params.totalPeople / standardRoomCapacity) || 1;
-		}
+		const isRoomDisabled
+			= !instPackage.isCustomised
+			|| instPackage.status === InstanceStatus.PENDING_PAYMENT;
 
-		if (!isCustomised) {
-			/* ==== Regular tour group ====
-			 * - packageRates: totalPeople
-			 * - flightRates: startDate, endDate
-			 * ============================ */
-			const curRatePackageReg = Rate.calPackageRate(params, packageRates);
-			if (curRatePackageReg) {
-				const curRateFlight = Rate.calFlightRate(startDate, flightRates);
-				var nxtRatePackageReq;
-				if (
-					curRatePackageReg.maxParticipant
-					&& instPackage.maxParticipant > curRatePackageReg.maxParticipant
-				) {
-					params.totalPeople = curRatePackageReg.maxParticipant + 1;
-					params.totalRooms
-						= Math.ceil(params.totalPeople / standardRoomCapacity) || 1;
-					nxtRatePackageReq = Rate.calPackageRate(params, packageRates);
-				} else {
-					nxtRatePackageReq = null;
-				}
-				// Set display msg
-				if (otherPeople + people > min) {
-					const gap
-						= curRatePackageReg.maxParticipant + 1 - (people + otherPeople);
-					const nextPrice = nxtRatePackageReq
-						? nxtRatePackageReq.price
-						  + curRateFlight.rate
-						  + curRateFlight.rateDomesticTotal
-						: 0;
-					const curPrice
-						= curRatePackageReg.price
-						+ curRateFlight.rate
-						+ curRateFlight.rateDomesticTotal;
-					finalCost.price = `${curPrice} pp`;
-					finalCost.promo = nxtRatePackageReq
-						? `${gap} more people ${nextPrice} pp`
-						: `Max group size is ${curRatePackageReg.maxParticipant}`;
-				} else {
-					const gap1
-						= curRatePackageReg.minParticipant - (people + otherPeople);
-					const gap2
-						= curRatePackageReg.maxParticipant + 1 - (people + otherPeople);
-					const nextPrice = nxtRatePackageReq
-						? nxtRatePackageReq.price
-						  + curRateFlight.rate
-						  + curRateFlight.rateDomesticTotal
-						: 0;
-					const curPrice
-						= curRatePackageReg.price
-						+ curRateFlight.rate
-						+ curRateFlight.rateDomesticTotal;
-					finalCost.price = gap1
-						? `${gap1} more people $${curPrice} pp`
-						: `$${curPrice} pp`;
-					finalCost.promo = nxtRatePackageReq
-						? gap2
-							? `${gap2} more people $${nextPrice} pp`
-							: `$${nextPrice} pp`
-						: `Max group size is ${curRatePackageReg.maxParticipant}`;
-				}
-			} else {
-				finalCost.price = 'ERROR';
-				finalCost.promo = 'ERROR';
-			}
+		if (curGap === 0) {
+			finalCost.price = `${curRate} pp`;
+			finalCost.promo
+				= nxtGap > 0
+					? `${nxtGap} more people ${nxtRate} pp`
+					: `Max group size is ${max}`;
 		} else {
-			/* ==== DIY tour group ====
-			 * - packageRates: people, [startDate]
-			 * - flightRates: [startDate], [type]
-			 * - carRates: people, [startDate], [type]
-			 * - packageItems: all package items
-			 * - packageHotels: rooms
-			 * ============================ */
-			const curRatePackageDiy = Rate.calPackageRate(params, packageRates);
-			console.log('>>>>Rate.calPackageRate', curRatePackageDiy);
-			if (curRatePackageDiy) {
-				const curRateFlightDiy = Rate.calFlightRate(startDate, flightRates);
-				console.log('>>>>Rate.calFlightRate', curRateFlightDiy);
-				if (curRateFlightDiy) {
-					const curRateCarDiy = Rate.calCarRate(
-						{ ...params, carOption, hotels, items },
-						carRates
-					);
-					console.log('>>>>Rate.calCarRate', curRateCarDiy);
-					if (curRateCarDiy) {
-						const curRateItemDiy = Rate.calItemRate({ startDate }, items);
-						const curRateHotelDiy = Rate.calHotelRate(params, hotels);
-						var nxtRatePackageDiy, nxtRateCarDiy;
-						if (
-							curRatePackageDiy.maxParticipant
-							&& instPackage.maxParticipant > curRatePackageDiy.maxParticipant
-						) {
-							params.totalPeople = curRatePackageDiy.maxParticipant + 1;
-							nxtRatePackageDiy = Rate.calPackageRate(params, packageRates);
-							nxtRateCarDiy = Rate.calCarRate(
-								{ ...params, carOption, hotels, items },
-								carRates
-							);
-						} else {
-							nxtRatePackageDiy = null;
-							nxtRateCarDiy = null;
-						}
-						const gap
-							= curRatePackageDiy.maxParticipant + 1 - (people + otherPeople);
-						const nextPrice
-							= nxtRatePackageDiy && nxtRateCarDiy
-								? nxtRatePackageDiy.premiumFee
-								  + curRateFlightDiy.rate
-								  + curRateFlightDiy.rateDomesticTotal
-								  + nxtRateCarDiy
-								  + curRateItemDiy
-								  + curRateHotelDiy
-								: 0;
-						finalCost.price
-							= curRatePackageDiy.premiumFee
-							+ curRateFlightDiy.rate
-							+ curRateFlightDiy.rateDomesticTotal
-							+ curRateCarDiy
-							+ curRateItemDiy
-							+ curRateHotelDiy;
-						finalCost.promo = nxtRatePackageDiy
-							? gap
-								? `${gap} more people $${nextPrice} pp`
-								: `$${nextPrice} pp`
-							: `Max group size is ${curRatePackageDiy.maxParticipant}`;
-					} else {
-						finalCost.price = 'ERROR';
-						finalCost.promo = 'ERROR';
-					}
-				} else {
-					finalCost.price = 'ERROR';
-					finalCost.promo = 'ERROR';
-				}
-			} else {
-				finalCost.price = 'ERROR';
-				finalCost.promo = 'ERROR';
-			}
+			finalCost.price = `${curGap} more people $${curRate} pp`;
+			finalCost.promo
+				= nxtGap > 0
+					? `${nxtGap} more people ${nxtRate} pp`
+					: `Max group size is ${max}`;
 		}
 
 		const miPeople = this.buildMenuItems(1, max, 'Person');
@@ -275,7 +139,7 @@ class BotHeader extends React.Component {
 								<TableCell style={{ padding: '4px', width: '25%' }}>
 									<FormControl
 										className={classes.formControl}
-										disabled={isPeopleSelectable}
+										disabled={isPeopleDisabled}
 									>
 										<Select
 											value={otherPeople + people}
@@ -292,7 +156,7 @@ class BotHeader extends React.Component {
 									</FormControl>
 									<FormControl
 										className={classes.formControl}
-										disabled={isRoomSelectable}
+										disabled={isRoomDisabled}
 									>
 										<Select
 											value={otherRooms + rooms}

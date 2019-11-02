@@ -46,7 +46,7 @@ const styles = theme => ({
 	},
 });
 
-const calcVisibility = ({ instPackage, extras }) => {
+const calcVisibility = ({ instPackage, instPackageExt }) => {
 	const vs = {
 		BtnBackward: { isHidden: true, isDisabled: false },
 		BtnForward: { isHidden: true, isDisabled: false },
@@ -62,7 +62,7 @@ const calcVisibility = ({ instPackage, extras }) => {
 	};
 	// Logic starts here
 	if (!instPackage.isCustomised) {
-		if (extras.isOwner) {
+		if (instPackageExt.isOwner) {
 			if (instPackage.status === Instance.status.INITIATED) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnCustomise.isHidden = instPackage.isCustomised;
@@ -76,8 +76,8 @@ const calcVisibility = ({ instPackage, extras }) => {
 		} else {
 			if (instPackage.status === Instance.status.INITIATED) {
 				vs.BtnShare.isHidden = false;
-				vs.BtnJoin.isHidden = !extras.isJoined;
-				vs.BtnLeave.isHidden = extras.isJoined;
+				vs.BtnJoin.isHidden = !instPackageExt.isJoined;
+				vs.BtnLeave.isHidden = instPackageExt.isJoined;
 			} else if (instPackage.status === Instance.status.PENDING_PAYMENT) {
 				vs.BtnStatus.isHidden = false;
 			} else {
@@ -85,46 +85,52 @@ const calcVisibility = ({ instPackage, extras }) => {
 			}
 		}
 	} else {
-		if (extras.isOwner) {
+		if (instPackageExt.isOwner) {
 			if (
-				extras.statusMember === Instance.status.INITIATED
-				|| extras.statusMember === Instance.status.SELECT_ATTRACTION
+				instPackage.status === Instance.status.INITIATED
+				|| instPackage.status === Instance.status.SELECT_ATTRACTION
 			) {
 				vs.BtnForward.isHidden = false;
 				vs.BtnCancelCustomise.isHidden = false;
 				vs.BtnShare.isHidden = false;
-			} else if (extras.statusMember === Instance.status.SELECT_HOTEL) {
+			} else if (instPackage.status === Instance.status.SELECT_HOTEL) {
 				vs.BtnBackward.isHidden = false;
 				vs.BtnForward.isHidden = false;
 				vs.BtnShare.isHidden = false;
 				vs.BtnCancelCustomise.isHidden = false;
-			} else if (extras.statusMember === Instance.status.REVIEW_ITINERARY) {
+			} else if (instPackage.status === Instance.status.REVIEW_ITINERARY) {
 				vs.BtnBackward.isHidden = false;
-				vs.BtnPayment.isHidden = false;
+				vs.BtnLock.isHidden = false;
 				vs.BtnShare.isHidden = false;
 				vs.BtnCancelCustomise.isHidden = false;
-			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
+			} else if (instPackage.status === Instance.status.PENDING_PAYMENT) {
+				vs.BtnUnlock.isHidden = false;
+				vs.BtnPayment.isHidden = false;
+			} else if (instPackage.status === Instance.status.DEPOSIT_PAID) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnStatus.isHidden = false;
-				vs.BtnLock.isHidden = false;
 			} else {
 				vs.BtnShare.isHidden = false;
 			}
 		} else {
-			if (!extras.statusMember) {
+			if (!instPackageExt.statusMember || !instPackageExt.people) {
 				vs.BtnJoin.isHidden = false;
 			} else if (
-				extras.statusMember === Instance.status.INITIATED
-				|| extras.statusMember === Instance.status.SELECT_ATTRACTION
-				|| extras.statusMember === Instance.status.SELECT_HOTEL
-				|| extras.statusMember === Instance.status.REVIEW_ITINERARY
+				instPackage.status === Instance.status.INITIATED
+				|| instPackage.status === Instance.status.SELECT_ATTRACTION
+				|| instPackage.status === Instance.status.SELECT_HOTEL
+				|| instPackage.status === Instance.status.REVIEW_ITINERARY
 			) {
 				vs.BtnShare.isHidden = false;
+				vs.BtnStatus.isHidden = false;
 				vs.BtnLeave.isHidden = false;
-				vs.BtnPayment.isHidden = false;
-			} else if (extras.statusMember === Instance.status.DEPOSIT_PAID) {
+			} else if (instPackage.status === Instance.status.PENDING_PAYMENT) {
 				vs.BtnShare.isHidden = false;
 				vs.BtnStatus.isHidden = false;
+			} else if (instPackage.status === Instance.status.DEPOSIT_PAID) {
+				vs.BtnShare.isHidden = false;
+				vs.BtnStatus.isHidden = false;
+				vs.BtnPayment.isHidden = false;
 			} else {
 				vs.BtnShare.isHidden = false;
 			}
@@ -144,7 +150,7 @@ class BotFooter extends React.Component {
 	// Render footer bar, including buttons []
 	render () {
 		console.log('>>>>BotFooter.render', this.state);
-		const { classes, instPackage, extras, actions } = this.props;
+		const { classes, instPackage, instPackageExt, rates, actions } = this.props;
 		const {
 			handleBackward,
 			handleForward,
@@ -158,15 +164,15 @@ class BotFooter extends React.Component {
 			handleCancelCustomise,
 			handlePay,
 		} = actions;
-		const vs = calcVisibility({ instPackage, extras });
+		const vs = calcVisibility({ instPackage, instPackageExt });
 		// ====== Event Handler ======
 		const doHandleBackward = () => {
 			console.log('>>>>BotFooter.doHandleBackward');
-			if (handleBackward) handleBackward();
+			if (handleBackward) handleBackward(rates);
 		};
 		const doHandleForward = () => {
 			console.log('>>>>BotFooter.doHandleForward');
-			if (handleForward) handleForward();
+			if (handleForward) handleForward(rates);
 		};
 		const doHandleShare = () => {
 			console.log('>>>>BotFooter.doHandleShare');
@@ -186,7 +192,7 @@ class BotFooter extends React.Component {
 		};
 		const doHandleLock = () => {
 			console.log('>>>>BotFooter.doHandleLock');
-			if (handleLock) handleLock(extras);
+			if (handleLock) handleLock();
 		};
 		const doHandleUnlock = () => {
 			console.log('>>>>BotFooter.doHandleUnlock');
