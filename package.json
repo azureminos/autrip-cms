@@ -26,7 +26,6 @@
     "react-paypal-button-v2": "^2.4.1",
     "react-scroll-to-component": "^1.0.2",
     "react-spinners": "^0.5.12",
-    "rimraf": "^3.0.0",
     "socket.io": "^2.0.3",
     "socket.io-client": "^2.0.3"
   },
@@ -38,6 +37,8 @@
   "scripts": {
     "lint": "eslint .",
     "build": "next build",
+    "heroku-prebuild": "export NPM_CONFIG_PRODUCTION=false; export NODE_ENV=; NPM_CONFIG_PRODUCTION=false NODE_ENV=development npm install --only=dev --dev",
+    "heroku-postbuild": "export NPM_CONFIG_PRODUCTION=true; export NODE_ENV=production;",
     "start": "node keystone.js"
   }
 }
