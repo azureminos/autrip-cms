@@ -252,6 +252,9 @@ class MobileApp extends React.Component {
 				instPackage.totalRooms = rooms + otherRooms;
 				instPackage.status = Instance.status.PENDING_PAYMENT;
 				instPackageExt.step = instPackageExt.step + 1;
+				for (var i = 0; i < instPackage.members.length; i++) {
+					instPackage.members[i].status = Instance.status.PENDING_PAYMENT;
+				}
 				this.setState({ instPackage, instPackageExt });
 			}
 		}
@@ -265,6 +268,9 @@ class MobileApp extends React.Component {
 		} else {
 			// Customised package, change status to REVIEW ITINERARY
 			instPackage.status = Instance.status.REVIEW_ITINERARY;
+		}
+		for (var i = 0; i < instPackage.members.length; i++) {
+			instPackage.members[i].status = Instance.status.INITIATED;
 		}
 		this.setState({ instPackage, instPackageExt });
 	}

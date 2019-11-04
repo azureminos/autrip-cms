@@ -171,8 +171,4 @@ class FlightCar extends React.Component {
 	}
 }
 
-FlightCar.propTypes = {
-	classes: PropTypes.object.isRequired,
-};
-
 export default withStyles(styles)(FlightCar);
