@@ -23,7 +23,6 @@
     "react-id-swiper": "^1.6.8",
     "react-jss": "^8.1.0",
     "react-loader-advanced": "^1.7.1",
-    "react-paypal-button-v2": "^2.4.1",
     "react-scroll-to-component": "^1.0.2",
     "react-spinners": "^0.5.12",
     "socket.io": "^2.0.3",
@@ -32,13 +31,11 @@
   "devDependencies": {
     "eslint": "3.15.0",
     "eslint-config-keystone": "3.0.0",
-    "eslint-plugin-react": "^5.1.1",
-    "rimraf": "^3.0.0"
+    "eslint-plugin-react": "^5.1.1"
   },
   "scripts": {
     "lint": "eslint .",
     "build": "next build",
-    "start": "node keystone.js",
-    "heroku-postbuild": "next build"
+    "start": "node keystone.js"
   }
 }

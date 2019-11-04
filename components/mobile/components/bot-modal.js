@@ -3,7 +3,7 @@ import React from 'react';
 import getConfig from 'next/config';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography, Grid, Modal, Button, Checkbox } from '@material-ui/core';
-import { PayPalButton } from 'react-paypal-button-v2';
+//import { PayPalButton } from 'react-paypal-button-v2';
 import CONSTANTS from '../../../lib/constants';
 
 const ModalConst = CONSTANTS.get().Modal;
@@ -179,6 +179,18 @@ class BotModal extends React.Component {
 				</div>
 			);
 			const divPayment = isTermsAgreed ? (
+				<Button>Paypal</Button>
+			) : (
+				<div className={classes.panelBody}>
+					<p style={{ color: 'red' }}>
+						<b>
+							In order to proceed with the payment, please read the terms and
+							conditions, then tick the checkbox above.
+						</b>
+					</p>
+				</div>
+			);
+			/*const divPayment = isTermsAgreed ? (
 				<PayPalButton
 					options={{
 						clientId: paypalId,
@@ -220,7 +232,7 @@ class BotModal extends React.Component {
 						</b>
 					</p>
 				</div>
-			);
+			);*/
 			const pBtnModal = [
 				{
 					title: ModalConst.button.CLOSE,
