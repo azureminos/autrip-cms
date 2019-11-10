@@ -65,7 +65,7 @@ const calcVisibility = ({ instPackage, instPackageExt }) => {
 		if (instPackageExt.isOwner) {
 			if (instPackage.status === Instance.status.INITIATED) {
 				vs.BtnShare.isHidden = false;
-				vs.BtnCustomise.isHidden = instPackage.isCustomised;
+				vs.BtnCustomise.isHidden = !instPackage.isCustomisable;
 				vs.BtnLock.isHidden = false;
 			} else if (instPackage.status === Instance.status.PENDING_PAYMENT) {
 				vs.BtnUnlock.isHidden = false;
