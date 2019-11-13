@@ -1,9 +1,7 @@
 // ==== MODULES ==========================================
 import _ from 'lodash';
-import Moment from 'moment';
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import { Paper, Typography } from '@material-ui/core';
 
 // ==== COMPONENTS =======================================
 import BotModal from './components/bot-modal';
@@ -55,7 +53,6 @@ class MobileApp extends React.Component {
 		this.handleFtBtnStatus = this.handleFtBtnStatus.bind(this);
 		this.handleFtBtnCustomise = this.handleFtBtnCustomise.bind(this);
 		this.handleFtBtnNoCustomise = this.handleFtBtnNoCustomise.bind(this);
-		// tbd
 		this.handleModalClose = this.handleModalClose.bind(this);
 		this.enablePackageDiy = this.enablePackageDiy.bind(this);
 		this.handleLikeAttraction = this.handleLikeAttraction.bind(this);
