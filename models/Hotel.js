@@ -29,6 +29,7 @@ Hotel.add({
 		select: true,
 		selectPrefix: 'Hotels',
 	},
+	carouselImages: { type: Types.CloudinaryImages, folder: 'Hotels' },
 	timeTraffic: { type: Types.Number, default: 0 },
 	// rooms: { type: Types.Relationship, ref: 'HotelRoom', many: true },
 	nearByAttractions: {
