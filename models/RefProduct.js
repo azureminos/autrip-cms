@@ -13,7 +13,7 @@ var RefProduct = new keystone.List('RefProduct', {
 });
 
 RefProduct.add({
-	source: { type: Types.Select, options: 'VIATOR, MANUAL', default: 'VIATOR' },
+	source: { type: Types.Select, options: 'VIATOR, MANUAL', default: 'MANUAL' },
 	productCode: { type: Types.Text, required: true, index: true, default: '' },
 	name: { type: Types.Text, required: true, default: '' },
 	shortTitle: { type: Types.Text, required: true, default: '' },
