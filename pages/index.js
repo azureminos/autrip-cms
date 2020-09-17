@@ -4,7 +4,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import getConfig from 'next/config';
 
-import { Paper, Typography } from '@material-ui/core';
+import { Paper, Button } from '@material-ui/core';
 import Loader from 'react-loader-advanced';
 
 import LoadingSpinner from '../components/loading-spinner';
@@ -19,15 +19,20 @@ let socket;
 
 class App extends Component {
 	static async getInitialProps () {
-		const urlGetPackages = `${
-			process.env.API_BASE_URL
-		}/api/travelpackage/template`;
+		const urlGetPackages = `${process.env.API_BASE_URL}/api/travelpackage/template`;
 		let resPackages = await axios.get(urlGetPackages);
 
 		const urlGetMetadata = `${process.env.API_BASE_URL}/api/metadata`;
 		let resMetadata = await axios.get(urlGetMetadata);
 
-		const drawerItems = ['Package', 'Country', 'City', 'Attraction', 'Hotel'];
+		const drawerItems = [
+			'Package',
+			'Country',
+			'City',
+			'Attraction',
+			'Hotel',
+			'Support',
+		];
 
 		return {
 			drawerItems,
@@ -169,7 +174,7 @@ class App extends Component {
 		const { idxSelectedSection, packages, selectedPackage } = this.state;
 		console.log('>>>>App.render', { reference, packages, drawerItems });
 		const spinner = <LoadingSpinner loading={this.state.updating} />;
-		let viewPackage, snackBar;
+		let viewPackage, viewSupport, snackBar;
 
 		// Init Snack Bar Popup
 		if (this.state.message) {
@@ -186,6 +191,10 @@ class App extends Component {
 		if (this.state.updating) {
 			viewPackage = <div style={{ height: 600 }} />;
 		} else {
+			// Init all views
+			viewSupport = <div style={{ height: 600 }} />;
+			viewPackage = <div style={{ height: 600 }} />;
+			// Setup view based on selection
 			if (idxSelectedSection === 0) {
 				if (packages && packages.length > 0) {
 					// Init tab content to display all packages
@@ -212,6 +221,32 @@ class App extends Component {
 				} else {
 					viewPackage = <div style={{ height: 600 }} />;
 				}
+			} else if (idxSelectedSection === 5) {
+				const doRefreshReference = () => {
+					console.log('>>>>Support.refreshReference() Started');
+					const urlRefreshReference = '/api/func/loadReference';
+					axios
+						.get(urlRefreshReference)
+						.then(res => {
+							console.log('>>>>Support.refreshReference() Finished', res.data);
+						})
+						.catch(error => {
+							console.log('>>>>Support.refreshReference() Error', error);
+						});
+				};
+				viewSupport = (
+					<div style={{ height: 600 }}>
+						<div>
+							<Button
+								variant="contained"
+								color="default"
+								onClick={() => doRefreshReference()}
+							>
+								Refresh Reference
+							</Button>
+						</div>
+					</div>
+				);
 			}
 		}
 
@@ -245,6 +280,7 @@ class App extends Component {
 						{idxSelectedSection === 2 && <div>This is City</div>}
 						{idxSelectedSection === 3 && <div>This is Attraction</div>}
 						{idxSelectedSection === 4 && <div>This is Hotel</div>}
+						{idxSelectedSection === 5 && viewSupport}
 					</PersistentDrawer>
 				</Paper>
 			</Loader>

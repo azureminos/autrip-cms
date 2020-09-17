@@ -8,13 +8,29 @@ var parseCountry = function (input) {
 	if (Array.isArray(input)) {
 		var rs = [];
 		_.each(input, function (item) {
-			var r = _.pick(item, 'name', 'region', 'description', 'tag', 'alias', 'additionalField');
+			var r = _.pick(
+				item,
+				'name',
+				'region',
+				'description',
+				'tag',
+				'alias',
+				'additionalField'
+			);
 			r.id = item._id;
 			rs.push(r);
 		});
 		return rs;
 	} else {
-		var r = _.pick(input, 'name', 'region', 'description', 'tag', 'alias', 'additionalField');
+		var r = _.pick(
+			input,
+			'name',
+			'region',
+			'description',
+			'tag',
+			'alias',
+			'additionalField'
+		);
 		r.id = input._id;
 		return r;
 	}

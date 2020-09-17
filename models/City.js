@@ -17,7 +17,9 @@ var City = new keystone.List('City', {
 
 City.add({
 	name: { type: Types.Text, required: true, index: true },
+	isImported: { type: Types.Boolean, default: false },
 	description: { type: Types.Textarea },
+	destId: { type: Types.Number },
 	country: { type: Types.Relationship, ref: 'Country' },
 	tag: { type: Types.TextArray },
 	alias: { type: Types.TextArray },
