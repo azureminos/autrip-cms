@@ -24,6 +24,7 @@ RefDestination.add({
 		default: 'CITY',
 	},
 	destinationId: { type: Types.Number, default: -1 },
+	lookupId: { type: Types.Text },
 	latitude: { type: Types.Text },
 	longitude: { type: Types.Text },
 	tag: { type: Types.TextArray },

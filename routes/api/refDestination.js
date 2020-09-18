@@ -85,6 +85,7 @@ exports.loadRefDestination = (req, res, next) => {
 							selectable: item.selectable,
 							defaultCurrencyCode: item.defaultCurrencyCode,
 							parentId: item.parentId,
+							lookupId: item.lookupId,
 							timeZone: item.timeZone,
 							type: item.destinationType,
 							destinationId: item.destinationId,
