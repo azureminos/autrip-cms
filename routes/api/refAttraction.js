@@ -6,12 +6,17 @@ const keystone = require('keystone');
 const tbRefDestination = keystone.list('RefDestination');
 const tbRefAttraction = keystone.list('RefAttraction');
 
+const { VIATOR_BASE_URL, VIATOR_AUTH_KEY } = process.env;
 // Delete all Ref_Attraction
-exports.delRefAttraction = next => {
+exports.delRefAttraction = (req, res, next) => {
 	console.log('>>>>Function [delRefAttraction] started');
 	tbRefAttraction.model.deleteMany({}, () => {
 		console.log('>>>>Function [delRefAttraction] executed');
-		next();
+		if (res) {
+			return res.apiResponse({ result: 200, error: '' });
+		} else if (next) {
+			next();
+		}
 	});
 };
 
@@ -33,13 +38,13 @@ exports.loadRefAttraction = (req, res, next) => {
 					console.log(`>>>>Processing Attraction of City[${city.name}]`);
 					axios
 						.post(
-							'https://viatorapi.viator.com/service/taxonomy/attractions',
+							`${VIATOR_BASE_URL}/service/taxonomy/attractions`,
 						{
 							destId: city.destinationId,
 						},
 						{
 							headers: {
-								'exp-api-key': '1ed594e8-944b-404f-bd21-92d9090c64d4',
+								'exp-api-key': VIATOR_AUTH_KEY,
 							},
 						}
 						)
@@ -90,11 +95,19 @@ exports.loadRefAttraction = (req, res, next) => {
 					);
 					tbRefAttraction.model.insertMany(attractions, () => {
 						console.log('>>>>Function [loadRefAttraction] completed');
-						next();
+						if (res) {
+							return res.apiResponse({ result: 200, error: '' });
+						} else if (next) {
+							next();
+						}
 					});
 				} else {
 					console.log('>>>>Function [loadRefAttraction] error', err);
-					next();
+					if (res) {
+						return res.apiResponse({ result: 500, error: err });
+					} else if (next) {
+						next('>>>>Function [loadRefAttraction] unknown error');
+					}
 				}
 			});
 		}

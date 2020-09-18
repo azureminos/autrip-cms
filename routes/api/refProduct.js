@@ -6,12 +6,17 @@ const keystone = require('keystone');
 const tbRefDestination = keystone.list('RefDestination');
 const tbRefProduct = keystone.list('RefProduct');
 
+const { VIATOR_BASE_URL, VIATOR_AUTH_KEY } = process.env;
 // Delete all Ref_Product
-exports.delRefProduct = next => {
+exports.delRefProduct = (req, res, next) => {
 	console.log('>>>>Function [delRefProduct] started');
 	tbRefProduct.model.deleteMany({}, () => {
 		console.log('>>>>Function [delRefProduct] executed');
-		next();
+		if (res) {
+			return res.apiResponse({ result: 200, error: '' });
+		} else if (next) {
+			next();
+		}
 	});
 };
 // Load Ref Product
@@ -32,14 +37,14 @@ exports.loadRefProduct = (req, res, next) => {
 					console.log(`>>>>Processing Product of City[${city.name}]`);
 					axios
 						.post(
-							'https://viatorapi.viator.com/service/search/products',
+							`${VIATOR_BASE_URL}/service/search/products`,
 						{
 							destId: city.destinationId,
 							currencyCode: 'AUD',
 						},
 						{
 							headers: {
-								'exp-api-key': '1ed594e8-944b-404f-bd21-92d9090c64d4',
+								'exp-api-key': VIATOR_AUTH_KEY,
 							},
 						}
 						)
@@ -97,11 +102,19 @@ exports.loadRefProduct = (req, res, next) => {
 					console.log(`>>>>[${products.length}] items loaded into RefProduct`);
 					tbRefProduct.model.insertMany(products, () => {
 						console.log('>>>>Function [loadRefProduct] completed');
-						next();
+						if (res) {
+							return res.apiResponse({ result: 200, error: '' });
+						} else if (next) {
+							next();
+						}
 					});
 				} else {
 					console.log('>>>>Function [loadRefProduct] error', err);
-					next();
+					if (res) {
+						return res.apiResponse({ result: 500, error: err });
+					} else if (next) {
+						next('>>>>Function [loadRefProduct] unknown error');
+					}
 				}
 			});
 		}

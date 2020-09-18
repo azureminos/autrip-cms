@@ -11,34 +11,34 @@ exports.loadReference = function (req, res) {
 	async.series(
 		[
 			function (callback) {
-				refAttraction.delRefAttraction(callback);
+				refAttraction.delRefAttraction(null, null, callback);
 			},
 			function (callback) {
-				refProduct.delRefProduct(callback);
+				refProduct.delRefProduct(null, null, callback);
 			},
 			function (callback) {
-				refCategory.delRefSubCategory(callback);
+				refCategory.delRefSubCategory(null, null, callback);
 			},
 			function (callback) {
-				refCategory.delRefCategory(callback);
+				refCategory.delRefCategory(null, null, callback);
 			},
 			function (callback) {
-				refDestination.delRefDestination(callback);
+				refDestination.delRefDestination(null, null, callback);
 			},
 			function (callback) {
-				refDestination.delRefCountry(callback);
+				refDestination.delRefCountry(null, null, callback);
 			},
 			function (callback) {
-				refDestination.loadRefDestination(req, res, callback);
+				refDestination.loadRefDestination(null, null, callback);
 			},
 			function (callback) {
-				refCategory.loadRefCategory(req, res, callback);
+				refCategory.loadRefCategory(null, null, callback);
 			},
 			function (callback) {
-				refProduct.loadRefProduct(req, res, callback);
+				refProduct.loadRefProduct(null, null, callback);
 			},
 			function (callback) {
-				refAttraction.loadRefAttraction(req, res, callback);
+				refAttraction.loadRefAttraction(null, null, callback);
 			},
 		],
 		function (err) {

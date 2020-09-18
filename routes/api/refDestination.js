@@ -6,37 +6,62 @@ const keystone = require('keystone');
 const tbRefCountry = keystone.list('RefCountry');
 const tbRefDestination = keystone.list('RefDestination');
 
+const { VIATOR_BASE_URL, VIATOR_AUTH_KEY } = process.env;
+
 // Delete all Ref_Country
-exports.delRefCountry = next => {
+exports.delRefCountry = (req, res, next) => {
 	console.log('>>>>Function [delRefCountry] started');
 	tbRefCountry.model.deleteMany({}, () => {
 		console.log('>>>>Function [delRefCountry] executed');
-		next();
+		if (res) {
+			return res.apiResponse({ result: 200, error: '' });
+		} else if (next) {
+			next();
+		}
 	});
 };
 // Get all Ref_Destination
-exports.getRefDestination = next => {
-	console.log('>>>>Function [getRefDestination] started');
-	tbRefDestination.model.deleteMany({}, () => {
-		console.log('>>>>Function [getRefDestination] executed');
-		next();
+exports.getRefDestination = (req, res, next) => {
+	console.log('>>>>Function [getRefDestination] started', req);
+	tbRefDestination.model.find(req, (err, docs) => {
+		if (err) {
+			console.log('>>>>Function [getRefDestination] error', err);
+			if (res) {
+				return res.apiResponse({ result: 500, error: err, data: [] });
+			} else if (next) {
+				next([]);
+			}
+		} else {
+			console.log(
+				`>>>>Function [getRefDestination] retrieved [${docs.length}] destinations'`
+			);
+			if (res) {
+				return res.apiResponse({ result: 200, error: '', data: docs });
+			} else if (next) {
+				next(docs);
+			}
+		}
 	});
 };
 // Delete all Ref_Destination
-exports.delRefDestination = next => {
+exports.delRefDestination = (req, res, next) => {
 	console.log('>>>>Function [delRefDestination] started');
 	tbRefDestination.model.deleteMany({}, () => {
 		console.log('>>>>Function [delRefDestination] executed');
-		next();
+		if (res) {
+			return res.apiResponse({ result: 200, error: '' });
+		} else if (next) {
+			next();
+		}
 	});
 };
 // Load Ref Country and Destinations
 exports.loadRefDestination = (req, res, next) => {
 	console.log('>>>>Function [loadRefDestination] started');
 	axios
-		.get('https://viatorapi.viator.com/service/taxonomy/destinations', {
+		.get(`${VIATOR_BASE_URL}/service/taxonomy/destinations`, {
 			headers: {
-				'exp-api-key': '1ed594e8-944b-404f-bd21-92d9090c64d4',
+				'exp-api-key': VIATOR_AUTH_KEY,
 			},
 		})
 		.then(resp => {
@@ -82,13 +107,21 @@ exports.loadRefDestination = (req, res, next) => {
 					],
 					function (err) {
 						console.log('>>>>Function [loadRefDestination] items loaded');
-						next();
+						if (res) {
+							return res.apiResponse({ result: 200, error: '' });
+						} else if (next) {
+							next();
+						}
 					}
 				);
 			}
 		})
 		.catch(error => {
 			console.error({ result: 500, error: error });
-			next('>>>>Function [loadRefDestination] unknown error');
+			if (res) {
+				return res.apiResponse({ result: 500, error: error });
+			} else if (next) {
+				next('>>>>Function [loadRefDestination] unknown error');
+			}
 		});
 };

@@ -7,20 +7,29 @@ const tbRefDestination = keystone.list('RefDestination');
 const tbRefCategory = keystone.list('RefCategory');
 const tbRefSubCategory = keystone.list('RefSubCategory');
 
+const { VIATOR_BASE_URL, VIATOR_AUTH_KEY } = process.env;
 // Delete all Ref_Category
-exports.delRefCategory = next => {
+exports.delRefCategory = (req, res, next) => {
 	console.log('>>>>Function [delRefCategory] started');
 	tbRefCategory.model.deleteMany({}, () => {
 		console.log('>>>>Function [delRefCategory] executed');
-		next();
+		if (res) {
+			return res.apiResponse({ result: 200, error: '' });
+		} else if (next) {
+			next();
+		}
 	});
 };
 // Delete all Ref_SubCategory
-exports.delRefSubCategory = next => {
+exports.delRefSubCategory = (req, res, next) => {
 	console.log('>>>>Function [delRefSubCategory] started');
 	tbRefSubCategory.model.deleteMany({}, () => {
 		console.log('>>>>Function [delRefSubCategory] executed');
-		next();
+		if (res) {
+			return res.apiResponse({ result: 200, error: '' });
+		} else if (next) {
+			next();
+		}
 	});
 };
 
@@ -43,10 +52,10 @@ exports.loadRefCategory = (req, res, next) => {
 					console.log(`>>>>Processing Category of Country[${item.name}]`);
 					axios
 						.get(
-							`https://viatorapi.viator.com/service/taxonomy/categories?destId=${item.destinationId}`,
+							`${VIATOR_BASE_URL}/service/taxonomy/categories?destId=${item.destinationId}`,
 						{
 							headers: {
-								'exp-api-key': '1ed594e8-944b-404f-bd21-92d9090c64d4',
+								'exp-api-key': VIATOR_AUTH_KEY,
 							},
 						}
 						)
@@ -106,12 +115,20 @@ exports.loadRefCategory = (req, res, next) => {
 						],
 						function (err) {
 							console.log('>>>>Function [loadRefCategory] completed');
-							next();
+							if (res) {
+								return res.apiResponse({ result: 200, error: '' });
+							} else if (next) {
+								next();
+							}
 						}
 					);
 				} else {
 					console.log('>>>>Function [loadRefCategory] error', err);
-					next();
+					if (res) {
+						return res.apiResponse({ result: 500, error: err });
+					} else if (next) {
+						next('>>>>Function [loadRefCategory] unknown error');
+					}
 				}
 			});
 		}
