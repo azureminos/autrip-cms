@@ -13,7 +13,11 @@ var RefAttraction = new keystone.List('RefAttraction', {
 });
 
 RefAttraction.add({
-	source: { type: Types.Select, options: 'VIATOR, MANUAL', default: 'MANUAL' },
+	source: {
+		type: Types.Select,
+		options: 'VIATOR, EXPOZ, ATDW, MANUAL',
+		default: 'MANUAL',
+	},
 	name: { type: Types.Text, required: true, default: '' },
 	seoId: { type: Types.Number, default: -1 },
 	webURL: { type: Types.Text },

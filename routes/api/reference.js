@@ -14,7 +14,10 @@ exports.loadReference = function (req, res) {
 				refAttraction.delRefAttraction(null, null, callback);
 			},
 			function (callback) {
-				refProduct.delRefProduct(null, null, callback);
+				refProduct.delRefProductViator(null, null, callback);
+			},
+			function (callback) {
+				refProduct.delRefProductExpOz(null, null, callback);
 			},
 			function (callback) {
 				refCategory.delRefSubCategory(null, null, callback);
@@ -35,7 +38,10 @@ exports.loadReference = function (req, res) {
 				refCategory.loadRefCategory(null, null, callback);
 			},
 			function (callback) {
-				refProduct.loadRefProduct(null, null, callback);
+				refProduct.loadRefProductViator(null, null, callback);
+			},
+			function (callback) {
+				refProduct.loadRefProductExpOz(null, null, callback);
 			},
 			function (callback) {
 				refAttraction.loadRefAttraction(null, null, callback);
