@@ -13,6 +13,15 @@ const {
 	EXPOZ_AUTH_USR,
 	EXPOZ_AUTH_PWD,
 } = process.env;
+
+/* ==== Helpers ==== */
+const doFilter = function (input) {
+	return doFilterByDuration(input);
+};
+const doFilterByDuration = function (input) {
+	return !input.duration || input.duration.indexOf('ays') > -1;
+};
+
 // Delete all Viator Ref_Product
 exports.delRefProductViator = (req, res, next) => {
 	console.log('>>>>Function [delRefProductViator] started');
@@ -77,7 +86,10 @@ exports.loadRefProductViator = (req, res, next) => {
 								`>>>>Retrieved [${count}] Product of City[${city.name}]`
 							);
 							_.forEach(resp.data.data, p => {
-								if (!_.find(products, { productCode: p.code })) {
+								if (
+									!_.find(products, { productCode: p.code })
+									&& !doFilter(p)
+								) {
 									products.push({
 										source: 'VIATOR',
 										productCode: p.code,
@@ -101,6 +113,8 @@ exports.loadRefProductViator = (req, res, next) => {
 										currencyCode: p.currencyCode,
 										onSale: p.onSale,
 										specialOfferAvailable: p.specialOfferAvailable,
+										hotelPickup: false,
+										addrCheckIn: '',
 										bookingEngineId: p.bookingEngineId,
 										specialReservationDetails: p.specialReservationDetails,
 										merchantCancellable: p.merchantCancellable,
@@ -196,6 +210,8 @@ exports.loadRefProductExpOz = (req, res, next) => {
 											currencyCode: 'AUD',
 											onSale: false,
 											specialOfferAvailable: false,
+											hotelPickup: false,
+											addrCheckIn: '',
 										});
 									}
 								});

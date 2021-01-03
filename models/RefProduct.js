@@ -39,6 +39,8 @@ RefProduct.add({
 	currencyCode: { type: Types.Text, default: 'AUD' },
 	onSale: { type: Types.Boolean, default: false },
 	specialOfferAvailable: { type: Types.Boolean, default: false },
+	hotelPickup: { type: Types.Boolean, default: false },
+	addrCheckIn: { type: Types.Text },
 	bookingEngineId: { type: Types.Text },
 	specialReservationDetails: { type: Types.Text },
 	merchantCancellable: { type: Types.Boolean, default: false },

@@ -89,8 +89,8 @@ exports.loadRefDestination = (req, res, next) => {
 							timeZone: item.timeZone,
 							type: item.destinationType,
 							destinationId: item.destinationId,
-							latitude: String(item.latitude),
-							longitude: String(item.longitude),
+							location: `${String(item.latitude)}, ${String(item.longitude)}`,
+							addrCarpark: '',
 						});
 					}
 				});

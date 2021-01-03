@@ -11,7 +11,10 @@ exports.loadReference = function (req, res) {
 	async.series(
 		[
 			function (callback) {
-				refAttraction.delRefAttraction(null, null, callback);
+				refAttraction.delRefAttractionViator(null, null, callback);
+			},
+			function (callback) {
+				refAttraction.delRefAttractionAtdw(null, null, callback);
 			},
 			function (callback) {
 				refProduct.delRefProductViator(null, null, callback);
@@ -40,12 +43,15 @@ exports.loadReference = function (req, res) {
 			function (callback) {
 				refProduct.loadRefProductViator(null, null, callback);
 			},
-			function (callback) {
+			/* function (callback) {
 				refProduct.loadRefProductExpOz(null, null, callback);
-			},
+			},*/
 			function (callback) {
-				refAttraction.loadRefAttraction(null, null, callback);
+				refAttraction.loadRefAttractionViator(null, null, callback);
 			},
+			/*function (callback) {
+				refAttraction.loadRefAttractionAtdw(null, null, callback);
+			},*/
 		],
 		function (err) {
 			console.log('All Steps Completed');

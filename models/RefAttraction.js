@@ -21,6 +21,8 @@ RefAttraction.add({
 	name: { type: Types.Text, required: true, default: '' },
 	seoId: { type: Types.Number, default: -1 },
 	webURL: { type: Types.Text },
+	description: { type: Types.Text },
+	summary: { type: Types.Text },
 	primaryDestinationName: { type: Types.Text },
 	primaryDestinationId: { type: Types.Number, default: -1 },
 	primaryGroupId: { type: Types.Number, default: -1 },
@@ -37,7 +39,7 @@ RefAttraction.add({
 	alias: { type: Types.TextArray },
 	additionalField: { type: Types.Textarea },
 });
-RefAttraction.defaultColumns = 'name, seoId, primaryDestinationName';
+RefAttraction.defaultColumns = 'name, seoId, primaryDestinationName, source';
 
 RefAttraction.schema.set('usePushEach', true);
 
