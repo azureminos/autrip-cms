@@ -38,7 +38,7 @@ exports.delRefAttractionAtdw = (req, res, next) => {
 };
 // Load Viator Ref Attraction
 exports.loadRefAttractionViator = (req, res, next) => {
-	console.log('>>>>Function [loadRefAttractionViator] started');
+	console.log('>>>>Function [loadRefAttractionViator] started', req);
 	tbRefDestination.model.find({ type: 'CITY' }, (err, docs) => {
 		if (err) {
 			console.log('>>>>Function [loadRefAttractionViator] error', err);
@@ -74,7 +74,7 @@ exports.loadRefAttractionViator = (req, res, next) => {
 							);
 							_.forEach(resp.data.data, att => {
 								if (!_.find(attractions, { seoId: att.seoId })) {
-									console.log(`>>>>Processing Attraction`, att);
+									// console.log(`>>>>Processing Attraction`, att);
 									attractions.push({
 										source: 'VIATOR',
 										name: att.title,

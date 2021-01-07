@@ -3,7 +3,8 @@
 require('dotenv').config();
 
 // Next app
-const app = require('express')();
+const express = require('express');
+const app = express();
 const next = require('next');
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
@@ -36,6 +37,10 @@ nextApp.prepare().then(() => {
 	app.get('*', (req, res) => {
 		return nextHandler(req, res);
 	});
+	/*	app.use(express.json({ limit: '50mb', extended: true }));
+	app.use(
+		express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 })
+	); */
 
 	// Setup common locals for your templates. The following are required for the
 	// bundled templates and layouts. Any runtime locals (that should be set uniquely

@@ -118,7 +118,10 @@ exports.loadRefCategory = (req, res, next) => {
 							if (res) {
 								return res.apiResponse({ result: 200, error: '' });
 							} else if (next) {
-								next();
+								next({
+									categories: cats,
+									subCategories: subcats,
+								});
 							}
 						}
 					);

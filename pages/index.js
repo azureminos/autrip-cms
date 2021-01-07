@@ -13,6 +13,7 @@ import PersistentDrawer from '../components/persistent-drawer';
 import PackageFilters from '../components/package-filters';
 import PackageCards from '../components/package-list-section';
 import PackageDetails from '../components/package-details-section';
+import SupportMain from '../components/support-main';
 
 const { publicRuntimeConfig } = getConfig();
 let socket;
@@ -236,15 +237,7 @@ class App extends Component {
 				};
 				viewSupport = (
 					<div style={{ height: 600 }}>
-						<div>
-							<Button
-								variant="contained"
-								color="default"
-								onClick={() => doRefreshReference()}
-							>
-								Refresh Reference
-							</Button>
-						</div>
+						<SupportMain />
 					</div>
 				);
 			}

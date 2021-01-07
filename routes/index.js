@@ -1,5 +1,5 @@
-var keystone = require('keystone');
-var importRoutes = keystone.importer(__dirname);
+const keystone = require('keystone');
+const importRoutes = keystone.importer(__dirname);
 
 // Import Route Controllers
 var routes = {
@@ -23,6 +23,16 @@ exports = module.exports = nextApp => keystoneApp => {
 		});
 	}
 	/* ===== Functions ===== */
+	keystoneApp.post(
+		'/api/uploadProduct',
+		keystone.middleware.api,
+		routes.api.upload.createProduct
+	);
+	keystoneApp.post(
+		'/api/uploadAttraction',
+		keystone.middleware.api,
+		routes.api.upload.createAttraction
+	);
 	keystoneApp.get(
 		'/api/func/loadReference',
 		keystone.middleware.api,

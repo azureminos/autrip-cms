@@ -51,6 +51,7 @@ exports.delRefProductExpOz = (req, res, next) => {
 // Load Viator Ref Product
 exports.loadRefProductViator = (req, res, next) => {
 	console.log('>>>>Function [loadRefProductViator] started');
+	const { subCategories } = req;
 	tbRefDestination.model.find({ type: 'CITY' }, (err, docs) => {
 		if (err) {
 			console.log('>>>>Function [loadRefProductViator] error', err);
@@ -90,6 +91,17 @@ exports.loadRefProductViator = (req, res, next) => {
 									!_.find(products, { productCode: p.code })
 									&& !doFilter(p)
 								) {
+									// console.log(`>>>>Processing VIATOR Product`, p);
+									const tags = [];
+									_.each(p.subCatIds, scid => {
+										const sc = _.find(subCategories, o => {
+											return o.itemId === scid;
+										});
+										if (sc) {
+											tags.push(sc.name);
+										}
+									});
+									// console.log(`>>>>Processing VIATOR Product Tags`, tags);
 									products.push({
 										source: 'VIATOR',
 										productCode: p.code,
@@ -118,6 +130,7 @@ exports.loadRefProductViator = (req, res, next) => {
 										bookingEngineId: p.bookingEngineId,
 										specialReservationDetails: p.specialReservationDetails,
 										merchantCancellable: p.merchantCancellable,
+										tags: tags,
 									});
 								}
 							});
@@ -191,6 +204,7 @@ exports.loadRefProductExpOz = (req, res, next) => {
 								);
 								_.forEach(resp.data.operators, p => {
 									if (!_.find(products, { productCode: String(p.id) })) {
+										console.log(`>>>>Processing EXPOZ Product`, p);
 										products.push({
 											source: 'EXPOZ',
 											productCode: String(p.id),

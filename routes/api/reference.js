@@ -4,6 +4,7 @@ const refDestination = require('./refDestination');
 const refCategory = require('./refCategory');
 const refProduct = require('./refProduct');
 const refAttraction = require('./refAttraction');
+const reference = {};
 
 /* ==== API to load reference data ==== */
 exports.loadReference = function (req, res) {
@@ -38,16 +39,23 @@ exports.loadReference = function (req, res) {
 				refDestination.loadRefDestination(null, null, callback);
 			},
 			function (callback) {
-				refCategory.loadRefCategory(null, null, callback);
+				const cbRefCategory = input => {
+					if (input) {
+						reference.categories = input.categories;
+						reference.subCategories = input.subCategories;
+					}
+					callback();
+				};
+				refCategory.loadRefCategory(null, null, cbRefCategory);
 			},
 			function (callback) {
-				refProduct.loadRefProductViator(null, null, callback);
+				refProduct.loadRefProductViator(reference, null, callback);
 			},
 			/* function (callback) {
 				refProduct.loadRefProductExpOz(null, null, callback);
 			},*/
 			function (callback) {
-				refAttraction.loadRefAttractionViator(null, null, callback);
+				refAttraction.loadRefAttractionViator(reference, null, callback);
 			},
 			/*function (callback) {
 				refAttraction.loadRefAttractionAtdw(null, null, callback);
