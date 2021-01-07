@@ -38,7 +38,7 @@ exports.createProduct = function (req, res) {
 	};
 	item.getUpdateHandler(req).process(req.files, function (err) {
 		if (err) return res.apiError('error', err);
-		console.log('>>>>FileUpload.createProduct() begin', item.file);
+		// console.log('>>>>FileUpload.createProduct() begin', item.file);
 		let path = `${__dirname}/../../public/uploads/files/${item.file.filename}`;
 
 		readXlsxFile(path).then(rows => {
@@ -67,8 +67,7 @@ exports.createProduct = function (req, res) {
 							}
 							docs.forEach(d => {
 								console.log(
-									`>>>>Update product[${p.productCode}] ID[${d._id}]`,
-									d
+									`>>>>Update product[${p.productCode}] ID[${d._id}]`
 								);
 								tbRefProduct.model
 									.findByIdAndUpdate(d._id, {
@@ -76,10 +75,11 @@ exports.createProduct = function (req, res) {
 										tag: _.union(docs.tag, p.tag),
 									})
 									.exec(function (err, docs) {
-										console.log('>>>>Result of findByIdAndUpdate', {
+										// Do Nothing
+										/* console.log('>>>>Result of findByIdAndUpdate', {
 											err,
 											docs,
-										});
+										});*/
 									});
 							});
 						});
