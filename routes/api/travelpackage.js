@@ -1,5 +1,4 @@
 // API to get TravelPackage
-var _ = require('lodash');
 var keystone = require('keystone');
 var Parser = require('../../lib/object-parser');
 var TravelPackage = keystone.list('TravelPackage');

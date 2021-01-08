@@ -110,6 +110,8 @@ exports.loadRefProductViator = (req, res, next) => {
 										primaryDestinationName: p.primaryDestinationName,
 										primaryDestinationId: p.primaryDestinationId,
 										primaryGroupId: p.primaryGroupId,
+										catIds: p.catIds,
+										subCatIds: p.subCatIds,
 										shortDescription: p.shortDescription,
 										duration: p.duration,
 										webURL: p.webURL,
