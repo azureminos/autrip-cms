@@ -6,9 +6,22 @@ const keystone = require('keystone');
 const tbRefDestination = keystone.list('RefDestination');
 const tbRefCategory = keystone.list('RefCategory');
 const tbRefSubCategory = keystone.list('RefSubCategory');
+const tbRefTagGroup = keystone.list('RefTagGroup');
 
 const { VIATOR_BASE_URL, VIATOR_AUTH_KEY } = process.env;
-// Delete all Ref_Category
+// Delete all TagGroup
+exports.delRefTagGroup = (req, res, next) => {
+	console.log('>>>>Function [delRefTagGroup] started');
+	tbRefTagGroup.model.deleteMany({}, () => {
+		console.log('>>>>Function [delRefTagGroup] executed');
+		if (res) {
+			return res.apiResponse({ result: 200, error: '' });
+		} else if (next) {
+			next();
+		}
+	});
+};
+// Delete all RefCategory
 exports.delRefCategory = (req, res, next) => {
 	console.log('>>>>Function [delRefCategory] started');
 	tbRefCategory.model.deleteMany({}, () => {
@@ -20,7 +33,7 @@ exports.delRefCategory = (req, res, next) => {
 		}
 	});
 };
-// Delete all Ref_SubCategory
+// Delete all RefSubCategory
 exports.delRefSubCategory = (req, res, next) => {
 	console.log('>>>>Function [delRefSubCategory] started');
 	tbRefSubCategory.model.deleteMany({}, () => {
@@ -36,65 +49,39 @@ exports.delRefSubCategory = (req, res, next) => {
 // Load Ref Category
 exports.loadRefCategory = (req, res, next) => {
 	console.log('>>>>Function [loadRefCategory] started');
-	tbRefDestination.model.find({ type: 'COUNTRY' }, (err, docs) => {
-		if (err) {
-			console.log('>>>>Function [loadRefCategory] error', err);
-			next();
-		} else {
-			console.log(
-				`>>>>Function [loadRefCategory] retrieved [${docs.length}] countries'`
-			);
-			const promises = [];
-			const cats = [];
-			const subcats = [];
-			_.forEach(docs, item => {
-				promises.push(callback => {
-					console.log(`>>>>Processing Category of Country[${item.name}]`);
-					axios
-						.get(
-							`${VIATOR_BASE_URL}/service/taxonomy/categories?destId=${item.destinationId}`,
-						{
-							headers: {
-								'exp-api-key': VIATOR_AUTH_KEY,
-							},
-						}
-						)
-						.then(resp => {
-							const count
-								= resp.data && resp.data.data && resp.data.data.length
-									? resp.data.data.length
-									: 0;
-							console.log(
-								`>>>>Retrieved [${count}] Category of Country[${item.name}]`
-							);
-							_.forEach(resp.data.data, it => {
-								if (!_.find(cats, { itemId: it.id })) {
-									cats.push({
-										itemId: it.id,
-										name: it.groupName,
-										thumbnailURL: it.thumbnailURL,
-										thumbnailHiResURL: it.thumbnailHiResURL,
-									});
-									_.forEach(it.subcategories, subit => {
-										if (!_.find(subcats, { itemId: subit.subcategoryId })) {
-											subcats.push({
-												itemId: subit.subcategoryId,
-												parentId: it.id,
-												name: subit.subcategoryName,
-											});
-										}
-									});
-								}
+	const promises = [];
+	const cats = [];
+	const subcats = [];
+	const tagGroups = [];
+
+	axios
+		.get(`${VIATOR_BASE_URL}/service/taxonomy/categories`, {
+			headers: {
+				'exp-api-key': VIATOR_AUTH_KEY,
+			},
+		})
+		.then(resp => {
+			_.forEach(resp.data.data, it => {
+				if (!_.find(cats, { itemId: it.id })) {
+					let tagGroup = { name: it.groupName, tags: [] };
+					cats.push({
+						itemId: it.id,
+						name: it.groupName,
+						thumbnailURL: it.thumbnailURL,
+						thumbnailHiResURL: it.thumbnailHiResURL,
+					});
+					_.forEach(it.subcategories, subit => {
+						tagGroup.tags.push(subit.subcategoryName);
+						if (!_.find(subcats, { itemId: subit.subcategoryId })) {
+							subcats.push({
+								itemId: subit.subcategoryId,
+								parentId: it.id,
+								name: subit.subcategoryName,
 							});
-							callback();
-						})
-						.catch(error => {
-							console.log(
-								`>>>>Error when processing Category of Country[${item.name}]`
-							);
-							callback();
-						});
-				});
+						}
+					});
+					tagGroups.push(tagGroup);
+				}
 			});
 			async.series(promises, function (err) {
 				if (!err) {
@@ -111,6 +98,12 @@ exports.loadRefCategory = (req, res, next) => {
 									`>>>>[${subcats.length}] item loaded into RefSubCategory`
 								);
 								tbRefSubCategory.model.insertMany(subcats, callback1);
+							},
+							callback1 => {
+								console.log(
+									`>>>>[${tagGroups.length}] item loaded into RefTagGroup`
+								);
+								tbRefTagGroup.model.insertMany(tagGroups, callback1);
 							},
 						],
 						function (err) {
@@ -134,6 +127,5 @@ exports.loadRefCategory = (req, res, next) => {
 					}
 				}
 			});
-		}
-	});
+		});
 };
