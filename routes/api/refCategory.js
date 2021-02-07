@@ -3,7 +3,6 @@ const axios = require('axios');
 const async = require('async');
 const keystone = require('keystone');
 
-const tbRefDestination = keystone.list('RefDestination');
 const tbRefCategory = keystone.list('RefCategory');
 const tbRefSubCategory = keystone.list('RefSubCategory');
 const tbRefTagGroup = keystone.list('RefTagGroup');

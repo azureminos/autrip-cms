@@ -15,6 +15,8 @@ var RefTagGroup = new keystone.List('RefTagGroup', {
 RefTagGroup.add({
 	name: { type: Types.Text, required: true, index: true },
 	tags: { type: Types.TextArray },
+	selectable: { type: Types.Boolean, default: false },
+	imgUrl: { type: Types.Text },
 });
 RefTagGroup.defaultColumns = 'name';
 
