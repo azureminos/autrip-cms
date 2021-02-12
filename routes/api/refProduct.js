@@ -132,7 +132,7 @@ exports.loadRefProductViator = (req, res, next) => {
 										bookingEngineId: p.bookingEngineId,
 										specialReservationDetails: p.specialReservationDetails,
 										merchantCancellable: p.merchantCancellable,
-										tags: tags,
+										tag: tags,
 									});
 								}
 							});

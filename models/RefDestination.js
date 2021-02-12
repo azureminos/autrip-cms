@@ -27,8 +27,6 @@ RefDestination.add({
 	destinationId: { type: Types.Number, default: -1 },
 	location: { type: Types.Text },
 	addrCarpark: { type: Types.Text },
-	imageUrl: { type: Types.Text },
-	description: { type: Types.Text },
 	tag: { type: Types.TextArray },
 	alias: { type: Types.TextArray },
 	additionalField: { type: Types.Textarea },
