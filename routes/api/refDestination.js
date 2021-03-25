@@ -6,7 +6,7 @@ const keystone = require('keystone');
 const tbRefCountry = keystone.list('RefCountry');
 const tbRefDestination = keystone.list('RefDestination');
 
-const { VIATOR_BASE_URL, VIATOR_AUTH_KEY } = process.env;
+const { VIATOR_BASE_URL, VIATOR_AUTH_KEY, VIATOR_COUNTRY_ID } = process.env;
 
 // Delete all Ref_Country
 exports.delRefCountry = (req, res, next) => {
@@ -55,6 +55,14 @@ exports.delRefDestination = (req, res, next) => {
 		}
 	});
 };
+const isToLoad = destination => {
+	return _.find(VIATOR_COUNTRY_ID.split(','), c => {
+		return (
+			destination.lookupId === c || destination.lookupId.indexOf(`${c}.`) > -1
+		);
+	});
+};
+
 // Load Ref Country and Destinations
 exports.loadRefDestination = (req, res, next) => {
 	console.log('>>>>Function [loadRefDestination] started');
@@ -79,9 +87,9 @@ exports.loadRefDestination = (req, res, next) => {
 						ct.push({ name: item.destinationName });
 					}
 					// Only load destination with currency code as AUD
-					if (item.defaultCurrencyCode === 'AUD') {
+					if (isToLoad(item)) {
 						ds.push({
-							name: item.destinationName,
+							name: item.destinationName.replace('&amp;', '&'),
 							selectable: item.selectable,
 							defaultCurrencyCode: item.defaultCurrencyCode,
 							parentId: item.parentId,

@@ -38,7 +38,7 @@ exports.delRefAttractionAtdw = (req, res, next) => {
 };
 // Load Viator Ref Attraction
 exports.loadRefAttractionViator = (req, res, next) => {
-	console.log('>>>>Function [loadRefAttractionViator] started', req);
+	console.log('>>>>Function [loadRefAttractionViator] started');
 	tbRefDestination.model.find({ type: 'CITY' }, (err, docs) => {
 		if (err) {
 			console.log('>>>>Function [loadRefAttractionViator] error', err);
